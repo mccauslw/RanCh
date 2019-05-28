@@ -14,7 +14,8 @@ Imports:
     klaR,
     MASS,
     bitops,
-    Smisc
+    Smisc,
+    ggtern
 Depends: R (>= 3.6.0)
 License: CC0
 Encoding: UTF-8
