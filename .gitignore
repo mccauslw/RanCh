@@ -2,6 +2,3 @@
 inst/doc
 doc
 Meta
-.Rd2pdf*
-.Rbuildignore
-.Rhistory
