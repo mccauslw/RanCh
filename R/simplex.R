@@ -9,13 +9,13 @@ plot.axioms = function(pxy, pyz, pxz, PTx, PTy,
                        both.ce.color = '#E0E0E0',
                        border=NA,
                        panel.label=NULL) {
-  
+
   # Derived probabilities
   PTz = (1-PTx-PTy)
   pyx = (1-pxy)
   pzy = (1-pyz)
   pzx = (1-pxz)
-  
+
   # Set up empty plot with no frame (with grid that will be overwritten)
   tripl = triplot(frame=FALSE, grid=grid)
   text(0, -0.4, panel.label, pos=1)
@@ -43,7 +43,7 @@ plot.axioms = function(pxy, pyz, pxz, PTx, PTy,
     r3a = c(pac, pac*pcb/den, 0, 0, pac) # Region 3, context effect in both directions
     r3b = c(0, pca*pbc/den, pbc, 0, 0)
     r3c = c(pca, pca*pcb/den, pcb, 1, pca)
-    
+
     # Plotting, according to between/dissimilar object
     if (between==1) {
       polygon(tritrafo(r1c, r1a, r1b), col=one.ce.color, border=border)
@@ -61,18 +61,18 @@ plot.axioms = function(pxy, pyz, pxz, PTx, PTy,
       polygon(tritrafo(r3a, r3b, r3c), col=both.ce.color, border=border)
     }
   }
-  
+
   triframe(label=label)
   trigrid(grid)
-  
+
   # Sides of triangle
   tripoints(pxy, pyx, 0.0, pch=binary.pch)
   tripoints(0.0, pyz, pzy, pch=binary.pch)
   tripoints(pxz, 0.0, pzx, pch=binary.pch)
-  
+
   # Centre of triangle
   if (do.ternary) tripoints(PTx, PTy, PTz, pch=ternary.pch)
-  
+
   # Regularity and multiplicative regions
   pmin.x = pxy*pxz
   pmax.x = min(pxy, pxz)
@@ -80,7 +80,7 @@ plot.axioms = function(pxy, pyz, pxz, PTx, PTy,
   pmax.y = min(pyx, pyz)
   pmin.z = pzx*pzy
   pmax.z = min(pzx, pzy)
-  
+
   cycle = pxy + pyz + pzx
   if (do.reg && cycle <= 2 && cycle >= 1) {
     trilines(c(pmax.x, pmax.x, 1-pmax.y-pmax.z, pmax.x),
