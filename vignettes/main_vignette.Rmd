@@ -1,0 +1,183 @@
+---
+title: "RanCh: A package for abstract discrete *Ran*dom *Ch*oice analysis"
+author: "William McCausland"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: bibliography.bib
+vignette: >
+  %\VignetteIndexEntry{main_vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(RanCh)
+library(klaR)
+library(bitops)
+library(Smisc)
+```
+
+## Introduction
+
+This package provides tools for a research project whose purpose is to help us better understand the foundations of stochastic discrete choice. It includes datasets compiled from the context effects literature, the stochastic intransitivity literature, and from some recent experiments where we observe choices from all doubleton and larger subsets of some universe of objects. It provides graphical tools illustrating likelihood function and posterior density contours, as well as regions, in the space of choice probabilities, defined by various stochastic choice axioms, context effects and other conditions. Finally, it provides tools for parametric and non-parametric inference subject to various combinations of discrete choice axioms, as well as the testing of said axioms.
+
+## Data sets
+
+### Some data sets from the context effects literature
+(to be added later)
+
+### Some data sets from the stochastic intransitivity literature
+(to be added later)
+
+### Some new data sets
+
+We provide data from three experiments in which individuals, or a sample from a population of individuals, make repeated choices from all doubleton and larger subsets of a universe of related choice objects.
+See the data frame `PC_trials` for a population choice experiment described in (citation needed).
+See the data frame `YG_trials` for a population choice experiment conducted by YouGov.
+
+The data frame `PC_trials` shows all responses of all subjects in a discrete choice experiment.
+The first few variables are the subject identifier, the name of the choice domain (a universe of five related choice objects), the trial index giving the order in which a subject responded to the various choice sets presented to her.
+The next variable, `subs`, is a string showing which choice objects were presented at a given trial, in alphabetical order.
+This is followed by `choice`, a letter indicating which object the subject chose from the given subset.
+The variable `subs_conf` shows the configuration of the objects as seen on screen by the subject.
+The subset and choice information is repeated in the values of the variables `sub_bin` and `choice_int`.
+The variable `sub_bin` is a binary representation of the choice set, where each digit (or bit) in the binary representation is an inclusion indicator: object $i$ is in the set if and only if the $i$'th digit from the right is 1.
+Take for example the first row of the tqble below.
+The decimal value 30 is binary 11110, which indicates that the 2nd, 3rd, 4th and 5th elements of the set $\{a,b,c,d,e\}$ are in the choice set.
+Note that the singleton set with object $i$ is represented as $2^{i-1}$.
+The bitwise "or" of the binary representations of two sets gives the binary representation of the union; the bitwise "and", the intersection.
+
+```{r trials}
+head(PC_trials[c('subj', 'domain', 'trial', 'subs', 'choice', 'subs_conf', 'subs_bin', 'choice_int')], 5)
+```
+
+The remaining variables are revealed preference indicators for given pairs of objects.
+The value of variable `ab` is 1 if object $a$ is revealed preferred to object $b$, -1 if object $b$ is revealed preferred to object $a$ and zero otherwise.
+So for example, the choice of $e$ from $\{b,c,d,e\}$ reveals $e$ preferred to $c$, $d$, and $b$.
+The following table repeats the first five observations of the variables `subs` and `choice`, and includes the first five observations of the revealed preference indicators.
+```{r RP}
+head(PC_trials[c(c(4, 5), 9:18)])
+```
+
+One possible application is aggregation of preferences.
+Aggregating revealed preference indicators for the `Beer` domain gives the following table.
+```{r RP_plus}
+colSums(PC_trials[PC_trials$domain=='Beer', 9:18])
+```
+In terms of net revealed preference, all values are consistent with the preference ranking $e \succ d \succ b \succ a \succ c$.
+That is, the number of times a higher ranked object is revealed preferred to a lower ranked object is always greater than the number of times the lower ranked object is revealed preferred to the higher ranked object.
+
+Choice counts for the experiment are in the R table `PC_counts`, a $32 \times 31 \times 5$ matrix.
+The first dimension is indexed by choice domain, the second by choice subset and the third by realized choice.
+The number of times any of the subjects choose object $a$ from choice set $\{a,b\}$ of domain `Beer` is `PC_counts['Beer', 'ab', 'a']` or `PC_counts['Beer', 3, 1]`.
+Counts of impossible events, such as choosing $a$ from $\{b,c\}$ have the value NA rather than zero.
+This is deliberate; accessing information that doesn't make sense should lead to an immediate (and therefore easy to find) error.
+
+Here is a cross section of counts for the 2nd, 3rd and 5th objects of the `Beer` domain.
+For example, the number of times any subject choose beer $b$ when presented with a choice between beers $b$ and $c$ is 36.
+```{r counts}
+N_bce = marginalize(PC_counts['Beer', , ], c(2, 3, 5))
+N_bce
+```
+
+Demographic information for the subjects in the same experiment is found in the data frame `PC_demographics`.
+Here is the demographic information for the first five subjects.
+```{r demographic}
+head(PC_demographics, 5)
+```
+
+## Random Choice Structures
+
+Let $T = (x_1,\ldots,x_n)$ be a universe of choice objects.
+When faced with a non-empty choice set $A \subseteq T$, a decision maker (DM) chooses a single object from $A$.
+The probability that the DM chooses $x \in A$ is denoted $P_A(x)$.
+A *Random Choice Structure* (RCS) is the complete specification of the $P_A(x)$, $x \in A \subseteq T$, and is denoted $P$.
+
+The following code computes and displays choice proportions for the counts in the cross section `N_bce` computed above.
+```{r write_RCS}
+P_bce = proportions(N_bce)          # Compute proportions from count data
+P_bce[c('bc', 'be', 'ce', 'bce'), ] # Show binary and ternary probabilities
+```
+
+A big part of this package is a collection of tools for plotting binary and ternary probabilities in barycentric coordinate systems.
+The Wikipedia page on [ternary plots][terW] gives a nice overview of plotting ternary probabilities or proportions in the regular 2-simplex, an equililateral triangle.
+The page on [Barycentric coordinate systems][barW] gives more detail and generality.
+
+The following code creates a figure displaying four points in barycentric coordinates, correponding to the three binary choice probability vectors and the ternary choice probability vector of the Random Choice Structure `P_bce` we just constructed.
+```{r plot_RCS}
+triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
+plot_P3(P_bce)                  # Plot points 
+```
+
+Each point in the triangle $bce$ is a unique convex combination $\lambda_b b + \lambda_c c + \lambda_e e$ of the vertices $b$, $c$ and $e$, and the vector $(\lambda_b, \lambda_c, \lambda_e)$ gives the coordinates of that point in Barycentric coordinates.
+Thus, the vertices $b$, $c$ and $e$ have Barycentric coordinates $(1,0,0)$, $(0,1,0)$ and $(0,0,1)$, respectively.
+We will interpret a point $(\lambda_b, \lambda_c, \lambda_e)$ as giving choice probabilities of $b$, $c$ and $e$.
+Since $bce$ is equilateral, the distances of point $(\lambda_b, \lambda_c, \lambda_e)$ to the sides $ce$, $be$ and $bc$ of the triangle are fractions $\lambda_b$, $\lambda_c$ and $\lambda_e$, respectively, of the height of the triangle.
+
+Each row in the table is represented by a point in the figure.
+The hollow dot on the left side of the triangle gives the choice probabilities $p(b, c) = 0.9$ and $p(c, b) = 1 - p(b, c) = 0.1$.
+It is the convex combination $p(b, c) b + p(c, b) c$ of vertices $b$, or $c$, $(p(b, c), p(c, b),0)$ in three dimensional barycentric coordinates.
+Similarly, the hollow point on the right side gives the choice probabilities $p(c, e)$ and $p(e, c)$; the hollow point on the base gives $p(b, e)$ and $p(e, b)$.
+
+The ternary probability vector $P_\{b,c,e\}(\cdot)$ given in the final row of the table is indicated by a solid dot in the interior of the triangle.
+This point has Barycentric coordinates $(P_\{b,c,e\}(b), P_\{b,c,e\}(c), P_\{b,c,e\}(e)) = (0.25, 0.025, 0.725)$.
+We adopt the convention that binary probabilities are indicated by hollow dots and ternary probability vectors by solid dots.
+In this way, we can tell the difference between a binary probability and a ternary probability vector that happens to be on the boundary of the triangle.
+
+## Axioms
+
+Let $\Delta$ be the space of random choice structures consistent with the axioms of probability; $\Delta$ is a Cartesian product of unit simplexes of various dimensions.
+
+Various axioms, conditions, properties and hypotheses about probabilistic choice behaviour can be expressed as restrictions over the various choice probabilities of a RCS.
+Henceforth, we will use the term axiom as a generic term to include all such restrictions.
+Each restriction defines a subset of $\Delta$.
+
+Examples, include weak, moderate and strong stochastic transitivity, regularity, the triangle inequality, the Block-Marshak inequalities and the multiplicative inequality.
+@Falm78 showed that the Block-Marshak inequalities are necessary and sufficient for random utility.
+@Tver72b and @SattTver76 establish that the Block-Marshak inequalities, moderate stochastic transitivity and the multiplicative inequality are all necessary conditions for, and thus testable implications of, the Elimination by Aspects model (EBA) introduced by @Tver72a.
+
+### Displaying cross sections of regions in barycentric coordinates
+
+A random choice structure $P$ satisfies
+- *regularity* if for all $x \in A \subseteq B \subseteq T$, $P_A(x) \geq P_B(x)$,
+- the *multiplicative inequality* if for all $x \in A, B \subseteq T$, $P_{A \cup B} \geq P_A(x) P_B(x)$,
+- the *Block-Marshak* inequalities if and only if for all $x \in A \subseteq T$, $$\sum_{B \colon A \subseteq B \subseteq T} (-1)^{|B \backslash A|} P_B(x) \geq 0$$.
+
+The next code excerpt displays cross sections of the regularity and multiplicative inequality regions, both subsets of $\Delta$.
+The blue triangle shows the region of ternary probabilities that is consistent with both regularity and the specified binary choice probabilities.
+The red triangle shows the region of ternary probabilities consistent with the multiplicative inequality and the binary choice probabilities.
+```{r regularity}
+triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
+plot_P3(P_bce)                  # Plot points 
+polygon(tritrafo(regularity_X3(P_bce)), border='blue')
+polygon(tritrafo(multiplicative_X3(P_bce)), border='red')
+```
+
+For a universe of size three, regularity and the Block-Marshak conditions are equivalent, so the blue triangle also gives the set of ternary probabilities consistent with the B-M conditions.
+Notice that the ternary choice probability lies outside the two cross sections: the solid dot is not inside the inverted triangle.
+We can conclude that the random choice structure with the given choice proportions does not satisfy regularity, the multiplicative inequality, or the Block-Marschak inequalities.
+
+### Checking whether a given Random Choice Structure satisfies a given axiom
+(to be added later)
+
+## Inference
+
+```{r HPD}
+prior_A = RCD_prior_1(2.0, ncol(N_bce))
+post_A = prior_A + N_bce
+triplot(label=c('b', 'c', 'e'))
+plot_HD_Dir3(post_A, 0.90)
+
+print(Ind_Dir_mult_ML(prior_A, N_bce, log=TRUE))
+```
+
+## References
+
+[terW]: https://en.wikipedia.org/wiki/Ternary_plot
+[barW]: https://en.wikipedia.org/wiki/Barycentric_coordinate_system
+[DirW]: https://en.wikipedia.org/wiki/Dirichlet_distribution
+[betW]: https://en.wikipedia.org/wiki/Beta_distribution
