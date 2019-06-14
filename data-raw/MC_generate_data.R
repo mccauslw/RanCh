@@ -66,6 +66,7 @@ for (i in 82:length(letterCodes)) {
   MC_raw <- rbind(MC_raw, t_i2)
 }
 
+# Create MC_trials tibble, a database of all trials
 MC_trials <- MC_raw %>% as_tibble() %>%
 
   select(num_range("g", 1:5), subj=Subject, index=ClickedGamble) %>%
@@ -99,8 +100,8 @@ MC_table <- table(MC_trials[c('subj', 'subs_bin', 'choice_int')])
 # Dimension naming for MC_counts
 MC_count_dimnames <- dimnames(MC_table)
 names(MC_count_dimnames) <- c('Subject', 'Subset', 'Object')
-MC_count_dimnames$Object <- object_names[1:n_objects]
 MC_count_dimnames$Subset <- subset_names[1:n_subsets]
+MC_count_dimnames$Object <- object_names[1:n_objects]
 # Create matrix with correct names, fill in counts for all subsets, even singletons
 MC_counts <- array(0, dim=c(n_subjects, n_subsets, n_objects), dimnames = MC_count_dimnames)
 MC_counts[, (1:n_subsets)[subset_card[1:n_subsets]>1], ] <- MC_table

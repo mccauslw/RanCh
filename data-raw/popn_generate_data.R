@@ -98,8 +98,8 @@ PC_table = table(PC_trials[c('domain', 'subs_bin', 'choice_int')])
 # Dimension naming for MC_counts
 PC_count_dimnames = dimnames(PC_table)
 names(PC_count_dimnames) = c('Domain', 'Subset', 'Object')
-PC_count_dimnames$Object = object_names[1:n_objects]
 PC_count_dimnames$Subset = subset_names[1:n_subsets]
+PC_count_dimnames$Object = object_names[1:n_objects]
 # Create matrix with correct names, fill in counts for all subsets, even singletons
 PC_counts = array(0, dim=c(n_domains, n_subsets, n_objects), dimnames = PC_count_dimnames)
 PC_counts[, (1:n_subsets)[subset_card[1:n_subsets]>1], ] = PC_table

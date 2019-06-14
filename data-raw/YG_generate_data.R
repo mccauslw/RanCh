@@ -26,7 +26,7 @@ n_domains = length(domain_names)
 # Other experiment parameters
 n_objects = 4
 n_subsets = 2^n_objects-1
-n_reps = 2 # Number of times a subject sees each domain
+n_waves = 2 # Number of times a subject sees each domain
 n_subjects_per_set = 10
 n_subjects = (n_subsets - n_objects) * n_domains * n_subjects_per_set
 
@@ -46,6 +46,7 @@ YG_trials <- YG_raw %>% as_tibble() %>%
   mutate(
     domain = as.factor(domain_names[domain]),
     subj = design,
+    wave = rep(c(rep(1, n_domains), rep(2, n_domains)), n_subjects),
     trial = order,
     subs_vec = pmap(.[sprintf("option_%d", 1:n_objects)], c),
     choice_int = response,
@@ -73,16 +74,18 @@ YG_demographics =
          age = as.factor(age_names[YG_raw[subj_seq, 'age_cross']]))
 
 # Compute choice counts by domain, subset and choice object
-YG_table = table(YG_trials[c('domain', 'subs_bin', 'choice_int')])
+YG_table = table(YG_trials[c('domain', 'wave', 'subs_bin', 'choice_int')])
 # Dimension naming for MC_counts
 YG_count_dimnames = dimnames(YG_table)
-names(YG_count_dimnames) = c('Domain', 'Subset', 'Object')
-YG_count_dimnames$Object = object_names[1:n_objects]
+names(YG_count_dimnames) = c('Domain', 'Wave', 'Subset', 'Object')
+YG_count_dimnames$Wave = c('1st wave', '2nd wave')
 YG_count_dimnames$Subset = subset_names[1:n_subsets]
+YG_count_dimnames$Object = object_names[1:n_objects]
 # Create matrix with correct names, fill in counts for all subsets, even singletons
-YG_counts = array(0, dim=c(n_domains, n_subsets, n_objects), dimnames = YG_count_dimnames)
-YG_counts[, (1:n_subsets)[subset_card[1:n_subsets]>1], ] = YG_table
+YG_counts = array(0, dim=c(n_domains, n_waves, n_subsets, n_objects), dimnames = YG_count_dimnames)
+YG_counts[, , (1:n_subsets)[subset_card[1:n_subsets]>1], ] = YG_table
 # Set counts that don't make sense (e.g. number of times a chosen from {b,c}) to NA
-YG_counts = YG_counts * outer(rep(1, n_domains), member_table[1:n_subsets, 1:n_objects])
+YG_counts = YG_counts * outer(rep(1, n_domains) %o% rep(1, n_waves),
+                              member_table[1:n_subsets, 1:n_objects])
 
 usethis::use_data(YG_raw, YG_counts, YG_trials, YG_demographics, overwrite=TRUE)
