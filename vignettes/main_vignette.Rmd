@@ -166,6 +166,8 @@ We can conclude that the random choice structure with the given choice proportio
 
 ## Inference
 
+### High posterior density curves
+
 ```{r HPD}
 prior_A = RCD_prior_1(2.0, ncol(N_bce))
 post_A = prior_A + N_bce
@@ -173,6 +175,22 @@ triplot(label=c('b', 'c', 'e'))
 plot_HD_Dir3(post_A, 0.90)
 
 print(Ind_Dir_mult_ML(prior_A, N_bce, log=TRUE))
+```
+
+### Pearson two-sample chi-square tests
+
+Compute for every domain and every subset of size two or more, the p-value for the 
+test that the two waves are counts from the same multinomial distribution.
+```{r compare.waves}
+my.chisq.test = function(A)
+{
+  x = na.omit(t(A))
+  if (nrow(x) > 1) {
+    chi2 = chisq.test(x)
+    chi2$p.value
+  } else NA
+}
+apply(YG_counts, c(1, 3), my.chisq.test)
 ```
 
 ## References
