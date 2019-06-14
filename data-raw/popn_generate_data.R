@@ -61,7 +61,7 @@ PC_trials <- PC_raw %>% as_tibble() %>%
     domain = as.factor(domain_names[domain]),
     subj = as.integer((0:(n_lines-1)) %/% n_domains + 1),
     trial = set,
-    subs_vec = pmap(.[sprintf("obj%d", 1:5)], c),
+    subs_vec = pmap(.[sprintf("obj%d", 1:n_objects)], c),
     choice_int = map2_int(subs_vec, choice, function(v, i) v[i]),
     choice = as.factor(object_names[choice_int]),
     subs_conf = map_chr(subs_vec, function(l) paste(na.omit(object_names[l]), collapse='')),

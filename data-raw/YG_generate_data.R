@@ -55,13 +55,13 @@ YG_trials <- YG_raw %>% as_tibble() %>%
     subs = as.factor(subset_names[subs_bin])) %>%
 
   # Drop intermediate unused variables
-  select(-starts_with("option"), -design, -card, -combo, -perm, -choiceset, -response,
+  select(-starts_with("option"), -design, -card, -combo, -perm, -choiceset, -response, -order,
          -gender, -educ, -region, -race, -age_cross)
 
 # Add revealed preference information to YG_trials
 YG_trials[doubleton_names[1:choose(n_objects, 2)]] =
   t(apply(YG_trials[c('subs_bin', 'choice_int')], 1,
-          function(v) RP_table[v['subs_bin'], v['choice_int'], 1:choose(n_objects, 2)]))
+          function(v) as.integer(RP_table[v['subs_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
 
 # Set up YG_demographics database
 subj_seq = seq(from=1, by=32, length.out=n_subjects)
