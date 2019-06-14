@@ -20,6 +20,7 @@ domain_names = c('Art',         # 1
                  'Outcome',
                  'Smartphone',  # 15
                  'Car')
+n_domains = length(domain_names)
 
 # Demographic categories
 sex_names = c('Male', 'Female')
@@ -30,23 +31,12 @@ race_names = c('White', 'Black', 'Hispanic', 'Asian', 'Native American',
 region_names = c('Northeast', 'Midwest', 'South', 'West')
 age_names = c('18 to 34', '35-54', '55+')
 
-# Construct the 3-D array YG_counts to contain all choice counts.
-# YG_counts is indexed by (domain, choice set, object),
-# where domain is the index of the domain (see order in domain_names),
-# choice set is the binary set representation of the subset, with
-#   0 the empty set, 15=1111b the master set of all four objects in the domain,
-#   2^(i-1) the singleton set with object i, i=1,2,3,4
-#   (Note: bitwise OR (AND) of two bineary set representations gives the binary
-#    set representation of the union (intersection, repectively)
-# and object is the index (i=1,2,3,4) of the set.
-n_domains = length(domain_names)
+# Other experiment parameters
 n_objects = 4
 n_subsets = 2^n_objects-1
-n_doubletons = choose(n_objects, 2)
-n_trial_subsets = n_subsets - n_objects
 n_reps = 2 # Number of times a subject sees each domain
 n_subjects_per_set = 10
-n_subjects = n_trial_subsets * n_domains * n_subjects_per_set
+n_subjects = (n_subsets - n_objects) * n_domains * n_subjects_per_set
 
 # YG_counts dataset
 YG_counts = array(0, c(n_domains, n_subsets, n_objects),

@@ -1,4 +1,6 @@
 library(bitops)
+library(tidyverse)
+
 PC_raw = read.csv("data-raw/Population.csv")
 n_lines = nrow(PC_raw)
 
@@ -36,6 +38,14 @@ domain_names = c(
 	'Televisions',          # 30
 	'Coffee',
 	'Charity')
+n_domains = length(domain_names)
+
+# Other experiment parameters
+n_objects = 5
+n_subsets = 2^n_objects-1
+n_subjects_per_set = 40
+n_subjects_extra = 2
+n_subjects = (n_subsets - n_objects) * n_subjects_per_set + n_subjects_extra
 
 # Demographic categories
 sex_names = c('Male', 'Female')
@@ -44,30 +54,19 @@ location_names = c('Alberta', 'British Columbia', 'Manitoba', 'New Brunswick',
                    'Nova Scotia', 'Ontario', 'Prince Edward Island',
                    'Quebec', 'Saskatchewan', 'Yukon Territory')
 
-# Construct the 3-D array PC_counts to contain all choice counts.
-# PC_counts is indexed by (domain, choice set, object),
-# where domain is the index of the domain (see order in domain_names),
-# choice set is the binary set representation of the subset, with
-#   0 the empty set and 32=11111b the master set of all five objects in the domain,
-#   2^(i-1) the singleton set with object i, i=1,2,3,4,5
-#   (Note: bitwise OR (AND) of representations of two sets gives the representation of the union (intersection, repectively).
-# object the index (i=1,2,3,4,5) of the set.
-n_domains = length(domain_names)
-n_objects = 5
-n_subsets = 2^n_objects-1
-n_doubletons = choose(n_objects, 2)
-n_trial_subsets = n_subsets - n_objects
-n_subjects = 1042
-
 # Set up storage for PC_trials database
-PC_trials = data.frame(subj = (0:(n_lines-1)) %/% n_domains + 1,
-                       domain = as.factor(domain_names[PC_raw$domain]),
-                       trial = PC_raw$set,
-                       subs = NA,
-                       choice = NA,
-                       subs_conf = apply(v, 1, function(v) paste(na.omit(object_names[v[1:5]]), collapse='')),
-                       subs_bin = apply(v, 1, function(v) sum(bitShiftL(1, v[1:5]-1), na.rm = TRUE)),
-                       choice_int = apply(v, 1, function(v) v[v[6]]))
+PC_trials = <- PC_raw %>% as_tibble() %>%
+  mutate(
+    subj = (0:(n_lines-1)) %/% n_domains + 1,
+    domain = as.factor(domain_names[domain]),
+    trial = set,
+    choice_int = ?,
+    choice = as.factor(object_names[choice_int]),
+    subs_conf = map_chr(subs_list, function(l) paste(na.omit(object_names[l]), collapse='')),
+    subs_bin = map_int(sub_list, function(l) sum(as.integer(bitShiftL(1, l-1)), na.rm=TRUE)),
+    subs = as.factor(subset_names[subs_bin]),
+    choice = as.factor(object_names[choice_int])
+	)
 
 # Choice subset and chosen object as factors with string and letter values
 PC_trials$subs = as.factor(subset_names[PC_trials$subs_bin])
@@ -85,14 +84,26 @@ PC_demographics =
              age = PC_raw[subj_seq, 'age'],
              location = as.factor(location_names[PC_raw[subj_seq, 'location']]))
 
-# Create PC_counts, a 3D array indexed by domain, subset, choice
+# Construct 3-D array PC_counts to contain choice counts, indexed by
+# (domain, choice set, object), where
+# domain is the index of the domain (see order in domain_names, above),
+# choice set is the binary set representation of the choice subset, with
+#   0 the empty set and 32=11111b the master set of all five objects in the domain,
+#   2^(i-1) the singleton set with object i, i=1,2,3,4,5
+#   (Note: bitwise OR (AND) of representations of two sets gives the representation of the union (intersection, repectively),
+# object is the index (one of 1,2,3,4,5) of the chosen object.
+
+# Compute choice counts by domain, subset and choice object
 PC_table = table(PC_trials[c('domain', 'subs_bin', 'choice_int')])
+# Dimension naming for MC_counts
 PC_count_dimnames = dimnames(PC_table)
 names(PC_count_dimnames) = c('Domain', 'Subset', 'Object')
 PC_count_dimnames$Object = object_names[1:n_objects]
 PC_count_dimnames$Subset = subset_names[1:n_subsets]
+# Create matrix with correct names, fill in counts for all subsets, even singletons
 PC_counts = array(0, dim=c(n_domains, n_subsets, n_objects), dimnames = PC_count_dimnames)
 PC_counts[, (1:n_subsets)[subset_card[1:n_subsets]>1], ] = PC_table
+# Set counts that don't make sense (e.g. number of times a chosen from {b,c}) to NA
 PC_counts = PC_counts * outer(rep(1, n_domains), member_table[1:n_subsets, 1:n_objects])
 
 usethis::use_data(PC_raw, PC_counts, PC_trials, PC_demographics, overwrite=TRUE)
