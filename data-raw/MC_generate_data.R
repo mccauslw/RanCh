@@ -39,10 +39,10 @@ n_subjects <- length(letterCodes)
 
 # Other experiment parameters
 n_objects <- 5
-n_subsets = 2^n_objects-1
+n_subsets <- 2^n_objects-1
 n_trials_per_subset = 6
 n_trials_per_subject = (n_subsets - n_objects) * n_trials_per_subset
-n_trials = n_trials_per_subject * n_subjects
+n_trials <- n_trials_per_subject * n_subjects
 
 # Gamble names, distractor names, vector of all names
 g_names <- sprintf('Gamble_%s.bmp', LETTERS[1:5])
@@ -78,8 +78,8 @@ MC_trials <- MC_raw %>% as_tibble() %>%
 
   # Compute standard variables
   mutate(
-    subs_vec = pmap(.[1:5], c),
     trial = as.integer(1 + (0:(n_trials-1) %% n_trials_per_subject)),
+    subs_vec = pmap(.[1:5], c),
     choice_int = map2_int(subs_vec, index, function(v, i) v[i]),
     choice = as.factor(object_names[choice_int]),
     subs_conf = map_chr(subs_vec, function(l) paste(na.omit(object_names[l]), collapse='')),

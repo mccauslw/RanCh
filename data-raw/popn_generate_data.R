@@ -54,28 +54,28 @@ location_names = c('Alberta', 'British Columbia', 'Manitoba', 'New Brunswick',
                    'Nova Scotia', 'Ontario', 'Prince Edward Island',
                    'Quebec', 'Saskatchewan', 'Yukon Territory')
 
-# Set up storage for PC_trials database
-PC_trials = <- PC_raw %>% as_tibble() %>%
-  mutate(
-    subj = (0:(n_lines-1)) %/% n_domains + 1,
-    domain = as.factor(domain_names[domain]),
-    trial = set,
-    choice_int = ?,
-    choice = as.factor(object_names[choice_int]),
-    subs_conf = map_chr(subs_list, function(l) paste(na.omit(object_names[l]), collapse='')),
-    subs_bin = map_int(sub_list, function(l) sum(as.integer(bitShiftL(1, l-1)), na.rm=TRUE)),
-    subs = as.factor(subset_names[subs_bin]),
-    choice = as.factor(object_names[choice_int])
-	)
+# Create PC_trials tibble, a database of all trials
+PC_trials <- PC_raw %>% as_tibble() %>%
 
-# Choice subset and chosen object as factors with string and letter values
-PC_trials$subs = as.factor(subset_names[PC_trials$subs_bin])
-PC_trials$choice = as.factor(object_names[PC_trials$choice_int])
+  mutate(
+    domain = as.factor(domain_names[domain]),
+    subj = as.integer((0:(n_lines-1)) %/% n_domains + 1),
+    trial = set,
+    subs_vec = pmap(.[sprintf("obj%d", 1:5)], c),
+    choice_int = map2_int(subs_vec, choice, function(v, i) v[i]),
+    choice = as.factor(object_names[choice_int]),
+    subs_conf = map_chr(subs_vec, function(l) paste(na.omit(object_names[l]), collapse='')),
+    subs_bin = map_int(subs_vec, function(l) sum(as.integer(bitShiftL(1, l-1)), na.rm=TRUE)),
+    subs = as.factor(subset_names[subs_bin])) %>%
+
+	# Drop unused variables
+	select(-starts_with("obj"), -consent, -feedback, -block, -responseid,
+	       -gender, -age, -location, -set, -block,)
 
 # Add revealed preference information to PC_trials
 PC_trials[doubleton_names[1:choose(n_objects, 2)]] =
   t(apply(PC_trials[c('subs_bin', 'choice_int')], 1,
-          function(v) {RP_table[v['subs_bin'], v['choice_int'], 1:choose(n_objects, 2)]}))
+          function(v) as.integer(RP_table[v['subs_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
 
 # Set up PC_demographics database
 subj_seq = seq(from=1, by=32, length.out=n_subjects)
