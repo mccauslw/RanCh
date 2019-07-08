@@ -38,19 +38,24 @@
 #' }
 "YG_demographics"
 
-#' Record of all choice trials
+#' Table of choice trials, population choice experiment
 #'
-#' @format A data frame with 14 variables
+#' @format A tibble with 17 variables
 #' \describe{
-#' \item{\code{subj}}{Subject identifier}
-#' \item{\code{domain}}{Factor indicating choice domain}
-#' \item{\code{trial}}{Trial identifier (gives the order in which a subject sees choice sets)}
-#' \item{\code{subs}}{Factor indicating the choice subset presented: 'ab', 'cde', etc.}
-#' \item{\code{choice}}{Factor indicating the choice made: 'a', 'b', 'c' or 'd'}
-#' \item{\code{subs_conf}}{Subset configuration, the order objects appear on the screen}
-#' \item{\code{subs_bin}}{Code for subset where digits of binary representation indicate object membership}
-#' \item{\code{choice_int}}{Integer code for chosen object}
-#' \item{\code{ab}}{Revealed preference indicator: 1 for a revealed preferred to b, -1 for b revealed preferred to a, 0 otherwise}
+#' \item{\code{domain}}{factor, name of choice domain}
+#' \item{\code{subject}}{subject identifier}
+#' \item{\code{block}}{block, equal to 1 or 2, identifying the first or second pass a subject makes through the domains.}
+#' \item{\code{trial}}{trial identifier (gives the order in which a subject sees choice sets)}
+#' \item{\code{duration}}{duration of trial in seconds}
+#' \item{\code{set}}{factor, name of choice set presented: 'ab', 'bcd', etc., with objects
+#' in alphabetical order}
+#' \item{\code{choice}}{factor, choice made by subject: 'a', 'b', 'c', or 'd'}
+#' \item{\code{set_perm}}{factor, order of presentation of objects on screen, left to right}
+#' \item{\code{set_card}}{Integer, cardinality of choice set (i.e. number of available options)}
+#' \item{\code{set_bin}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
+#' \item{\code{choice_int}}{Integer code for chosen object: a=1, b=2, ..., d=4}
+#' \item{\code{ab}, \code{ac}, \ldots \code{cd}}{revealed preference indicator: taking column ab as an example,
+#' value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 0 otherwise.}
 #' }
 "YG_trials"
 

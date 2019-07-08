@@ -26,7 +26,7 @@ n_domains = length(domain_names)
 # Other experiment parameters
 n_objects = 4
 n_subsets = 2^n_objects-1
-n_waves = 2 # Number of times a subject sees each domain
+n_blocks = 2 # Number of times a subject sees each domain
 n_subjects_per_set = 10
 n_subjects = (n_subsets - n_objects) * n_domains * n_subjects_per_set
 
@@ -45,24 +45,22 @@ YG_trials <- YG_raw %>% as_tibble() %>%
   # Compute standard variables
   mutate(
     domain = as.factor(domain_names[domain]),
-    subj = design,
-    wave = rep(c(rep(1, n_domains), rep(2, n_domains)), n_subjects),
+    subject = design,
+    block = rep(c(rep(1, n_domains), rep(2, n_domains)), n_subjects),
     trial = order,
-    subs_vec = pmap(.[sprintf("option_%d", 1:n_objects)], c),
-    choice_int = response,
-    choice = as.factor(object_names[choice_int]),
-    subs_conf = choiceset,
-    subs_bin = map_int(subs_vec, function(l) sum(as.integer(bitShiftL(1, l-1)), na.rm=TRUE)),
-    subs = as.factor(subset_names[subs_bin])) %>%
+    set_vector = pmap(.[sprintf("option_%d", 1:n_objects)], c),
+    choice_int = response) %>%
 
-  # Drop intermediate unused variables
-  select(-starts_with("option"), -design, -card, -combo, -perm, -choiceset, -response, -order,
-         -gender, -educ, -region, -race, -age_cross)
+  # Compute variables for choice sets and choice objects
+  compute_set_choice_vars() %>%
+
+  # Put standard variables in order for easy reading
+  arrange_set_choice_vars()
 
 # Add revealed preference information to YG_trials
 YG_trials[doubleton_names[1:choose(n_objects, 2)]] =
-  t(apply(YG_trials[c('subs_bin', 'choice_int')], 1,
-          function(v) as.integer(RP_table[v['subs_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
+  t(apply(YG_trials[c('set_bin', 'choice_int')], 1,
+          function(v) as.integer(RP_table[v['set_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
 
 # Set up YG_demographics database
 subj_seq = seq(from=1, by=32, length.out=n_subjects)
@@ -74,11 +72,11 @@ YG_demographics =
          age = as.factor(age_names[YG_raw[subj_seq, 'age_cross']]))
 
 # Compute choice counts by domain, subset and choice object
-YG_table = table(YG_trials[c('domain', 'wave', 'subs_bin', 'choice_int')])
+YG_table = table(YG_trials[c('domain', 'block', 'set_bin', 'choice_int')])
 # Dimension naming for MC_counts
 YG_count_dimnames = dimnames(YG_table)
-names(YG_count_dimnames) = c('Domain', 'Wave', 'Subset', 'Object')
-YG_count_dimnames$Wave = c('1st wave', '2nd wave')
+names(YG_count_dimnames) = c('Domain', 'Block', 'Subset', 'Object')
+YG_count_dimnames$Block = c('1st wave', '2nd wave')
 YG_count_dimnames$Subset = subset_names[1:n_subsets]
 YG_count_dimnames$Object = object_names[1:n_objects]
 # Create matrix with correct names, fill in counts for all subsets, even singletons

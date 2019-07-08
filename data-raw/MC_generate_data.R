@@ -69,7 +69,7 @@ for (i in 82:length(letterCodes)) {
 # Create MC_trials tibble, a database of all trials
 MC_trials <- MC_raw %>% as_tibble() %>%
 
-  select(num_range("g", 1:5), subj=Subject, index=ClickedGamble) %>%
+  select(num_range("g", 1:5), subject=Subject, index=ClickedGamble) %>%
 
   # Convert character codes for gambles in integer (including NA) codes
   mutate_at(vars(num_range("g", 1:5)), function(g) numeric_objects[as.character(g)]) %>%
@@ -80,23 +80,22 @@ MC_trials <- MC_raw %>% as_tibble() %>%
   # Compute standard variables
   mutate(
     trial = as.integer(1 + (0:(n_trials-1) %% n_trials_per_subject)),
-    subs_vec = pmap(.[1:5], c),
-    choice_int = map2_int(subs_vec, index, function(v, i) v[i]),
-    choice = as.factor(object_names[choice_int]),
-    subs_conf = map_chr(subs_vec, function(l) paste(na.omit(object_names[l]), collapse='')),
-    subs_bin = map_int(subs_vec, function(l) sum(as.integer(bitShiftL(1, l-1)), na.rm=TRUE)),
-    subs = as.factor(subset_names[subs_bin])) %>%
+    set_vector = pmap(.[1:5], c),
+    choice_int = map2_int(set_vector, index, function(v, i) v[i])) %>%
 
-  # Drop intermediate unused variables
-  select(-num_range("g", 1:5), -index)
+  # Compute variables for choice sets and choice objects
+  compute_set_choice_vars() %>%
+
+  # Put standard variables in order for easy reading
+  arrange_set_choice_vars()
 
 # Add revealed preference information to MC_trials
 MC_trials[doubleton_names[1:choose(n_objects, 2)]] =
-  t(apply(MC_trials[c('subs_bin', 'choice_int')], 1,
-          function(v) as.integer(RP_table[v['subs_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
+  t(apply(MC_trials[c('set_bin', 'choice_int')], 1,
+          function(v) as.integer(RP_table[v['set_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
 
 # Compute choice counts by subject, subset and choice object
-MC_table <- table(MC_trials[c('subj', 'subs_bin', 'choice_int')])
+MC_table <- table(MC_trials[c('subject', 'set_bin', 'choice_int')])
 # Dimension naming for MC_counts
 MC_count_dimnames <- dimnames(MC_table)
 names(MC_count_dimnames) <- c('Subject', 'Subset', 'Object')

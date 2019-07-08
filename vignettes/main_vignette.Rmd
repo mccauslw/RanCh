@@ -19,6 +19,7 @@ library(RanCh)
 library(klaR)
 library(bitops)
 library(Smisc)
+library(tidyverse)
 ```
 
 ## Introduction
@@ -52,21 +53,21 @@ Note that the singleton set with object $i$ is represented as $2^{i-1}$.
 The bitwise "or" of the binary representations of two sets gives the binary representation of the union; the bitwise "and", the intersection.
 
 ```{r trials}
-head(PC_trials[c('subj', 'domain', 'trial', 'subs', 'choice', 'subs_conf', 'subs_bin', 'choice_int')], 5)
+head(PC_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set_bin', 'choice_int')], 5)
 ```
 
 The remaining variables are revealed preference indicators for given pairs of objects.
 The value of variable `ab` is 1 if object $a$ is revealed preferred to object $b$, -1 if object $b$ is revealed preferred to object $a$ and zero otherwise.
 So for example, the choice of $e$ from $\{b,c,d,e\}$ reveals $e$ preferred to $c$, $d$, and $b$.
-The following table repeats the first five observations of the variables `subs` and `choice`, and includes the first five observations of the revealed preference indicators.
+The following table repeats the first five observations of the variables `set` and `choice`, and includes the first five observations of the revealed preference indicators.
 ```{r RP}
-head(PC_trials[c(c(4, 5), 9:18)])
+PC_trials %>% select(set, choice, matches("^[a-e]{2}$"))
 ```
 
 One possible application is aggregation of preferences.
 Aggregating revealed preference indicators for the `Beer` domain gives the following table.
 ```{r RP_plus}
-colSums(PC_trials[PC_trials$domain=='Beer', 9:18])
+PC_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSums
 ```
 In terms of net revealed preference, all values are consistent with the preference ranking $e \succ d \succ b \succ a \succ c$.
 That is, the number of times a higher ranked object is revealed preferred to a lower ranked object is always greater than the number of times the lower ranked object is revealed preferred to the higher ranked object.
@@ -164,6 +165,36 @@ We can conclude that the random choice structure with the given choice proportio
 ### Checking whether a given Random Choice Structure satisfies a given axiom
 (to be added later)
 
+## Context effects
+
+### Displaying context effects
+
+```{r similarity}
+S = similarity_X3(pxz = 0.6, pyz = 0.4)
+triplot(label=c('x', 'y', 'z')) # Set up ternary plot, with labels and grid
+polygon(tritrafo(S$So), col=grey(0.95)); text(tritrafo(colMeans(S$So)), 'So')
+polygon(tritrafo(S$Sx), col=grey(0.9)); text(tritrafo(colMeans(S$Sx)), 'Sx')
+polygon(tritrafo(S$Sy), col=grey(0.9)); text(tritrafo(colMeans(S$Sy)), 'Sy')
+polygon(tritrafo(S$Sxy), col=grey(0.8)); text(tritrafo(colMeans(S$Sxy)), 'Sxy')
+```
+
+```{r similarity_rotate}
+S = similarity_X3(pxz = 0.6, pyz = 0.4)
+triplot(label=c('a', 'b', 'c')) # Set up ternary plot, with labels and grid
+Sacb = S$Sxyz[, c(1, 3, 2)]
+polygon(tritrafo(Sacb), col=grey(0.95))
+text(tritrafo(colMeans(Sacb)), 'Sacb')
+```
+
+```{r compromise}
+C = compromise_X3(pyx = 0.6, pyz = 0.5)
+triplot(label=c('x', 'y', 'z')) # Set up ternary plot
+polygon(tritrafo(C$Co), col=grey(0.95)); text(tritrafo(colMeans(C$Co)), 'Co')
+polygon(tritrafo(C$Cx), col=grey(0.9)); text(tritrafo(colMeans(C$Cx)), 'Cx')
+polygon(tritrafo(C$Cz), col=grey(0.9)); text(tritrafo(colMeans(C$Cz)), 'Cz')
+polygon(tritrafo(C$Cxz), col=grey(0.8)); text(tritrafo(colMeans(C$Cxz)), 'Cxz')
+```
+
 ## Inference
 
 ### High posterior density curves
@@ -190,7 +221,8 @@ my.chisq.test = function(A)
     chi2$p.value
   } else NA
 }
-apply(YG_counts, c(1, 3), my.chisq.test)
+M = apply(YG_counts, c(1, 3), my.chisq.test)
+hist(M, 20)
 ```
 
 ## References
