@@ -13,6 +13,6 @@
 PC_raw
 }
 \description{
-Record of every choice made by every respondant.
+Record of trials in population choice experiment
 }
 \keyword{datasets}

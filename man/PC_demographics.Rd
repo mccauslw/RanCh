@@ -3,7 +3,7 @@
 \docType{data}
 \name{PC_demographics}
 \alias{PC_demographics}
-\title{Demographic information for subjects}
+\title{Demographic information for population choice experiment}
 \format{A data frame with demographic information on subjects
 \describe{
 \item{\code{sex}}{Sex of subject }
@@ -14,6 +14,6 @@
 PC_demographics
 }
 \description{
-Demographic information for subjects
+Demographic information for population choice experiment
 }
 \keyword{datasets}
