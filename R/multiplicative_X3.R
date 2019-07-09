@@ -8,7 +8,7 @@
 #' barycentric coordinates, of the triangular region where the multiplicative
 #' inequality holds.
 #' @export
-#' @keywords Multiplicative inequality
+#' @keywords axioms regions
 #' @examples
 #' P = create_P(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
 #' multiplicative_X3(P)

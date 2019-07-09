@@ -18,6 +18,7 @@
 #' \item{\code{Sxy}}{region with both effects}
 #' }
 #' @export
+#' @keywords 'context effects' regions
 #' @examples
 #' S = similarity_X3(0.5, 0.6)
 similarity_X3 <- function(pxz, pyz) {

@@ -18,6 +18,7 @@
 #' \item{\code{Cxz}}{region with both effects}
 #' }
 #' @export
+#' @keywords "context effects" regions
 #' @examples
 #' C = compromise_X3(0.5, 0.6)
 compromise_X3 <- function(pyx, pyz) {

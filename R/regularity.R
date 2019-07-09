@@ -5,6 +5,7 @@
 #' @param P A random choice structure
 #' @return A logical value indicating whether \code{P} satisfies regularity.
 #' @export
+#' @keywords axioms indicators
 #' @examples
 #' P = create_P(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
 #' regularity(P)
