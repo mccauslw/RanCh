@@ -7,8 +7,11 @@
 #' @return A random choice structure.
 #' @export
 #' @examples
-#' PC_P = proportions(PC_counts)
+#' PC_P = proportions(PC_counts[1,,])
 proportions <- function(N) {
   n_objects = ncol(N)
   P = N/rowSums(N, na.rm = TRUE)
+  for (i in 1:n_objects)
+    P[singletons[i], i] = 1.0
+  P
 }

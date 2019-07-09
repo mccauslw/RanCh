@@ -18,6 +18,12 @@ for (subset in seq(1, n_subsets)) {
   subset_card[subset] = card
 }
 
+# Singletons are special because we can set choice probability to one
+# without data
+n_singletons = n_objects
+singletons = (1:n_subsets)[subset_card==1]
+singleton_names = object_names
+
 # Doubletons are special because they figure in revealed preference
 # calculations
 n_doubletons = choose(1:n_objects, 2)
@@ -52,6 +58,10 @@ for (subset in seq(1, n_subsets)) {
   }
 }
 
+# R objects related to impossible choice probabilities
+#  - membership function returns one if object obj in in subset sub, NA otherwise
+#  - vmembership vectorizes membership function in both dimensions
+#  - member_table gives 1 or NA for every element of subset X object table
 membership = function(subs, obj) {ifelse(bitwAnd(subs, bitShiftL(1, obj-1)) > 0, 1, NA)}
 vmembership = Vectorize(membership)
 member_table = outer(1:n_subsets, 1:n_objects, vmembership)
@@ -59,6 +69,7 @@ member_table = outer(1:n_subsets, 1:n_objects, vmembership)
 usethis::use_data(object_names,
                   subset_names,
                   subset_card,
+                  singletons,
                   doubleton_names,
                   tripleton_names,
                   member_table,

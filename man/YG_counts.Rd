@@ -4,7 +4,7 @@
 \name{YG_counts}
 \alias{YG_counts}
 \title{Counts}
-\format{An object of class \code{table} of dimension 16 x 11 x 4.}
+\format{An object of class \code{array} of dimension 16 x 2 x 15 x 4.}
 \usage{
 YG_counts
 }

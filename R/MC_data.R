@@ -1,30 +1,19 @@
 #' Population Choice experiment data
 #'
-#' Record of trials in population choice experiment
+#' Record of every choice made by every respondant.
 #'
 #' @format A data frame with 17 variables:
 #' \describe{
 #' \item{\code{design}}{}
 #' \item{\code{gender}}{Sex of respondant: 1 for male, 2 for female}
 #' }
-"PC_raw"
-#' Demographic information for population choice experiment
+"MC_raw"
+#' Table of choice trials, multiple choice experiment
 #'
-#' @format A data frame with demographic information on subjects
+#' @format A tibble with 18 variables
 #' \describe{
-#' \item{\code{sex}}{Sex of subject }
-#' \item{\code{age}}{Age of subject in years}
-#' \item{\code{location}}{Province or territory in Canada}
-#' }
-"PC_demographics"
-#' Table of choice trials, population choice experiment
-#'
-#' @format A tibble with 20 variables
-#' \describe{
-#' \item{\code{domain}}{factor, name of choice domain}
 #' \item{\code{subject}}{subject identifier}
 #' \item{\code{trial}}{trial identifier (gives the order in which a subject sees choice sets)}
-#' \item{\code{duration}}{duration of trial in seconds}
 #' \item{\code{set}}{factor, name of choice set presented: 'ab', 'cde', etc., with objects
 #' in alphabetical order}
 #' \item{\code{choice}}{factor, choice made by subject: 'a', 'b', 'c', 'd' or 'e'}
@@ -35,9 +24,9 @@
 #' \item{\code{ab}, \code{ac}, \ldots \code{de}}{revealed preference indicator: taking column ab as an example,
 #' value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 0 otherwise.}
 #' }
-"PC_trials"
+"MC_trials"
 #' Counts
 #'
-#' A 32x26x5 matrix with count data.
+#' A 141x26x5 matrix with count data.
 #'
-"PC_counts"
+"MC_counts"

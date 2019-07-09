@@ -1,7 +1,8 @@
 library(bitops)
+library(tidyverse)
 
 YG_raw = read.csv('data-raw/YouGov.csv')
-n_lines = dim(YG_raw)[1]
+n_lines = nrow(YG_raw)
 
 # Names of the 16 domains in the experiment
 domain_names = c('Art',         # 1
@@ -20,6 +21,14 @@ domain_names = c('Art',         # 1
                  'Outcome',
                  'Smartphone',  # 15
                  'Car')
+n_domains = length(domain_names)
+
+# Other experiment parameters
+n_objects = 4
+n_subsets = 2^n_objects-1
+n_blocks = 2 # Number of times a subject sees each domain
+n_subjects_per_set = 10
+n_subjects = (n_subsets - n_objects) * n_domains * n_subjects_per_set
 
 # Demographic categories
 sex_names = c('Male', 'Female')
@@ -30,59 +39,51 @@ race_names = c('White', 'Black', 'Hispanic', 'Asian', 'Native American',
 region_names = c('Northeast', 'Midwest', 'South', 'West')
 age_names = c('18 to 34', '35-54', '55+')
 
-# Construct the 3-D array YG_counts to contain all choice counts.
-# YG_counts is indexed by (domain, choice set, object),
-# where domain is the index of the domain (see order in domain_names),
-# choice set is the binary set representation of the subset, with
-#   0 the empty set, 15=1111b the master set of all four objects in the domain,
-#   2^(i-1) the singleton set with object i, i=1,2,3,4
-#   (Note: bitwise OR (AND) of two bineary set representations gives the binary
-#    set representation of the union (intersection, repectively)
-# and object is the index (i=1,2,3,4) of the set.
-n_domains = length(domain_names)
-n_objects = 4
-n_subsets = 2^n_objects-1
-n_doubletons = choose(n_objects, 2)
-n_trial_subsets = n_subsets - n_objects
-n_reps = 2 # Number of times a subject sees each domain
-n_subjects_per_set = 10
-n_subjects = n_trial_subsets * n_domains * n_subjects_per_set
+# Create YG_trials tibble, a database of all trials
+YG_trials <- YG_raw %>% as_tibble() %>%
 
-# YG_counts dataset
-YG_counts = array(0, c(n_domains, n_subsets, n_objects),
-                  dimnames = list(domain=domain_names,
-                                  subset=subset_names[1:n_subsets],
-                                  objectd=object_names[1:n_objects]))
+  # Compute standard variables
+  mutate(
+    domain = as.factor(domain_names[domain]),
+    subject = design,
+    block = rep(c(rep(1, n_domains), rep(2, n_domains)), n_subjects),
+    trial = order,
+    set_vector = pmap(.[sprintf("option_%d", 1:n_objects)], c),
+    choice_int = response) %>%
 
-# YG_trials dataset
-v = YG_raw[sprintf("option_%i", 1:n_objects)]
-YG_trials = data.frame(subj = YG_raw$design,
-                       domain = as.factor(domain_names[YG_raw$domain]),
-                       trial = YG_raw$order,
-                       subs = NA,
-                       choice = as.factor(object_names[YG_raw$response]),
-                       subs_conf = as.factor(YG_raw$choiceset),
-                       subs_bin = apply(v, 1, function(v) sum(bitShiftL(1, v-1), na.rm = TRUE)),
-                       choice_int = YG_raw$response)
+  # Compute variables for choice sets and choice objects
+  compute_set_choice_vars() %>%
 
-# Make factors of subset and object names
-YG_trials$subs = as.factor(subset_names[YG_trials$subs_bin])
+  # Put standard variables in order for easy reading
+  arrange_set_choice_vars()
 
 # Add revealed preference information to YG_trials
 YG_trials[doubleton_names[1:choose(n_objects, 2)]] =
-  t(apply(YG_trials[c('subs_bin', 'choice_int')], 1,
-          function(v) RP_table[v['subs_bin'], v['choice_int'], 1:choose(n_objects, 2)]))
+  t(apply(YG_trials[c('set_bin', 'choice_int')], 1,
+          function(v) as.integer(RP_table[v['set_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
 
 # Set up YG_demographics database
 subj_seq = seq(from=1, by=32, length.out=n_subjects)
 YG_demographics =
-  data.frame(sex = as.factor(sex_names[YG_raw[subj_seq, 'gender']]),
-             educ = as.factor(educ_names[YG_raw[subj_seq, 'educ']]),
-             region = as.factor(region_names[YG_raw[subj_seq, 'region']]),
-             race = as.factor(race_names[YG_raw[subj_seq, 'race']]),
-             age = as.factor(age_names[YG_raw[subj_seq, 'age_cross']]))
+  tibble(sex = as.factor(sex_names[YG_raw[subj_seq, 'gender']]),
+         educ = as.factor(educ_names[YG_raw[subj_seq, 'educ']]),
+         region = as.factor(region_names[YG_raw[subj_seq, 'region']]),
+         race = as.factor(race_names[YG_raw[subj_seq, 'race']]),
+         age = as.factor(age_names[YG_raw[subj_seq, 'age_cross']]))
 
-# Set up counts table, a 3D array indexed by domain, subset, choice
-YG_counts = table(YG_trials[c('domain', 'subs_bin', 'choice_int')])
+# Compute choice counts by domain, subset and choice object
+YG_table = table(YG_trials[c('domain', 'block', 'set_bin', 'choice_int')])
+# Dimension naming for MC_counts
+YG_count_dimnames = dimnames(YG_table)
+names(YG_count_dimnames) = c('Domain', 'Block', 'Subset', 'Object')
+YG_count_dimnames$Block = c('1st wave', '2nd wave')
+YG_count_dimnames$Subset = subset_names[1:n_subsets]
+YG_count_dimnames$Object = object_names[1:n_objects]
+# Create matrix with correct names, fill in counts for all subsets, even singletons
+YG_counts = array(0, dim=c(n_domains, n_waves, n_subsets, n_objects), dimnames = YG_count_dimnames)
+YG_counts[, , (1:n_subsets)[subset_card[1:n_subsets]>1], ] = YG_table
+# Set counts that don't make sense (e.g. number of times a chosen from {b,c}) to NA
+YG_counts = YG_counts * outer(rep(1, n_domains) %o% rep(1, n_waves),
+                              member_table[1:n_subsets, 1:n_objects])
 
 usethis::use_data(YG_raw, YG_counts, YG_trials, YG_demographics, overwrite=TRUE)
