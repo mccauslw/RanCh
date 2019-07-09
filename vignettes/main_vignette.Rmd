@@ -81,8 +81,8 @@ This is deliberate; accessing information that doesn't make sense should lead to
 Here is a cross section of counts for the 2nd, 3rd and 5th objects of the `Beer` domain.
 For example, the number of times any subject choose beer $b$ when presented with a choice between beers $b$ and $c$ is 36.
 ```{r counts}
-#N_bce = marginalize(PC_counts['Beer', , ], c(2, 3, 5))
-#N_bce
+N_bce = marginalize(PC_counts['Beer', , ], c(2, 3, 5))
+N_bce
 ```
 
 Demographic information for the subjects in the same experiment is found in the data frame `PC_demographics`.
@@ -100,8 +100,8 @@ A *Random Choice Structure* (RCS) is the complete specification of the $P_A(x)$,
 
 The following code computes and displays choice proportions for the counts in the cross section `N_bce` computed above.
 ```{r write_RCS}
-#P_bce = proportions(N_bce)          # Compute proportions from count data
-#P_bce[c('bc', 'be', 'ce', 'bce'), ] # Show binary and ternary probabilities
+P_bce = proportions(N_bce)          # Compute proportions from count data
+P_bce[c('bc', 'be', 'ce', 'bce'), ] # Show binary and ternary probabilities
 ```
 
 A big part of this package is a collection of tools for plotting binary and ternary probabilities in barycentric coordinate systems.
