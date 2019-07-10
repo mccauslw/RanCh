@@ -14,7 +14,7 @@
 #' choice probability that happens to be on the boundary of the triangle.
 #' @export
 #' @examples
-#' P = create_P(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
+#' P = create_P3(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
 #' plot_P3(P)
 plot_P3 = function(P, perm=c(1, 2, 3), binary_pch = 1, ternary_pch = 20) {
   # Object and subset shortcuts

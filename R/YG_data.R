@@ -1,6 +1,6 @@
 #' YouGov Experiment data
 #'
-#' Record of every choice made by every respondant.
+#' Raw trial-by-trial data from YouGov experiment
 #'
 #' @format A data frame with 17 variables:
 #' \describe{
@@ -54,13 +54,21 @@
 #' \item{\code{set_card}}{Integer, cardinality of choice set (i.e. number of available options)}
 #' \item{\code{set_bin}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
 #' \item{\code{choice_int}}{Integer code for chosen object: a=1, b=2, ..., d=4}
-#' \item{\code{ab}, \code{ac}, \ldots \code{cd}}{revealed preference indicator: taking column ab as an example,
+#' \item{\code{ab}, \code{ac}, \ldots, \code{cd}}{revealed preference indicator: taking column ab as an example,
 #' value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 0 otherwise.}
 #' }
 "YG_trials"
 
-#' Counts
+#' Choice counts in YouGov experiment
 #'
-#' A 3x16x15x4 matrix with count data.
+#' A four dimensional array, 16 by 2 by 15 by 4, of count data.
+#' Element h,i,j,k gives the number of subjects who chose object k when
+#' presented with choice set j of domain h, in their i'th block of 16 trials.
+#' The choice set index j=1,...,15 encodes a non-empty subset of the universe
+#' of the four choice objects a, b, c, and d, numbered 1, 2, 3, 4.
+#' Each digit (or bit) in the binary representation of j is an inclusion indicator: object k
+#' is in the set if and only if the k'th digit from the right is 1.
+#' For example, the set with b, c, and d (but not a) is encoded as binary 1110 (decimal 14)
+#' Whenever k is not an element of j, the value is NA.
 #'
 "YG_counts"

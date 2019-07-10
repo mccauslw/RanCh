@@ -3,12 +3,20 @@
 \docType{data}
 \name{YG_counts}
 \alias{YG_counts}
-\title{Counts}
+\title{Choice counts in YouGov experiment}
 \format{An object of class \code{array} of dimension 16 x 2 x 15 x 4.}
 \usage{
 YG_counts
 }
 \description{
-A 3x16x15x4 matrix with count data.
+A four dimensional array, 16 by 2 by 15 by 4, of count data.
+Element h,i,j,k gives the number of subjects who chose object k when
+presented with choice set j of domain h, in their i'th block of 16 trials.
+The choice set index j=1,...,15 encodes a non-empty subset of the universe
+of the four choice objects a, b, c, and d, numbered 1, 2, 3, 4.
+Each digit (or bit) in the binary representation of j is an inclusion indicator: object k
+is in the set if and only if the k'th digit from the right is 1.
+For example, the set with b, c, and d (but not a) is encoded as binary 1110 (decimal 14)
+Whenever k is not an element of j, the value is NA.
 }
 \keyword{datasets}

@@ -1,40 +1,50 @@
-#' Compute various cross sections of compromise effect regions
+#' Compromise effect regions
 #'
-#' \code{compromise_X3} computes six regions associated with similary effects
-#' @param pyx Binary choice probability, where y is the between, or compromise object and
-#' x is one of the extreme objects.
-#' @param pyz Binary choice probability, where y is the between, or compromise, object and
-#' z is the other extreme object.
-#' @return A list of six regions in barycentric coordinates. Rows are vertices, columns give
-#' ternary probabilities for objects x, y and z, respectively.
+#' \code{compromise_X3} constructs six regions (all polygons) associated with
+#' binary-ternary compromise effects.
+#' Below, x and z are the extreme choice objects and y is the between
+#' (or compromise) object.
+#' The interior of each polygon gives the set of ternary choice probabilities
+#' consistent with (1) the two specified binary choice probabilities and (2)
+#' one of six compromise effect conditions.
+#' @param pyx scalar giving the probability of choosing y when presented with {x,y}.
+#' @param pyz scalar giving the probability of choosing y when presented with {y,z}.
+#' @return named list of six polygons in a barycentric coordinate system.
+#' Each polygon is a matrix, with one row for each polygon vertex and one column
+#' for each of the three choice objects x, y and z.
+#' Element i,j gives the probability of choosing j when presented with {x,y,z},
+#' at the i'th polygon vertex.
+#' The six polygons---triangles except for \code{Cxz}, a quadrilateral---are:
 #' \describe{
-#' \item{\code{Cxyz}}{region where there is a similarity effect with object y as target,
+#' \item{\code{Cxyz}}{region where there is a compromise effect with y as target,
 #' x as competitor and z as decoy}
-#' \item{\code{Czyx}}{region where there is a similarity effect with object y as target,
+#' \item{\code{Czyx}}{region where there is a compromise effect with y as target,
 #' z as competitor and x as decoy}
-#' \item{\code{Co}}{region where there is neither similarity effect}
+#' \item{\code{Co}}{region where there is neither compromise effect}
 #' \item{\code{Cx}}{region with only the x effect}
 #' \item{\code{Cz}}{region with only the z effect}
 #' \item{\code{Cxz}}{region with both effects}
 #' }
 #' @export
-#' @keywords "context effects" regions
 #' @examples
 #' C = compromise_X3(0.5, 0.6)
+#' @seealso \code{\link{similarity_X3}} for an analogous function for the
+#' similarity effect.
 compromise_X3 <- function(pyx, pyz) {
+
   # Vertices of barycentric coordinate system
   x <- c(1, 0, 0); y <- c(0, 1, 0); z <- c(0, 0, 1)
 
   # Binary choice probabilities pyz and pxz as ternary probabilities xp and yp
   xp <- c(0, pyz, 1-pyz); zp <- c(1-pyx, pyx, 0)
 
-  # Interior point
+  # Compute interior point w
   A = matrix(c(-pyx, 1-pyx, 0,
                0, 1-pyz, -pyz,
                1,     1,    1), nrow=3, ncol=3, byrow=TRUE)
   w = solve(A, c(0, 0, 1))
 
-  # Create regions
+  # Construct regions
   Cxyz = matrix(c(y, z, zp), nrow=3, ncol=3, byrow=TRUE)
   Czyx = matrix(c(x, z, zp), nrow=3, ncol=3, byrow=TRUE)
   Co = matrix(c(w, x, z), nrow=3, ncol=3, byrow=TRUE)

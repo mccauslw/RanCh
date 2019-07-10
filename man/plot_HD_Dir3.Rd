@@ -4,7 +4,7 @@
 \alias{plot_HD_Dir3}
 \title{Plot highest density region for a third order Dirichlet distribution}
 \usage{
-plot_HD_Dir3(A, HD_probability)
+plot_HD_Dir3(A, HD_probability, selection)
 }
 \arguments{
 \item{HD_probability}{probability of highest density region}
@@ -16,5 +16,5 @@ This function plots the Dirichlet highest density region in barycentric
 coordinates.
 }
 \examples{
-plot_HD_Dir_3(0.95, c(23, 13, 4))
+plot_HD_Dir3(A, 0.95, c(1,2,3))
 }

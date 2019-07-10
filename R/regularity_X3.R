@@ -7,9 +7,8 @@
 #' @return If the region is empty, the output is NULL. Otherwise, a 3x3 matrix
 #'   where each row gives one of the three vertices in barycentric coordinates.
 #' @export
-#' @keywords axioms regions
 #' @examples
-#' P = create_P(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
+#' P = create_P3(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
 #' reg_region = regularity_X3(P)
 regularity_X3 <- function(P) {
   P_max = c(min(P[3, 1], P[5, 1]), min(P[3, 2], P[6, 2]), min(P[5, 3], P[6, 3]))

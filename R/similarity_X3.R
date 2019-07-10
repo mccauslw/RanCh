@@ -1,12 +1,20 @@
-#' Compute various cross sections of similarity effect regions
+#' Similarity effect regions
 #'
-#' \code{similarity_X3} computes six regions associated with similary effects
-#' @param pxz Binary choice probability, where x is one of the similar objects and
-#' $z$ is the dissimilar object
-#' @param pyz Binary choice probability, where y is the other similar object and z
-#' is the dissimilar object
-#' @return A list of six regions in barycentric coordinates. Rows are vertices, columns give
-#' ternary probabilities for objects x, y and z, respectively.
+#' \code{similarity_X3} constructs six regions (all polygons) associated with
+#' binary-ternary similary effects.
+#' Below, x and y are "similar" choice objects and object z is dissimilar to both
+#' x and y.
+#' The interior of each polygon gives the set of ternary choice probabilities
+#' consistent with (1) the two specified binary choice probabilities and (2) one of six
+#' similarity effect conditions.
+#' @param pxz scalar giving the probability of choosing y when presented with x and z
+#' @param pyz scalar giving the probability of choosing y when presented with y and z
+#' @return named list of six polygons in a barycentric coordinate system.
+#' Each polygon is a matrix, with one row for each polygon vertex and one column for
+#' each of the three choice objects x, y and z.
+#' Element i,j gives the probability of choosing j, when presented with x, y and z,
+#' at the i'th polygon vertex.
+#' The six polygons---triangles except for \code{Sxy}, a quadrilateral---are:
 #' \describe{
 #' \item{\code{Sxyz}}{region where there is a similarity effect with object x as target,
 #' y as decoy and z as competitor}
@@ -18,9 +26,10 @@
 #' \item{\code{Sxy}}{region with both effects}
 #' }
 #' @export
-#' @keywords 'context effects' regions
 #' @examples
 #' S = similarity_X3(0.5, 0.6)
+#' @seealso \code{\link{compromise_X3}} for an analogous function for the
+#' compromise effect.
 similarity_X3 <- function(pxz, pyz) {
   # Vertices of barycentric coordinate system
   x <- c(1, 0, 0); y <- c(0, 1, 0); z <- c(0, 0, 1)

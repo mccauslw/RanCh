@@ -41,11 +41,11 @@ See the data frame `PC_trials` for a population choice experiment described in (
 See the data frame `YG_trials` for a population choice experiment conducted by YouGov.
 
 The data frame `PC_trials` shows all responses of all subjects in a discrete choice experiment.
-The first few variables are the subject identifier, the name of the choice domain (a universe of five related choice objects), the trial index giving the order in which a subject responded to the various choice sets presented to her.
-The next variable, `subs`, is a string showing which choice objects were presented at a given trial, in alphabetical order.
-This is followed by `choice`, a letter indicating which object the subject chose from the given subset.
-The variable `subs_conf` shows the configuration of the objects as seen on screen by the subject.
-The subset and choice information is repeated in the values of the variables `sub_bin` and `choice_int`.
+The first few variables are the name of the choice domain (a universe of five related choice objects), the subject identifier and the trial index giving the order in which a subject responded to the various choice sets presented to her.
+The next variable, `set`, is a string showing which choice objects were presented at a given trial, the objects in alphabetical order.
+This is followed by `choice`, a letter indicating which object the subject chose from the given choice set.
+The variable `set_perm` shows the configuration of the objects as seen on screen by the subject.
+The subset and choice information is repeated in the values of the variables `set_bin` and `choice_int`.
 The variable `sub_bin` is a binary representation of the choice set, where each digit (or bit) in the binary representation is an inclusion indicator: object $i$ is in the set if and only if the $i$'th digit from the right is 1.
 Take for example the first row of the tqble below.
 The decimal value 30 is binary 11110, which indicates that the 2nd, 3rd, 4th and 5th elements of the set $\{a,b,c,d,e\}$ are in the choice set.
@@ -58,14 +58,15 @@ head(PC_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set
 
 The remaining variables are revealed preference indicators for given pairs of objects.
 The value of variable `ab` is 1 if object $a$ is revealed preferred to object $b$, -1 if object $b$ is revealed preferred to object $a$ and zero otherwise.
-So for example, the choice of $e$ from $\{b,c,d,e\}$ reveals $e$ preferred to $c$, $d$, and $b$.
-The following table repeats the first five observations of the variables `set` and `choice`, and includes the first five observations of the revealed preference indicators.
+So for example, the choice of $e$ from $\{b,c,d,e\}$ reveals $e$ preferred to $c$, $d$, and $b$; see the first row of the following table, which repeats the first five observations of the variables `set` and `choice`, and includes the first five observations of the revealed preference indicators.
 ```{r RP}
-PC_trials %>% select(set, choice, matches("^[a-e]{2}$"))
+PC_trials %>% select(set, choice, matches("^[a-e]{2}$")) %>% head(5)
 ```
 
 One possible application is aggregation of preferences.
 Aggregating revealed preference indicators for the `Beer` domain gives the following table.
+The regular expression `^[a-e]{2}$` matches variable names that are strings of length two
+formed from the letters a through e.
 ```{r RP_plus}
 PC_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSums
 ```
@@ -76,7 +77,7 @@ Choice counts for the experiment are in the R table `PC_counts`, a $32 \times 31
 The first dimension is indexed by choice domain, the second by choice subset and the third by realized choice.
 The number of times any of the subjects choose object $a$ from choice set $\{a,b\}$ of domain `Beer` is `PC_counts['Beer', 'ab', 'a']` or `PC_counts['Beer', 3, 1]`.
 Counts of impossible events, such as choosing $a$ from $\{b,c\}$ have the value NA rather than zero.
-This is deliberate; accessing information that doesn't make sense should lead to an immediate (and therefore easy to find) error.
+This is deliberate; accessing information that doesn't make sense should lead to an immediate (thus relatively easy to find) error.
 
 Here is a cross section of counts for the 2nd, 3rd and 5th objects of the `Beer` domain.
 For example, the number of times any subject choose beer $b$ when presented with a choice between beers $b$ and $c$ is 36.
@@ -92,6 +93,8 @@ head(PC_demographics, 5)
 ```
 
 ## Random Choice Structures
+
+To make sense of most of the functions in this package, we need to introduce the concept of a Random Choice Structure (RCS), which organizes choice probabilities.
 
 Let $T = (x_1,\ldots,x_n)$ be a universe of choice objects.
 When faced with a non-empty choice set $A \subseteq T$, a decision maker (DM) chooses a single object from $A$.
@@ -110,22 +113,23 @@ The page on [Barycentric coordinate systems][barW] gives more detail and general
 
 The following code creates a figure displaying four points in barycentric coordinates, correponding to the three binary choice probability vectors and the ternary choice probability vector of the Random Choice Structure `P_bce` we just constructed.
 ```{r plot_RCS}
-#triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
-#plot_P3(P_bce)                  # Plot points 
+triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
+plot_P3(P_bce)                  # Plot points 
 ```
 
 Each point in the triangle $bce$ is a unique convex combination $\lambda_b b + \lambda_c c + \lambda_e e$ of the vertices $b$, $c$ and $e$, and the vector $(\lambda_b, \lambda_c, \lambda_e)$ gives the coordinates of that point in Barycentric coordinates.
 Thus, the vertices $b$, $c$ and $e$ have Barycentric coordinates $(1,0,0)$, $(0,1,0)$ and $(0,0,1)$, respectively.
-We will interpret a point $(\lambda_b, \lambda_c, \lambda_e)$ as giving choice probabilities of $b$, $c$ and $e$.
+We will interpret a point $(\lambda_b, \lambda_c, \lambda_e)$ as giving choice probabilities of $b$, $c$ and $e$ when the choice set $\{b,c,e\}$ is presented.
 Since $bce$ is equilateral, the distances of point $(\lambda_b, \lambda_c, \lambda_e)$ to the sides $ce$, $be$ and $bc$ of the triangle are fractions $\lambda_b$, $\lambda_c$ and $\lambda_e$, respectively, of the height of the triangle.
 
-Each row in the table is represented by a point in the figure.
+Each row in the table above is represented by a point in the figure above.
 The hollow dot on the left side of the triangle gives the choice probabilities $p(b, c) = 0.9$ and $p(c, b) = 1 - p(b, c) = 0.1$.
-It is the convex combination $p(b, c) b + p(c, b) c$ of vertices $b$, or $c$, $(p(b, c), p(c, b),0)$ in three dimensional barycentric coordinates.
+It is the convex combination $p(b, c) b + p(c, b) c$ of vertices $b$ and $c$; it is also
+the point $(p(b, c), p(c, b),0)$ in three dimensional barycentric coordinates.
 Similarly, the hollow point on the right side gives the choice probabilities $p(c, e)$ and $p(e, c)$; the hollow point on the base gives $p(b, e)$ and $p(e, b)$.
 
-The ternary probability vector $P_\{b,c,e\}(\cdot)$ given in the final row of the table is indicated by a solid dot in the interior of the triangle.
-This point has Barycentric coordinates $(P_\{b,c,e\}(b), P_\{b,c,e\}(c), P_\{b,c,e\}(e)) = (0.25, 0.025, 0.725)$.
+The ternary probability vector $P_{\{b,c,e\}}(\cdot)$ given in the final row of the table is indicated by a solid dot in the interior of the triangle.
+This point has Barycentric coordinates $(P_{\{b,c,e\}}(b), P_{\{b,c,e\}}(c), P_{\{b,c,e\}}(e)) = (0.25, 0.025, 0.725)$.
 We adopt the convention that binary probabilities are indicated by hollow dots and ternary probability vectors by solid dots.
 In this way, we can tell the difference between a binary probability and a ternary probability vector that happens to be on the boundary of the triangle.
 
@@ -144,9 +148,10 @@ Examples, include weak, moderate and strong stochastic transitivity, regularity,
 ### Displaying cross sections of regions in barycentric coordinates
 
 A random choice structure $P$ satisfies
+
 - *regularity* if for all $x \in A \subseteq B \subseteq T$, $P_A(x) \geq P_B(x)$,
 - the *multiplicative inequality* if for all $x \in A, B \subseteq T$, $P_{A \cup B} \geq P_A(x) P_B(x)$,
-- the *Block-Marshak* inequalities if and only if for all $x \in A \subseteq T$, $$\sum_{B \colon A \subseteq B \subseteq T} (-1)^{|B \backslash A|} P_B(x) \geq 0$$.
+- the *Block-Marshak* inequalities if and only if for all $x \in A \subseteq T$, $$\sum_{B \colon A \subseteq B \subseteq T} (-1)^{|B \backslash A|} P_B(x) \geq 0.$$
 
 The next code excerpt displays cross sections of the regularity and multiplicative inequality regions, both subsets of $\Delta$.
 The blue triangle shows the region of ternary probabilities that is consistent with both regularity and the specified binary choice probabilities.
@@ -200,12 +205,11 @@ polygon(tritrafo(C$Cxz), col=grey(0.8)); text(tritrafo(colMeans(C$Cxz)), 'Cxz')
 ### High posterior density curves
 
 ```{r HPD}
-prior_A = RCD_prior_1(2.0, ncol(N_bce))
+prior_A = prior_DCE_scalar_alpha(2.0, ncol(N_bce))
 post_A = prior_A + N_bce
 triplot(label=c('b', 'c', 'e'))
-plot_HD_Dir3(post_A, 0.90)
-
-print(Ind_Dir_mult_ML(prior_A, N_bce, log=TRUE))
+plot_HD_Dir3(post_A, 0.90, c(1,2,3))
+print(ML_DCE_Dir_mult(prior_A, N_bce, log=TRUE))
 ```
 
 ### Pearson two-sample chi-square tests

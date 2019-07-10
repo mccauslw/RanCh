@@ -30,6 +30,6 @@
 YG_raw
 }
 \description{
-Record of every choice made by every respondant.
+Raw trial-by-trial data from YouGov experiment
 }
 \keyword{datasets}

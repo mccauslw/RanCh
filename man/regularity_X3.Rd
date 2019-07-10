@@ -19,6 +19,6 @@ ternary probabilities consistent with given binary probabilities and the
 regularity condition.
 }
 \examples{
-P = create_P(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
+P = create_P3(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
 reg_region = regularity_X3(P)
 }

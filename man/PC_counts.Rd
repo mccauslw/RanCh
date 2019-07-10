@@ -3,12 +3,20 @@
 \docType{data}
 \name{PC_counts}
 \alias{PC_counts}
-\title{Counts}
+\title{Choice counts in Population Choice experiment}
 \format{An object of class \code{array} of dimension 32 x 31 x 5.}
 \usage{
 PC_counts
 }
 \description{
-A 32x26x5 matrix with count data.
+A three dimensional array, 32 by 31 by 5, of count data.
+Element i,j,k gives the number of subjects that chose object k when
+presented with choice set j of domain i.
+The choice set index j=1,...,31 encodes a non-empty subset of the universe
+of the five choice objects a, b, c, d and e, numbered 1, 2, 3, 4, 5.
+Each digit (or bit) in the binary representation of j is an inclusion indicator: object k
+is in the set if and only if the k'th digit from the right is 1.
+For example, the set with b, c, d and e (but not a) is encoded as binary 11110 (decimal 30)
+Whenever k is not an element of j, the value is NA.
 }
 \keyword{datasets}

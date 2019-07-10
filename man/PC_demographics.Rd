@@ -6,9 +6,11 @@
 \title{Demographic information for population choice experiment}
 \format{A data frame with demographic information on subjects
 \describe{
-\item{\code{sex}}{Sex of subject }
+\item{\code{sex}}{Sex of subject: 1 for male, 2 for female}
 \item{\code{age}}{Age of subject in years}
-\item{\code{location}}{Province or territory in Canada}
+\item{\code{location}}{Province or territory in Canada, 1=Alberta, 2=British Columbia,
+3=Manitoba, 4=New Brunswick, 5=Newfoundland/Labrador, 6=Northwest Territories,
+7=Nova Scotia, 8=Ontario, 9=Prince Edward Island, 10=Quebec, 11=Saskatchewan, 12=Yukon}
 }}
 \usage{
 PC_demographics

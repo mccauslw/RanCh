@@ -2,7 +2,7 @@
 % Please edit documentation in R/HPD.R
 \name{dDir}
 \alias{dDir}
-\title{Dirichlet density}
+\title{Dirichlet density function}
 \usage{
 dDir(p, alpha, log = TRUE)
 }
