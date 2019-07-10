@@ -2,27 +2,29 @@
 #'
 #' \code{compromise_X3} constructs six regions (all polygons) associated with
 #' binary-ternary compromise effects.
-#' Below, x and z are the extreme choice objects and y is the between
+#' Below, \eqn{x} and \eqn{z} are the extreme choice objects and \eqn{y} is the between
 #' (or compromise) object.
 #' The interior of each polygon gives the set of ternary choice probabilities
 #' consistent with (1) the two specified binary choice probabilities and (2)
 #' one of six compromise effect conditions.
-#' @param pyx scalar giving the probability of choosing y when presented with {x,y}.
-#' @param pyz scalar giving the probability of choosing y when presented with {y,z}.
+#' @param pyx scalar, probability \eqn{p(y,x)} of choosing \eqn{y} when
+#' presented with choice set \eqn{\{x,y\}}.
+#' @param pyz scalar, the probability \eqn{p(y,z)} of choosing \eqn{y} when
+#' presented with choice set \eqn{\{y,z\}}.
 #' @return named list of six polygons in a barycentric coordinate system.
 #' Each polygon is a matrix, with one row for each polygon vertex and one column
-#' for each of the three choice objects x, y and z.
-#' Element i,j gives the probability of choosing j when presented with {x,y,z},
-#' at the i'th polygon vertex.
+#' for each of the three choice objects \eqn{x}, \eqn{y} and \eqn{z}.
+#' Element \eqn{i,j} gives the probability of choosing \eqn{j} when presented with
+#' choice set \eqn{\{x,y,z\}}, at the \eqn{i}'th polygon vertex.
 #' The six polygons---triangles except for \code{Cxz}, a quadrilateral---are:
 #' \describe{
-#' \item{\code{Cxyz}}{region where there is a compromise effect with y as target,
-#' x as competitor and z as decoy}
-#' \item{\code{Czyx}}{region where there is a compromise effect with y as target,
-#' z as competitor and x as decoy}
+#' \item{\code{Cxyz}}{region where there is a compromise effect with \eqn{y} as target,
+#' \eqn{x} as competitor and \eqn{z} as decoy}
+#' \item{\code{Czyx}}{region where there is a compromise effect with \eqn{y} as target,
+#' \eqn{z} as competitor and \eqn{x} as decoy}
 #' \item{\code{Co}}{region where there is neither compromise effect}
-#' \item{\code{Cx}}{region with only the x effect}
-#' \item{\code{Cz}}{region with only the z effect}
+#' \item{\code{Cx}}{region with only the \eqn{x} effect}
+#' \item{\code{Cz}}{region with only the \eqn{z} effect}
 #' \item{\code{Cxz}}{region with both effects}
 #' }
 #' @export

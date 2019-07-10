@@ -18,4 +18,11 @@ PC_demographics
 \description{
 Demographic information for population choice experiment
 }
+\seealso{
+{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{PC_trials}} for trial-by-trial data,
+\code{\link{PC_counts}} for choice count data and
+\code{\link{PC_raw}} for the original raw data.
+}
 \keyword{datasets}

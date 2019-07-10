@@ -19,4 +19,11 @@ is in the set if and only if the k'th digit from the right is 1.
 For example, the set with b, c, d and e (but not a) is encoded as binary 11110 (decimal 30)
 Whenever k is not an element of j, the value is NA.
 }
+\seealso{
+{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{PC_trials}} for trial-by-trial data,
+\code{\link{PC_demographics}} for demographic information and
+\code{\link{PC_raw}} for the original raw data.
+}
 \keyword{datasets}

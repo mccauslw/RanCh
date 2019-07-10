@@ -2,11 +2,11 @@
 
 export(Dir2_HD_region)
 export(Dir3_HD_region)
-export(ML_DCE_Dir_mult)
-export(ML_Dir_mult)
 export(compromise_X3)
 export(create_P3)
 export(dDir)
+export(log_ML_DCE_Dir_mult)
+export(log_ML_Dir_mult)
 export(marginalize)
 export(multiplicative_X3)
 export(plot_HD_Dir3)

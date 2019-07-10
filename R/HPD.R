@@ -82,7 +82,7 @@ log_ML_Dir_mult <- function(alpha, N, log=TRUE) {
 
 #' Marginal likelihood for discrete choice experiment, Dirichlet-multinomial model
 #'
-#' \code{ML_DCE_Dir_mult} computes the marginal likelihood for a model
+#' \code{log_ML_DCE_Dir_mult} computes the marginal likelihood for a model
 #' where choice count vectors are independent multinomial across choice sets
 #' and choice probability vectors are independent Dirichlet across choice sets.
 #' @param A matrix of Dirichlet parameters, each row giving the Dirichlet
@@ -95,7 +95,7 @@ log_ML_DCE_Dir_mult <- function(A, N, log=TRUE) {
   ln_ML = 0
   for (i in 1:nrow(A)) {
     if (subset_card[i] > 1) {
-      ln_ML = ln_ML + ML_Dir_mult(A[i, ], N[i, ], log=TRUE)
+      ln_ML = ln_ML + log_ML_Dir_mult(A[i, ], N[i, ], log=TRUE)
     }
   }
   if (log) ln_ML else exp(ln_ML)

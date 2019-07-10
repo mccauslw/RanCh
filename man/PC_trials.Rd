@@ -26,4 +26,11 @@ PC_trials
 \description{
 Table of choice trials, population choice experiment
 }
+\seealso{
+\code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{PC_counts}} for choice count data,
+\code{\link{PC_demographics}} for demographic information and
+\code{\link{PC_raw}} for the original raw data.
+}
 \keyword{datasets}
