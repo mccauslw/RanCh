@@ -9,7 +9,7 @@
 #' one of six compromise effect conditions.
 #' @param pyx scalar, probability \eqn{p(y,x)} of choosing \eqn{y} when
 #' presented with choice set \eqn{\{x,y\}}.
-#' @param pyz scalar, the probability \eqn{p(y,z)} of choosing \eqn{y} when
+#' @param pyz scalar, probability \eqn{p(y,z)} of choosing \eqn{y} when
 #' presented with choice set \eqn{\{y,z\}}.
 #' @return named list of six polygons in a barycentric coordinate system.
 #' Each polygon is a matrix, with one row for each polygon vertex and one column

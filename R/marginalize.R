@@ -10,9 +10,10 @@
 #' @return A count matrix
 #' @export
 #' @examples
-#' N_bce = marginalize(PC_counts, c(2,3,5))
-#' P_abd = marginalize()
-#' N
+#' N_bce = marginalize(PC_counts['Beer',,], c(2, 3, 5)) # Marginalize data first
+#' P_bce_1 = proportions(N_bce)                         # then compute proportions
+#' P = proportions(PC_counts['Beer',,])   # Compute proportions first
+#' P_bce_2 = marginalize(P, c(2, 3, 5))   # then marginalize. Gives same result.
 marginalize <- function(input_N, objects) {
   d = dim(input_N)
   n = d[2]               # Number of objects in universe

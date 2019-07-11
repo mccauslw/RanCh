@@ -1,12 +1,12 @@
 #' Check if random choice structure satisfies regularity
 #'
 #' \code{regularity} returns TRUE if the random choice structure P satisfies
-#' regularity and false otherwise.
+#' regularity and FALSE otherwise.
 #' @param P A random choice structure
 #' @return A logical value indicating whether \code{P} satisfies regularity.
 #' @export
 #' @examples
-#' P = create_P3(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
+#' P = create_P3(0.7, 0.6, 0.8, 0.6, 0.3, names = c('x', 'y', 'z'))
 #' regularity(P)
 #'
 regularity = function(P) {

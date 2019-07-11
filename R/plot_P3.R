@@ -12,17 +12,18 @@
 #' to a solid circle. The convention established with the defaults for binary_pch and
 #' ternary_pch allow one to distinguish between a binary choice probability and a ternary
 #' choice probability that happens to be on the boundary of the triangle.
+#' @importFrom klaR tripoints
 #' @export
 #' @examples
-#' P = create_P3(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
+#' P = create_P3(0.7, 0.6, 0.8, 0.6, 0.3, names = c('x', 'y', 'z'))
 #' plot_P3(P)
 plot_P3 = function(P, perm=c(1, 2, 3), binary_pch = 1, ternary_pch = 20) {
   # Object and subset shortcuts
   x = perm[1]; y = perm[2]; z = perm[3]
-  xy = sum(bitShiftL(1, c(x, y)-1))
-  yz = sum(bitShiftL(1, c(y, z)-1))
-  xz = sum(bitShiftL(1, c(x, z)-1))
-  xyz = 7
+  xy = set_index(c(x, y))
+  yz = set_index(c(y, z))
+  xz = set_index(c(x, z))
+  xyz = set_index(c(x, y, z))
 
   # Sides of triangle
   tripoints(P[xy, x], P[xy, y], 0.0, pch=binary_pch)

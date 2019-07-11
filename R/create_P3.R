@@ -4,7 +4,7 @@
 #' from
 #' @param p12 Probability of chosing object 1 when presented with objects 1 and 2
 #' @param p23 Probability of chosing object 2 when presented with objects 2 and 3
-#' @param P13 Probability of chosing object 1 when presented with objects 1 and 3
+#' @param p13 Probability of chosing object 1 when presented with objects 1 and 3
 #' @param P1 Probability of chosing object 1 when presented with objects 1, 2 and 3
 #' @param P2 Probability of chosing object 2 when presented with objects 1, 2 and 3
 #' @param names character vector giving names to the three objects

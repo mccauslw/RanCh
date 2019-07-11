@@ -1,21 +1,22 @@
-# Quantile of density value for third order Dirichlet
-#
-# \code{dDir3_quantile} computes an approximation of the given
-# quantile of a third order Dirichlet density value, under that Dirichlet
-# distribution.
-# @param quantile the quantile of the desired density value
-# @param alpha a vector of Dirichlet parameters
-# @param normalized binary; if TRUE, return the quantile as a fraction of
-# the maximum density value; if FALSE, return the unnormalized quantile.
-# @return The value of the quantile, normalized or not
+#' Quantile of density value for third order Dirichlet
+#'
+#' \code{dDir3_quantile} computes an approximation of the given
+#' quantile of a third order Dirichlet density value, under that Dirichlet
+#' distribution.
+#' @param quantile the quantile of the desired density value
+#' @param alpha a vector of Dirichlet parameters
+#' @param normalized binary; if TRUE, return the quantile as a fraction of
+#' the maximum density value; if FALSE, return the unnormalized quantile.
+#' @return The value of the quantile, normalized or not
+#' @importFrom stats qbeta
 dDir3_quantile <- function(quantile, alpha, normalized=FALSE) {
   ld_max = dDir_max(alpha, log=TRUE)
-  m = exp(dDir_moments(alpha, 2, log=TRUE) - c(1,2)*ld_max)
-  r = m[2]/m[1]
-  den = r*(1-m[1]) - m[1]*(1-r)
-  theta1 = m[1]*(1-r)/den
-  theta2 = (1-m[1])*(1-r)/den
-  q = qbeta(quantile, theta1, theta2)
+  m <- exp(dDir_moments(alpha, 2, log=TRUE) - c(1,2)*ld_max)
+  r <- m[2]/m[1]
+  den <- r*(1-m[1]) - m[1]*(1-r)
+  theta1 <- m[1]*(1-r)/den
+  theta2 <- (1-m[1])*(1-r)/den
+  q <- qbeta(quantile, theta1, theta2)
   if (normalized) q else q * exp(ld_max)
 }
 
@@ -31,15 +32,35 @@ dDir3_quantile <- function(quantile, alpha, normalized=FALSE) {
 #' @examples
 #' f = dDir(c(0.1, 0.3, 0.6), c(2.5, 0.5, 1.0))
 dDir <- function(p, alpha, log=FALSE) {
-  ln_f = lgamma(sum(alpha)) - sum(lgamma(alpha))
-  ln_f = ln_f + sum((alpha-1)*log(p))
+  ln_f <- lgamma(sum(alpha)) - sum(lgamma(alpha))
+  ln_f <- ln_f + sum((alpha-1)*log(p))
   if (log) ln_f else exp(ln_f)
 }
 
+#' Dirichlet random variates
+#'
+#' \code{rDir} draws from the Dirichlet distribution
+#' @param n number of draws
+#' @param alpha vector of Dirichlet parameters
+#' @return matrix with n rows, each a draw from the Dirichlet distribution
+#' @importFrom stats rgamma
+#' @export
+#' @examples
+#' library(klaR)
+#' p = rDir(1000, c(1, 1, 1)) # Uniform distribution on 2-simplex
+#' triplot(label=c('x', 'y', 'z'))
+#' plot(tritrafo(p))
+rDir <-function(n, alpha) {
+  K <- length(alpha)
+  p <- matrix(0, nrow=n, ncol=K)
+  for (i in 1:K) p[, i] <- rgamma(n, alpha[i])
+  p <- p/rowSums(p)
+}
+
 dDir3 <- function(p1, p2, alpha, log=FALSE) {
-  p3 = pmax(0, 1-p1-p2)
-  ln_f = lgamma(sum(alpha)) - sum(lgamma(alpha))
-  ln_f = ln_f + (alpha[1]-1)*log(p1) + (alpha[2]-1)*log(p2) + (alpha[3]-1)*log(p3)
+  p3 <- pmax(0, 1-p1-p2)
+  ln_f <- lgamma(sum(alpha)) - sum(lgamma(alpha))
+  ln_f <- ln_f + (alpha[1]-1)*log(p1) + (alpha[2]-1)*log(p2) + (alpha[3]-1)*log(p3)
   if (log) ln_f else exp(ln_f)
 }
 
@@ -68,6 +89,7 @@ dDir_max <- function(alpha, log=FALSE) {
 #' @param log logical; if TRUE, return the log marginal likelihood; if FALSE,
 #' the marginal likelihood. log=FALSE is usually not recommendend, as underflow
 #' is likely.
+#' @importFrom stats na.omit
 #' @export
 #' @return Marginal likelihood or log marginal likelihood
 log_ML_Dir_mult <- function(alpha, N, log=TRUE) {
@@ -85,17 +107,17 @@ log_ML_Dir_mult <- function(alpha, N, log=TRUE) {
 #' \code{log_ML_DCE_Dir_mult} computes the marginal likelihood for a model
 #' where choice count vectors are independent multinomial across choice sets
 #' and choice probability vectors are independent Dirichlet across choice sets.
-#' @param A matrix of Dirichlet parameters, each row giving the Dirichlet
+#' @param Alpha matrix of Dirichlet parameters, each row giving the Dirichlet
 #' distribution of the corresponding row of a random choice structure.
-#' @param N count matrix with the same dimensions as A, pertaining to the same
+#' @param N count matrix with the same dimensions as \code{Alpha}, pertaining to the same
 #' universe of objects.
 #' @param log logical; if TRUE, return the log Bayes factor
 #' @export
-log_ML_DCE_Dir_mult <- function(A, N, log=TRUE) {
+log_ML_DCE_Dir_mult <- function(Alpha, N, log=TRUE) {
   ln_ML = 0
-  for (i in 1:nrow(A)) {
+  for (i in 1:nrow(Alpha)) {
     if (subset_card[i] > 1) {
-      ln_ML = ln_ML + log_ML_Dir_mult(A[i, ], N[i, ], log=TRUE)
+      ln_ML = ln_ML + log_ML_Dir_mult(Alpha[i, ], N[i, ], log=TRUE)
     }
   }
   if (log) ln_ML else exp(ln_ML)
@@ -149,10 +171,11 @@ dDir_moments <- function(beta, n_mu, log=FALSE) {
 #' highest posterior density (HPD) regions for a Dirichlet-multinomial model.
 #' @param alpha vector of three (positive) Dirichlet parameters.
 #' @param HD_probability scalar in [0,1] giving the probability of the HD region
-#' @export
 #' @return matrix giving polygon approximation of HD region.
 #' Each row gives a polygon vertex.
 #' The three columns correspond to coordinates in a barycentric coordinate system.
+#' @importFrom grDevices contourLines
+#' @export
 Dir3_HD_region = function(alpha, HD_probability) {
   # Grid of points
   p1 <- p2 <- seq(0, 1, by=0.001)
@@ -174,11 +197,13 @@ Dir3_HD_region = function(alpha, HD_probability) {
 #' density (HPD) regions for a second order Dirichlet-multinomial model
 #' (i.e. a beta-binomial model).
 #' @param alpha vector of three (positive) Dirichlet parameters.
-#' @param HD_probability scalar in [0,1] giving the probability of the HD region
-#' @export
+#' @param HD_probability scalar in \eqn{[0,1]} giving the probability of the HD region
 #' @return matrix giving polygon approximation of HD region.
 #' Each row gives a polygon vertex.
 #' The three columns correspond to coordinates in a barycentric coordinate system.
+#' @importFrom Smisc hpd
+#' @importFrom stats dbeta pbeta
+#' @export
 Dir2_HD_region = function(alpha, HD_probability) {
   interval = hpd(function(x) dbeta(x, alpha[1], alpha[2]), c(0, 1),
                  cdf = function(x) pbeta(x, alpha[1], alpha[2]),
@@ -196,6 +221,15 @@ Dir2_HD_region = function(alpha, HD_probability) {
 #' probabilities on the sides of the 3rd order barycentric coordinate system.
 #' The two non-zero columns of the result are specified in the 2-vector
 #' ternary_cols.
+#' @param binary_points matrix of points, with each row a 2-vector on the 1-simplex
+#' @param ternary_cols 2-vector specifying the columns of the result
+#' corresponding to the two columns of \code{binary_points}
+#' @return matrix of points, with each row a 3-vector on the 2-simplex. The first
+#' element of \code{ternary_cols} gives the column of the result that takes the values
+#' of the first column of \code{binary_points}; the second element gives the column of
+#' the result taking the values of the second column of \code{binary_points}.
+#' The remaining column of the result is set to zero.
+#' @export
 #' @examples
 #' binary2ternary(matrix(c(0.6, 0.4), nrow=1), c(2,3)) # returns 1x3 matrix [0 0.6 0.4]
 #' binary2ternary(matrix(c(0.6, 0.4), nrow=1), c(3,2)) # returns 1x3 matrix [0 0.4 0.6]
@@ -207,16 +241,25 @@ binary2ternary <- function(binary_points, ternary_cols)
   ternary_points
 }
 
-#' Plot highest density region for a third order Dirichlet distribution
+#' Plot highest density regions for RCS with 3 objects
 #'
-#' This function plots the Dirichlet highest density region in barycentric
-#' coordinates.
-#' @param alpha vector of Dirichlet parameters
-#' @param HD_probability probability of highest density region
+#' This function plots the Dirichlet highest density (HD) regions in barycentric
+#' coordinates for the three binary choice probability and one ternary choice
+#' probability vectors of a random RCS
+#' @param Alpha matrix of Dirichlet parameters specifying the distribution of an RCD
+#' @param HD_probability scalar in \eqn{[0,1}] giving the probability of the HD region
+#' @param selection 3-vector specifying the three columns of \code{A} to use for plotting
+#' @importFrom graphics polygon lines
+#' @importFrom klaR tritrafo triplot
 #' @export
 #' @examples
-#' plot_HD_Dir3(A, 0.95, c(1,2,3))
-plot_HD_Dir3 <- function(A, HD_probability, selection)
+#' library(klaR)
+#' N_bce = marginalize(PC_counts['Beer', , ], c(2, 3, 5)) # Counts for objects 2, 3, 5
+#' prior_Alpha = prior_DCE_scalar_alpha(2.0, 3) # Parameters of simple conjugate prior
+#' post_Alpha = prior_Alpha + N_bce             # Posterior parameters
+#' triplot(label=c('b', 'c', 'e'))              # Set up ternary plot
+#' plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))     # Plot HPD regions
+plot_HD_Dir3 <- function(Alpha, HD_probability, selection)
 {
   obj1 = selection[1]; obj2 = selection[2]; obj3 = selection[3]
   set_123 = set_index(c(obj1, obj2, obj3))
@@ -225,18 +268,21 @@ plot_HD_Dir3 <- function(A, HD_probability, selection)
   set_13 = set_index(c(obj1, obj3))
 
   # Highest density region for ternary probability
-  HD_region = Dir3_HD_region(A[set_123, c(obj1, obj2, obj3)], HD_probability)
+  HD_region = Dir3_HD_region(Alpha[set_123, c(obj1, obj2, obj3)], HD_probability)
   polygon(tritrafo(HD_region), col='lightgreen')
 
   # Highest density region for (p1, p2)
-  HD12 = binary2ternary(Dir2_HD_region(A[set_12, c(obj1, obj2)], HD_probability), c(1, 2))
+  HD12 = binary2ternary(Dir2_HD_region(Alpha[set_12, c(obj1, obj2)], HD_probability),
+                        c(1, 2))
   lines(tritrafo(HD12), lwd=4)
 
   # Highest density region for (p2, p3)
-  HD23 = binary2ternary(Dir2_HD_region(A[set_23, c(obj2, obj3)], HD_probability), c(2, 3))
+  HD23 = binary2ternary(Dir2_HD_region(Alpha[set_23, c(obj2, obj3)], HD_probability),
+                        c(2, 3))
   lines(tritrafo(HD23), lwd=4)
 
   # Highest density region for (p1, p3)
-  HD13 = binary2ternary(Dir2_HD_region(A[set_13, c(obj1, obj3)], HD_probability), c(1, 3))
+  HD13 = binary2ternary(Dir2_HD_region(Alpha[set_13, c(obj1, obj3)], HD_probability),
+                        c(1, 3))
   lines(tritrafo(HD13), lwd=4)
 }

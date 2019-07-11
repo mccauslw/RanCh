@@ -1,11 +1,4 @@
-#' Multiple Choice experiment data
-#'
-#' Raw trial-by-trial data from Multiple Choice experiment
-#'
-#' @format A data frame with 53 variables generated in (WJM)
-#' We do not provide documentation, although the variable names are suggestive.
-"MC_raw"
-#' Tibble recording every choice trial in the multiple choice experiment
+#' Table of choice trial data from the Multiple Choice experiment
 #'
 #' @format A tibble with 18 variables
 #' \describe{
@@ -21,7 +14,13 @@
 #' \item{\code{ab}, \code{ac}, \ldots, \code{de}}{revealed preference indicator:
 #' taking column ab as an example, the value is 1 if a is revealed preferred to b,
 #' -1 if b is revealed preferred to a, 0 otherwise.}}
+#' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
+#' Other data objects for the experiment include
+#' \code{\link{MC_counts}}, an array of choice count data, and
+# \code{\link{MC_demographics}}, a table of demographic information and
+#' \code{\link{MC_raw}}, a table of raw data.
 "MC_trials"
+
 #' Choice counts in multiple choice experiment
 #'
 #' A three dimensional array, 141 by 31 by 5, of count data.
@@ -33,5 +32,22 @@
 #' is in the set if and only if the k'th digit from the right is 1.
 #' For example, the set with b, c, d and e (but not a) is encoded as binary 11110 (decimal 30).
 #' Whenever k is not an element of j, the value is NA.
-#'
+#' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
+#' Other data objects for the experiment include
+#' \code{\link{MC_trials}}, a table of choice trial data, and
+# \code{\link{MC_demographics}}, a table of demographic information and
+#' \code{\link{MC_raw}}, a table of raw data.
 "MC_counts"
+
+#' Multiple Choice experiment data
+#'
+#' Raw trial-by-trial data from Multiple Choice experiment
+#'
+#' @format A data frame with 53 variables generated in (WJM)
+#' We do not provide documentation, although the variable names are suggestive.
+#' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
+#' Other data objects for the experiment include
+#' \code{\link{MC_trials}}, a table of choice trial data, and
+#' \code{\link{MC_counts}}, an array of choice count data.
+# \code{\link{MC_demographics}}, a table of demographic information and
+"MC_raw"
