@@ -3,7 +3,7 @@
 \docType{data}
 \name{YG_trials}
 \alias{YG_trials}
-\title{Table of choice trials, population choice experiment}
+\title{Table of choice trials data from the YouGov experiment}
 \format{A tibble with 17 variables
 \describe{
 \item{\code{domain}}{factor, name of choice domain}
@@ -25,6 +25,13 @@ value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 
 YG_trials
 }
 \description{
-Table of choice trials, population choice experiment
+Table of choice trials data from the YouGov experiment
+}
+\seealso{
+\code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{YG_counts}}, an array of choice count data,
+\code{\link{YG_demographics}}, a table of demographic information, and
+\code{\link{YG_raw}}, a table of raw data.
 }
 \keyword{datasets}

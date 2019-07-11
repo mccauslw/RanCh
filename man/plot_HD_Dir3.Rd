@@ -2,19 +2,27 @@
 % Please edit documentation in R/HPD.R
 \name{plot_HD_Dir3}
 \alias{plot_HD_Dir3}
-\title{Plot highest density region for a third order Dirichlet distribution}
+\title{Plot highest density regions for RCS with 3 objects}
 \usage{
-plot_HD_Dir3(A, HD_probability, selection)
+plot_HD_Dir3(Alpha, HD_probability, selection)
 }
 \arguments{
-\item{HD_probability}{probability of highest density region}
+\item{Alpha}{matrix of Dirichlet parameters specifying the distribution of an RCD}
 
-\item{alpha}{vector of Dirichlet parameters}
+\item{HD_probability}{scalar in \eqn{[0,1}] giving the probability of the HD region}
+
+\item{selection}{3-vector specifying the three columns of \code{A} to use for plotting}
 }
 \description{
-This function plots the Dirichlet highest density region in barycentric
-coordinates.
+This function plots the Dirichlet highest density (HD) regions in barycentric
+coordinates for the three binary choice probability and one ternary choice
+probability vectors of a random RCS
 }
 \examples{
-plot_HD_Dir3(A, 0.95, c(1,2,3))
+library(klaR)
+N_bce = marginalize(PC_counts['Beer', , ], c(2, 3, 5)) # Counts for objects 2, 3, 5
+prior_Alpha = prior_DCE_scalar_alpha(2.0, 3) # Parameters of simple conjugate prior
+post_Alpha = prior_Alpha + N_bce             # Posterior parameters
+triplot(label=c('b', 'c', 'e'))              # Set up ternary plot
+plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))     # Plot HPD regions
 }

@@ -3,7 +3,7 @@
 \docType{data}
 \name{PC_raw}
 \alias{PC_raw}
-\title{Raw trial-by-trial data from Population Choice experiment}
+\title{Table of raw data from Population Choice experiment}
 \format{A data frame with 23 variables
 \describe{
 \item{\code{responseid}}{Unused subject identifier}
@@ -36,13 +36,13 @@
 PC_raw
 }
 \description{
-Raw trial-by-trial data from Population Choice experiment
+Table of raw data from Population Choice experiment
 }
 \seealso{
 {\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 Other data objects for the experiment include
-\code{\link{PC_trials}} for trial-by-trial data,
-\code{\link{PC_counts}} for choice count data and
-\code{\link{PC_demographics}} for demographic information
+\code{\link{PC_trials}}, a table of choice trial data,
+\code{\link{PC_counts}}, a matrix of choice count data, and
+\code{\link{PC_demographics}}, a table of demographic information
 }
 \keyword{datasets}

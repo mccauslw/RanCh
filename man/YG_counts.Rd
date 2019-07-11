@@ -3,7 +3,7 @@
 \docType{data}
 \name{YG_counts}
 \alias{YG_counts}
-\title{Choice counts in YouGov experiment}
+\title{Array of choice count data from the YouGov experiment}
 \format{An object of class \code{array} of dimension 16 x 2 x 15 x 4.}
 \usage{
 YG_counts
@@ -18,5 +18,12 @@ Each digit (or bit) in the binary representation of j is an inclusion indicator:
 is in the set if and only if the k'th digit from the right is 1.
 For example, the set with b, c, and d (but not a) is encoded as binary 1110 (decimal 14)
 Whenever k is not an element of j, the value is NA.
+}
+\seealso{
+{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{YG_trials}}, a table of choice trial data,
+\code{\link{YG_demographics}}, a table of demographic information, and
+\code{\link{YG_raw}}, a table of raw data.
 }
 \keyword{datasets}

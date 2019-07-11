@@ -3,7 +3,7 @@
 \docType{data}
 \name{YG_raw}
 \alias{YG_raw}
-\title{YouGov Experiment data}
+\title{Table of choice trial data from the YouGov experiment}
 \format{A data frame with 17 variables:
 \describe{
 \item{\code{design}}{}
@@ -30,6 +30,13 @@
 YG_raw
 }
 \description{
-Raw trial-by-trial data from YouGov experiment
+Table of choice trial data from the YouGov experiment
+}
+\seealso{
+{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{YG_trials}}, a table of choice trial data,
+\code{\link{YG_counts}}, a matrix of choice count data, and
+\code{\link{YG_demographics}}, a table of demographic information
 }
 \keyword{datasets}

@@ -3,7 +3,7 @@
 \docType{data}
 \name{PC_trials}
 \alias{PC_trials}
-\title{Table of choice trials, population choice experiment}
+\title{Table of choice trial data from the Population Choice experiment}
 \format{A tibble with 20 variables
 \describe{
 \item{\code{domain}}{factor, name of choice domain}
@@ -24,13 +24,13 @@ value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 
 PC_trials
 }
 \description{
-Table of choice trials, population choice experiment
+Table of choice trial data from the Population Choice experiment
 }
 \seealso{
 \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
 Other data objects for the experiment include
-\code{\link{PC_counts}} for choice count data,
-\code{\link{PC_demographics}} for demographic information and
-\code{\link{PC_raw}} for the original raw data.
+\code{\link{PC_counts}}, an array of choice count data,
+\code{\link{PC_demographics}}, a table of demographic information, and
+\code{\link{PC_raw}}, a table of raw data.
 }
 \keyword{datasets}

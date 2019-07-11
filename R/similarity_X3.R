@@ -2,27 +2,29 @@
 #'
 #' \code{similarity_X3} constructs six regions (all polygons) associated with
 #' binary-ternary similary effects.
-#' Below, x and y are "similar" choice objects and object z is dissimilar to both
-#' x and y.
+#' Below, \eqn{x} and \eqn{y} are "similar" choice objects and object \eqn{z} is dissimilar to both
+#' \eqn{x} and \eqn{y}.
 #' The interior of each polygon gives the set of ternary choice probabilities
 #' consistent with (1) the two specified binary choice probabilities and (2) one of six
 #' similarity effect conditions.
-#' @param pxz scalar giving the probability of choosing y when presented with x and z
-#' @param pyz scalar giving the probability of choosing y when presented with y and z
+#' @param pxz scalar, probability of choosing \eqn{y} when presented
+#' with choice set \eqn{\{x,z\}}
+#' @param pyz scalar, probability of choosing \eqn{y} when presented
+#' with choice set \eqn{\{y,z\}}
 #' @return named list of six polygons in a barycentric coordinate system.
-#' Each polygon is a matrix, with one row for each polygon vertex and one column for
-#' each of the three choice objects x, y and z.
-#' Element i,j gives the probability of choosing j, when presented with x, y and z,
-#' at the i'th polygon vertex.
+#' Each polygon is a matrix, with one row for each polygon vertex and one column
+#' for each of the three choice objects \eqn{x}, \eqn{y} and \eqn{z}.
+#' Element i,j gives the probability of choosing j, when presented with choice
+#' set \eqn{\{x,y,z\}}, at the i'th polygon vertex.
 #' The six polygons---triangles except for \code{Sxy}, a quadrilateral---are:
 #' \describe{
-#' \item{\code{Sxyz}}{region where there is a similarity effect with object x as target,
-#' y as decoy and z as competitor}
-#' \item{\code{Syxz}}{region where there is a similarity effect with object x as target,
-#' y as decoy and z as competitor}
+#' \item{\code{Sxyz}}{region where there is a similarity effect with object \eqn{x} as target,
+#' \eqn{y} as decoy and \eqn{z} as competitor}
+#' \item{\code{Syxz}}{region where there is a similarity effect with object \eqn{x} as target,
+#' \eqn{y} as decoy and \eqn{z} as competitor}
 #' \item{\code{So}}{region where there is neither similarity effect}
-#' \item{\code{Sx}}{region with only the x effect}
-#' \item{\code{Sy}}{region with only the y effect}
+#' \item{\code{Sx}}{region with only the \eqn{x} effect}
+#' \item{\code{Sy}}{region with only the \eqn{y} effect}
 #' \item{\code{Sxy}}{region with both effects}
 #' }
 #' @export

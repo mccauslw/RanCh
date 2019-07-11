@@ -69,7 +69,7 @@ YG_demographics =
          educ = as.factor(educ_names[YG_raw[subj_seq, 'educ']]),
          region = as.factor(region_names[YG_raw[subj_seq, 'region']]),
          race = as.factor(race_names[YG_raw[subj_seq, 'race']]),
-         age = as.factor(age_names[YG_raw[subj_seq, 'age_cross']]))
+         age_range = as.factor(age_names[YG_raw[subj_seq, 'age_cross']]))
 
 # Compute choice counts by domain, subset and choice object
 YG_table = table(YG_trials[c('domain', 'block', 'set_bin', 'choice_int')])

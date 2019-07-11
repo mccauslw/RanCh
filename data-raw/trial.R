@@ -4,7 +4,7 @@ compute_set_choice_vars <- function(tb)
 {
   tb %>% mutate(
 
-    # Choice set variables
+  # Choice set variables
 	# --------------------
 	# Permutation of objects in choice set presented to subject
     set_perm = map_chr(set_vector, function(l) paste(na.omit(object_names[l]), collapse='')),

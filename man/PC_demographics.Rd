@@ -3,7 +3,7 @@
 \docType{data}
 \name{PC_demographics}
 \alias{PC_demographics}
-\title{Demographic information for population choice experiment}
+\title{Table of demographic information from the Population Choice experiment}
 \format{A data frame with demographic information on subjects
 \describe{
 \item{\code{sex}}{Sex of subject: 1 for male, 2 for female}
@@ -16,13 +16,13 @@
 PC_demographics
 }
 \description{
-Demographic information for population choice experiment
+Table of demographic information from the Population Choice experiment
 }
 \seealso{
 {\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 Other data objects for the experiment include
-\code{\link{PC_trials}} for trial-by-trial data,
-\code{\link{PC_counts}} for choice count data and
-\code{\link{PC_raw}} for the original raw data.
+\code{\link{PC_trials}}, a table of choice trial data,
+\code{\link{PC_counts}}, a matrix of choice count data, and
+\code{\link{PC_raw}}, a table of raw data.
 }
 \keyword{datasets}
