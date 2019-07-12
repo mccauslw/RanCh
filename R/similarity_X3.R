@@ -14,8 +14,8 @@
 #' @return named list of six polygons in a barycentric coordinate system.
 #' Each polygon is a matrix, with one row for each polygon vertex and one column
 #' for each of the three choice objects \eqn{x}, \eqn{y} and \eqn{z}.
-#' Element i,j gives the probability of choosing j, when presented with choice
-#' set \eqn{\{x,y,z\}}, at the i'th polygon vertex.
+#' Element \eqn{i,j} gives the probability of choosing \eqn{j}, when presented with choice
+#' set \eqn{\{x,y,z\}}, at the \eqn{i}'th polygon vertex.
 #' The six polygons---triangles except for \code{Sxy}, a quadrilateral---are:
 #' \describe{
 #' \item{\code{Sxyz}}{region where there is a similarity effect with object \eqn{x} as target,
@@ -29,7 +29,7 @@
 #' }
 #' @export
 #' @examples
-#' S = similarity_X3(0.5, 0.6)
+#' S <- similarity_X3(0.5, 0.6)
 #' @seealso \code{\link{compromise_X3}} for an analogous function for the
 #' compromise effect.
 similarity_X3 <- function(pxz, pyz) {
@@ -40,17 +40,17 @@ similarity_X3 <- function(pxz, pyz) {
   xp <- c(0, pyz, 1-pyz); yp <- c(pxz, 0, 1-pxz)
 
   # Interior point
-  A = matrix(c(1-pxz, 0, -pxz,
+  B <- matrix(c(1-pxz, 0, -pxz,
                0, 1-pyz, -pyz,
                1,     1,    1), nrow=3, ncol=3, byrow=TRUE)
-  w = solve(A, c(0, 0, 1))
+  w <- solve(B, c(0, 0, 1))
 
   # Create regions
-  Sxyz = matrix(c(y, yp, z), nrow=3, ncol=3, byrow=TRUE)
-  Syxz = matrix(c(x, xp, z), nrow=3, ncol=3, byrow=TRUE)
-  So = matrix(c(x, y, w), nrow=3, ncol=3, byrow=TRUE)
-  Sx = matrix(c(y, w, xp), nrow=3, ncol=3, byrow=TRUE)
-  Sy = matrix(c(x, w, yp), nrow=3, ncol=3, byrow=TRUE)
-  Sxy = matrix(c(w, xp, z, yp), nrow=4, ncol=3, byrow=TRUE)
+  Sxyz <- matrix(c(y, yp, z), nrow=3, ncol=3, byrow=TRUE)
+  Syxz <- matrix(c(x, xp, z), nrow=3, ncol=3, byrow=TRUE)
+  So <- matrix(c(x, y, w), nrow=3, ncol=3, byrow=TRUE)
+  Sx <- matrix(c(y, w, xp), nrow=3, ncol=3, byrow=TRUE)
+  Sy <- matrix(c(x, w, yp), nrow=3, ncol=3, byrow=TRUE)
+  Sxy <- matrix(c(w, xp, z, yp), nrow=4, ncol=3, byrow=TRUE)
   list(Sxyz=Sxyz, Syxz=Syxz, So=So, Sx=Sx, Sy=Sy, Sxy=Sxy)
 }

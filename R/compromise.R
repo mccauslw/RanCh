@@ -13,23 +13,23 @@
 #' in the similarity effect region.
 #' @export
 #' @examples
-#' P = create_P3(0.7, 0.6, 0.8, 0.6, 0.3, names = c('x', 'y', 'z'))
+#' P <- create_P3(0.7, 0.6, 0.8, 0.6, 0.3, names = c('x', 'y', 'z'))
 #' compromise(P, target=1, competitor=2, decoy=3)
 #'
-compromise = function(P, target, competitor, decoy, two_sided=FALSE) {
+compromise <- function(P, target, competitor, decoy, two_sided=FALSE) {
   # Notation in Tversky and Simonson (1993)
-  x = competitor; y = target; z = decoy
+  x <- competitor; y <- target; z <- decoy
 
   # Construct ternary set T = {competitor, target, decoy}
-  T = set_index(c(x, y, z))
+  T <- set_index(c(x, y, z))
 
   # Construct two binary sets {t, d} and {c, d}
-  xy = set_index(c(x, y))
-  yz = set_index(c(y, z))
+  xy <- set_index(c(x, y))
+  yz <- set_index(c(y, z))
 
   # Evaluate indicators for two compromise effects
-  com_1 = P[xy, y] < P[T, y]/(P[T, x] + P[T, y])
-  com_2 = P[yz, y] < P[T, y]/(P[T, y] + P[T, z])
+  com_1 <- P[xy, y] < P[T, y]/(P[T, x] + P[T, y])
+  com_2 <- P[yz, y] < P[T, y]/(P[T, y] + P[T, z])
 
   if (two_sided) (com_1 & com_2) else com_1
 }

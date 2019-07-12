@@ -21,5 +21,5 @@ density or log density value
 regular simplex, for a vector \code{alpha} of Dirichlet parameters.
 }
 \examples{
-f = dDir(c(0.1, 0.3, 0.6), c(2.5, 0.5, 1.0))
+f <- dDir(c(0.1, 0.3, 0.6), c(2.5, 0.5, 1.0))
 }

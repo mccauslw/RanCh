@@ -82,7 +82,7 @@ This is deliberate; accessing information that doesn't make sense should lead to
 Here is a cross section of counts for the 2nd, 3rd and 5th objects of the `Beer` domain.
 For example, the number of times any subject choose beer $b$ when presented with a choice between beers $b$ and $c$ is 36.
 ```{r counts}
-N_bce = marginalize(PC_counts['Beer', , ], c(2, 3, 5))
+N_bce <- marginalize(PC_counts['Beer', , ], c(2, 3, 5))
 N_bce
 ```
 
@@ -98,15 +98,15 @@ Thus we can partition the complete dataset into two waves and test to see if cho
 
 In the following code, we compute for every domain and every subset of size two or more, the p-value for the Pearson two-sample chi-squared test that counts in the two waves are from the same multinomial distribution.
 ```{r compare.waves}
-my.chisq.test = function(A)
+my.chisq.test <- function(A)
 {
-  x = na.omit(t(A))
+  x <- na.omit(t(A))
   if (nrow(x) > 1) {
-    chi2 = chisq.test(x)
+    chi2 <- chisq.test(x)
     chi2$p.value
   } else NA
 }
-M = apply(YG_counts, c(1, 3), my.chisq.test)
+M <- apply(YG_counts, c(1, 3), my.chisq.test)
 hist(M, 20)
 ```
 
@@ -126,7 +126,7 @@ A *Random Choice Structure* (RCS) is the complete specification of the $P_A(x)$,
 
 The following code computes and displays choice proportions for the counts in the cross section `N_bce` computed above.
 ```{r write_RCS}
-P_bce = proportions(N_bce)          # Compute proportions from count data
+P_bce <- proportions(N_bce)          # Compute proportions from count data
 P_bce[c('bc', 'be', 'ce', 'bce'), ] # Show binary and ternary probabilities
 ```
 
@@ -227,7 +227,7 @@ It then displays the regions
 `Sxy` where there are both similarity effects.
 
 ```{r similarity}
-S = similarity_X3(pxz = 0.6, pyz = 0.4)
+S <- similarity_X3(pxz = 0.6, pyz = 0.4)
 triplot(label=c('x', 'y', 'z')) # Set up ternary plot, with labels and grid
 polygon(tritrafo(S$So), col=grey(0.95)); text(tritrafo(colMeans(S$So)), 'So')
 polygon(tritrafo(S$Sx), col=grey(0.9)); text(tritrafo(colMeans(S$Sx)), 'Sx')
@@ -240,7 +240,7 @@ Suppose we want to plot in a barycentric coordinate system where the three coord
 
 ```{r similarity_rotate}
 triplot(label=c('a', 'b', 'c')) # Set up ternary plot, with labels and grid
-Sacb = S$Sxyz[, c(1, 3, 2)]
+Sacb <- S$Sxyz[, c(1, 3, 2)]
 polygon(tritrafo(Sacb), col=grey(0.95))
 text(tritrafo(colMeans(Sacb)), 'Sacb')
 ```
@@ -255,7 +255,7 @@ the regions `Co`, where there is no compromise effect;
 `Cxz`, where there is a two-sided compromise effect.
 
 ```{r compromise}
-C = compromise_X3(pyx = 0.6, pyz = 0.4)
+C <- compromise_X3(pyx = 0.6, pyz = 0.4)
 triplot(label=c('x', 'y', 'z')) # Set up ternary plot
 polygon(tritrafo(C$Co), col=grey(0.95)); text(tritrafo(colMeans(C$Co)), 'Co')
 polygon(tritrafo(C$Cx), col=grey(0.9)); text(tritrafo(colMeans(C$Cx)), 'Cx')
@@ -274,13 +274,13 @@ In the second, we plot the points that satisfy the two-sided compromise effect.
 We note that the retained points fall in the regions `Sxy` and `Cxz` from the `similarity_X3` and `compromise_X3` examples, respectively.
 
 ```{r check_sim_comp}
-n = 500
-filt1 = vector('logical', n); filt2 = vector('logical', n)
-p = rDir(n, c(1, 1, 1)) # Uniform distribution on 2-simplex
+n <- 500
+filt1 <- vector('logical', n); filt2 <- vector('logical', n)
+p <- rDir(n, c(1, 1, 1)) # Uniform distribution on 2-simplex
 for (i in 1:n) {
-  P = create_P3(0.4, 0.4, 0.6, p[i,1], p[i,2])
-  filt1[i] = similarity(P, target=1, decoy=2, competitor=3, two_sided=TRUE)
-  filt2[i] = compromise(P, target=2, decoy=3, competitor=1, two_sided=TRUE)
+  P <- create_P3(0.4, 0.4, 0.6, p[i,1], p[i,2])
+  filt1[i] <- similarity(P, target=1, decoy=2, competitor=3, two_sided=TRUE)
+  filt2[i] <- compromise(P, target=2, decoy=3, competitor=1, two_sided=TRUE)
 }
 triplot(label=c('x', 'y', 'z'))
 points(tritrafo(p[filt1, ]), pch=20)
@@ -312,8 +312,8 @@ Here the matrix of Dirichlet parameters is the sum of `prior_A` and `N_bce`; see
 The code below constructs and then displays 0.95 High Posterior Density (HPD) regions for the three binary choice probabilities (in the form of intervals on the three sides of the triangle) and the ternary choice probability vector (in the form of the green shape in the interior of the triangle.
 
 ```{r HPD}
-prior_Alpha = prior_DCE_scalar_alpha(2.0, ncol(N_bce))
-post_Alpha = prior_Alpha + N_bce
+prior_Alpha <- prior_DCE_scalar_alpha(2.0, ncol(N_bce))
+post_Alpha <- prior_Alpha + N_bce
 triplot(label=c('b', 'c', 'e'))
 plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))
 ```

@@ -10,7 +10,7 @@
 #' @return The value of the quantile, normalized or not
 #' @importFrom stats qbeta
 dDir3_quantile <- function(quantile, alpha, normalized=FALSE) {
-  ld_max = dDir_max(alpha, log=TRUE)
+  ld_max <- dDir_max(alpha, log=TRUE)
   m <- exp(dDir_moments(alpha, 2, log=TRUE) - c(1,2)*ld_max)
   r <- m[2]/m[1]
   den <- r*(1-m[1]) - m[1]*(1-r)
@@ -30,7 +30,7 @@ dDir3_quantile <- function(quantile, alpha, normalized=FALSE) {
 #' @return density or log density value
 #' @export
 #' @examples
-#' f = dDir(c(0.1, 0.3, 0.6), c(2.5, 0.5, 1.0))
+#' f <- dDir(c(0.1, 0.3, 0.6), c(2.5, 0.5, 1.0))
 dDir <- function(p, alpha, log=FALSE) {
   ln_f <- lgamma(sum(alpha)) - sum(lgamma(alpha))
   ln_f <- ln_f + sum((alpha-1)*log(p))
@@ -47,7 +47,7 @@ dDir <- function(p, alpha, log=FALSE) {
 #' @export
 #' @examples
 #' library(klaR)
-#' p = rDir(1000, c(1, 1, 1)) # Uniform distribution on 2-simplex
+#' p <- rDir(1000, c(1, 1, 1)) # Uniform distribution on 2-simplex
 #' triplot(label=c('x', 'y', 'z'))
 #' plot(tritrafo(p))
 rDir <-function(n, alpha) {
@@ -69,14 +69,14 @@ dDir3 <- function(p1, p2, alpha, log=FALSE) {
 # \code{dDir_max} computes the maximum density value of a Dirichlet
 # distribution as a function of the parameter vector alpha.
 # @param alpha vector of Dirichlet parameters.
-# @param log logical; if TRUE, the log maximum density is returned.
+# @param log logical; if \code{TRUE}, the log maximum density is returned.
 # @return Density or log density value.
 dDir_max <- function(alpha, log=FALSE) {
   # Compute normalization constant
-  ln_d_max = lgamma(sum(alpha)) - sum(lgamma(alpha))
+  ln_d_max <- lgamma(sum(alpha)) - sum(lgamma(alpha))
   # Compute log density kernel at mode
-  ln_d_max = ln_d_max + sum((alpha-1)*log(alpha-1))
-  ln_d_max = ln_d_max - (sum(alpha)-length(alpha))*log(sum(alpha)-length(alpha))
+  ln_d_max <- ln_d_max + sum((alpha-1)*log(alpha-1))
+  ln_d_max <- ln_d_max - (sum(alpha)-length(alpha))*log(sum(alpha)-length(alpha))
   if (log) ln_d_max else exp(ln_d_max)
 }
 
@@ -86,19 +86,19 @@ dDir_max <- function(alpha, log=FALSE) {
 #' data generating process and a Dirichlet prior over choice probabilities.
 #' @param alpha vector of Dirichlet parameters
 #' @param N vector of multinomial counts
-#' @param log logical; if TRUE, return the log marginal likelihood; if FALSE,
-#' the marginal likelihood. log=FALSE is usually not recommendend, as underflow
-#' is likely.
+#' @param log logical; if \code{TRUE}, return the log marginal likelihood;
+#' if \code{FALSE}, the marginal likelihood.
+#' \code{log=FALSE} is usually not recommendend, as underflow is likely.
 #' @importFrom stats na.omit
 #' @export
 #' @return Marginal likelihood or log marginal likelihood
 log_ML_Dir_mult <- function(alpha, N, log=TRUE) {
   # Compute prior and posterior normalization constants
-  alpha = na.omit(alpha)
-  N = na.omit(N)
-  ln_prior_nc = lgamma(sum(alpha)) - sum(lgamma(alpha))
-  ln_post_nc = lgamma(sum(alpha + N)) - sum(lgamma(alpha + N))
-  ln_ML = ln_prior_nc - ln_post_nc
+  alpha <- na.omit(alpha)
+  N <- na.omit(N)
+  ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
+  ln_post_nc <- lgamma(sum(alpha + N)) - sum(lgamma(alpha + N))
+  ln_ML <- ln_prior_nc - ln_post_nc
   if (log) ln_ML else exp(ln_ML)
 }
 
@@ -114,10 +114,10 @@ log_ML_Dir_mult <- function(alpha, N, log=TRUE) {
 #' @param log logical; if TRUE, return the log Bayes factor
 #' @export
 log_ML_DCE_Dir_mult <- function(Alpha, N, log=TRUE) {
-  ln_ML = 0
+  ln_ML <- 0
   for (i in 1:nrow(Alpha)) {
     if (subset_card[i] > 1) {
-      ln_ML = ln_ML + log_ML_Dir_mult(Alpha[i, ], N[i, ], log=TRUE)
+      ln_ML <- ln_ML + log_ML_Dir_mult(Alpha[i, ], N[i, ], log=TRUE)
     }
   }
   if (log) ln_ML else exp(ln_ML)
@@ -133,7 +133,7 @@ log_ML_DCE_Dir_mult <- function(Alpha, N, log=TRUE) {
 #' @return a matrix of Dirichlet parameters with the same dimensions as a
 #' count matrix for a universe of the same size.
 prior_DCE_scalar_alpha <- function(alpha, n_objects) {
-  n_subsets = 2^n_objects-1
+  n_subsets <- 2^n_objects-1
   (alpha/subset_card[1:n_subsets]) * member_table[1:n_subsets, 1:n_objects]
 }
 
@@ -152,12 +152,12 @@ prior_DCE_scalar_alpha <- function(alpha, n_objects) {
 # @param log logical; if true return log moments of the density value.
 # @return vector of moments
 dDir_moments <- function(beta, n_mu, log=FALSE) {
-  ln_common = lgamma(sum(beta)) - sum(lgamma(beta))
-  log_mu = rep(0, n_mu);
+  ln_common <- lgamma(sum(beta)) - sum(lgamma(beta))
+  log_mu <- rep(0, n_mu);
   for (j in 1:n_mu) {
-    ln_j.factor = sum(lgamma((j+1)*beta-j))
-    ln_j.factor = ln_j.factor - lgamma((j+1)*sum(beta)-length(beta)*j)
-    log_mu[j] = (j+1)*ln_common + ln_j.factor
+    ln_j.factor <- sum(lgamma((j+1)*beta-j))
+    ln_j.factor <- ln_j.factor - lgamma((j+1)*sum(beta)-length(beta)*j)
+    log_mu[j] <- (j+1)*ln_common + ln_j.factor
   }
   if (log) log_mu else exp(log_mu)
 }
@@ -176,14 +176,14 @@ dDir_moments <- function(beta, n_mu, log=FALSE) {
 #' The three columns correspond to coordinates in a barycentric coordinate system.
 #' @importFrom grDevices contourLines
 #' @export
-Dir3_HD_region = function(alpha, HD_probability) {
+Dir3_HD_region <- function(alpha, HD_probability) {
   # Grid of points
   p1 <- p2 <- seq(0, 1, by=0.001)
   # Evaluation of Di density on grid
   f <- outer(p1, p2, FUN=dDir3, alpha, log=FALSE)
-  q.d = dDir3_quantile(1-HD_probability, alpha, FALSE)
-  cl = contourLines(p1, p2, f, levels = q.d) # Contour
-  nrow = length(cl[[1]]$x)
+  q.d <- dDir3_quantile(1-HD_probability, alpha, FALSE)
+  cl <- contourLines(p1, p2, f, levels = q.d) # Contour
+  nrow <- length(cl[[1]]$x)
   matrix(c(cl[[1]]$x, cl[[1]]$y, 1-cl[[1]]$x-cl[[1]]$y),
          byrow=FALSE, nrow=nrow, ncol=3)
 }
@@ -204,10 +204,10 @@ Dir3_HD_region = function(alpha, HD_probability) {
 #' @importFrom Smisc hpd
 #' @importFrom stats dbeta pbeta
 #' @export
-Dir2_HD_region = function(alpha, HD_probability) {
-  interval = hpd(function(x) dbeta(x, alpha[1], alpha[2]), c(0, 1),
-                 cdf = function(x) pbeta(x, alpha[1], alpha[2]),
-                 HD_probability)
+Dir2_HD_region <- function(alpha, HD_probability) {
+  interval <- hpd(function(x) dbeta(x, alpha[1], alpha[2]), c(0, 1),
+                  cdf = function(x) pbeta(x, alpha[1], alpha[2]),
+                  HD_probability)
   matrix(c(interval$lower, 1-interval$lower, interval$upper, 1-interval$upper),
          byrow=TRUE, nrow=2, ncol=2)
 }
@@ -254,35 +254,35 @@ binary2ternary <- function(binary_points, ternary_cols)
 #' @export
 #' @examples
 #' library(klaR)
-#' N_bce = marginalize(PC_counts['Beer', , ], c(2, 3, 5)) # Counts for objects 2, 3, 5
-#' prior_Alpha = prior_DCE_scalar_alpha(2.0, 3) # Parameters of simple conjugate prior
-#' post_Alpha = prior_Alpha + N_bce             # Posterior parameters
+#' N_bce <- marginalize(PC_counts['Beer', , ], c(2, 3, 5)) # Counts for objects 2, 3, 5
+#' prior_Alpha <- prior_DCE_scalar_alpha(2.0, 3) # Parameters of simple conjugate prior
+#' post_Alpha <- prior_Alpha + N_bce             # Posterior parameters
 #' triplot(label=c('b', 'c', 'e'))              # Set up ternary plot
 #' plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))     # Plot HPD regions
 plot_HD_Dir3 <- function(Alpha, HD_probability, selection)
 {
-  obj1 = selection[1]; obj2 = selection[2]; obj3 = selection[3]
-  set_123 = set_index(c(obj1, obj2, obj3))
-  set_12 = set_index(c(obj1, obj2))
-  set_23 = set_index(c(obj2, obj3))
-  set_13 = set_index(c(obj1, obj3))
+  obj1 <- selection[1]; obj2 <- selection[2]; obj3 <- selection[3]
+  set_123 <- set_index(c(obj1, obj2, obj3))
+  set_12 <- set_index(c(obj1, obj2))
+  set_23 <- set_index(c(obj2, obj3))
+  set_13 <- set_index(c(obj1, obj3))
 
   # Highest density region for ternary probability
-  HD_region = Dir3_HD_region(Alpha[set_123, c(obj1, obj2, obj3)], HD_probability)
+  HD_region <- Dir3_HD_region(Alpha[set_123, c(obj1, obj2, obj3)], HD_probability)
   polygon(tritrafo(HD_region), col='lightgreen')
 
   # Highest density region for (p1, p2)
-  HD12 = binary2ternary(Dir2_HD_region(Alpha[set_12, c(obj1, obj2)], HD_probability),
+  HD12 <- binary2ternary(Dir2_HD_region(Alpha[set_12, c(obj1, obj2)], HD_probability),
                         c(1, 2))
   lines(tritrafo(HD12), lwd=4)
 
   # Highest density region for (p2, p3)
-  HD23 = binary2ternary(Dir2_HD_region(Alpha[set_23, c(obj2, obj3)], HD_probability),
+  HD23 <- binary2ternary(Dir2_HD_region(Alpha[set_23, c(obj2, obj3)], HD_probability),
                         c(2, 3))
   lines(tritrafo(HD23), lwd=4)
 
   # Highest density region for (p1, p3)
-  HD13 = binary2ternary(Dir2_HD_region(Alpha[set_13, c(obj1, obj3)], HD_probability),
+  HD13 <- binary2ternary(Dir2_HD_region(Alpha[set_13, c(obj1, obj3)], HD_probability),
                         c(1, 3))
   lines(tritrafo(HD13), lwd=4)
 }

@@ -29,7 +29,7 @@
 #' }
 #' @export
 #' @examples
-#' C = compromise_X3(0.5, 0.6)
+#' C <- compromise_X3(0.5, 0.6)
 #' @seealso \code{\link{similarity_X3}} for an analogous function for the
 #' similarity effect.
 compromise_X3 <- function(pyx, pyz) {
@@ -41,17 +41,17 @@ compromise_X3 <- function(pyx, pyz) {
   xp <- c(0, pyz, 1-pyz); zp <- c(1-pyx, pyx, 0)
 
   # Compute interior point w
-  A = matrix(c(-pyx, 1-pyx, 0,
+  B <- matrix(c(-pyx, 1-pyx, 0,
                0, 1-pyz, -pyz,
                1,     1,    1), nrow=3, ncol=3, byrow=TRUE)
-  w = solve(A, c(0, 0, 1))
+  w <- solve(B, c(0, 0, 1))
 
   # Construct regions
-  Cxyz = matrix(c(y, z, zp), nrow=3, ncol=3, byrow=TRUE)
-  Czyx = matrix(c(x, z, zp), nrow=3, ncol=3, byrow=TRUE)
-  Co = matrix(c(w, x, z), nrow=3, ncol=3, byrow=TRUE)
-  Cx = matrix(c(w, xp, z), nrow=3, ncol=3, byrow=TRUE)
-  Cz = matrix(c(w, x, zp), nrow=3, ncol=3, byrow=TRUE)
-  Cxz = matrix(c(w, xp, y, zp), nrow=4, ncol=3, byrow=TRUE)
+  Cxyz <- matrix(c(y, z, zp), nrow=3, ncol=3, byrow=TRUE)
+  Czyx <- matrix(c(x, z, zp), nrow=3, ncol=3, byrow=TRUE)
+  Co <- matrix(c(w, x, z), nrow=3, ncol=3, byrow=TRUE)
+  Cx <- matrix(c(w, xp, z), nrow=3, ncol=3, byrow=TRUE)
+  Cz <- matrix(c(w, x, zp), nrow=3, ncol=3, byrow=TRUE)
+  Cxz <- matrix(c(w, xp, y, zp), nrow=4, ncol=3, byrow=TRUE)
   list(Cxyz=Cxyz, Czyx=Czyx, Co=Co, Cx=Cx, Cz=Cz, Cxz=Cxz)
 }
