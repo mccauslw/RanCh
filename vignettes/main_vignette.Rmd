@@ -28,13 +28,40 @@ This package provides tools for a research project whose purpose is to help us b
 
 ## Data sets
 
-### Some data sets from the context effects literature
-(to be added later)
+### Data sets from the context effects literature
 
-### Some data sets from the stochastic intransitivity literature
-(to be added later)
+We provide count data from the experiment described in @Tver72a, in the 4-dimensional array ($3 \times 8 \times 7 \times 3$) `T_1972_counts'.
 
-### Some new data sets
+The first dimension is indexed by choice domain, one of "Dots", "Gambles" and "Applicants", as described in the paper.
+The second dimension is indexed by subject number, from 1 to 8.
+The third dimension is indexed by choice subset and the fourth by the realized choice.
+The number of times subject 5 chose object $x$ from choice set $\{x,y,z\}$ of domain `Dots` is `T_1972_counts['Dots', 5, 'xyz', 'x']` or `T_1972_counts[1, 5, 7, 1]`.
+Counts of impossible events, such as choosing $x$ from $\{y,z\}$ have the value `NA` rather than zero.
+This is deliberate; accessing information that doesn't make sense should lead to an immediate (thus relatively easy to find) error.
+
+Here is a cross section of counts for the "Gambles" domain and the first subject, showing the choice sets (the only choice sets used in the experimental design) $\{x,z\}$, $\{y,z\}$ and $\{x,y,z\}$.
+For example, the number of times this subject choose gamble $x$ when presented with a choice from $\{x,y,z\}$ is 2.
+```{r counts_T_1972}
+T_1972_counts['Gambles', 1, c('xz', 'yz', 'xyz'), ]
+```
+
+### Data sets from the stochastic intransitivity literature
+
+We provide count data from the experiment described in @RegeDanaDavi11 in the 4-dimensional array ($3 \times 18 \times 31 \times 5$) `RDS_2011_counts`.
+The first dimension is indexed by choice domain, one of "Cash 1", "Cash 2" and "Noncash", as described in the paper.
+The second dimension is indexed by subject number, from 1 to 18.
+The third dimension is indexed choice subset and the fourth by the realized choice.
+The number of times subject 5 chose object $a$ from choice set $\{a,b\}$ of domain `Cash 1` is `RDS_2011_counts['Cash 1', 5, 'ab', 'a']` or `RDS_2011_counts[1, 5, 3, 1]`.
+Counts of impossible events, such as choosing $a$ from $\{b,c\}$ have the value NA rather than zero.
+This is deliberate; accessing information that doesn't make sense should lead to an immediate (thus relatively easy to find) error.
+
+Here is a cross section of counts for the "Cash 1" domain and the fifth subject, showing binary choice sets (the only choice sets used in the experimental design) only.
+For example, the number of times this subject choose lottery $b$ when presented with a choice between $b$ and $c$ is 2.
+```{r counts_RDS_2011}
+RDS_2011_counts['Cash 1', 5, c(3, 5, 6, 9, 10, 12), ]
+```
+
+### Data sets where all subsets of the universe of choice are presented 
 
 We provide data from three experiments in which individuals, or a sample from a population of individuals, make repeated choices from all doubleton and larger subsets of a universe of related choice objects.
 See the data frame `PC_trials` for a population choice experiment described in (citation needed).
