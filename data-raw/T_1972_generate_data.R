@@ -6,7 +6,6 @@ domain_names <- c("Dots", "Gambles", "Applicants")
 n_domains <- length(domain_names)
 n_subjects <- 8
 
-#dots
 object_names <- c('x', 'y', 'z')
 subset_names <- c('x', 'y', 'xy', 'z', 'xz', 'yz', 'xyz')
 
