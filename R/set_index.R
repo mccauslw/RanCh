@@ -1,20 +1,23 @@
 #' Compute set index
 #'
-#' \code{set_index} takes a vector of object indices and constructs a set index,
-#' which is an index for the set of objects whose indices appear in the given vector.
+#' \code{set_index} takes a vector \code{v} of object indices and constructs a
+#' set index, an index for the set of objects whose indices are elements of \code{v}.
 #' Each digit (or bit) in the binary representation of the resulting set index is
-#' an inclusion indicator: object i is in the set if and only if the i'th digit
-#' from the right is 1. For example, the set with objects 1, 3, and 4 has index
+#' an inclusion indicator: object \eqn{i} is in the set if and only if the \eqn{i}'th
+#' digit from the right is 1.
+#' For example, the set with objects 1, 3, and 4 has index
 #' equal to binary 1101, or decimal 13.
 #' The set with elements 1, 3 and 4 can be specified as the input vector c(1,3,4) or
 #' any permutation thereof, such as c(3,4,1).
 #'
-#' Note that the singleton set with object i is represented as 2^(i-1).
-#' The bitwise "or" (\code{bitwOr}) of the set indices of two sets gives the set
-#' index of the union; the bitwise "and" (\code{bitwAnd}), the intersection.
+#' Note that the singleton set with object \eqn{i} is represented as \eqn{2^{i-1}}.
+#' The bitwise "or" (\code{bitwOr}) of the set indices of two sets is the set
+#' index of their union; the bitwise "and" (\code{bitwAnd}), the set index
+#' of their intersection.
 #'
 #' @param v vector of object indices, in any order
-#' @return a integer index corresponding to the set of objects whose indices are in \code{v}
+#' @return An integer index corresponding to the set of objects whose indices are
+#' elements of \code{v}.
 #' @importFrom bitops bitShiftL
 #' @export
 #' @examples

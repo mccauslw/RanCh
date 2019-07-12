@@ -27,19 +27,18 @@
 #' Array of choice count data from the YouGov experiment
 #'
 #' A four dimensional array, 16 by 2 by 15 by 4, of count data.
-#' Element h,i,j,k gives the number of subjects who chose object k when
-#' presented with choice set j of domain h, in their i'th block of 16 trials.
-#' The choice set index j=1,...,15 encodes a non-empty subset of the universe
+#' Element \eqn{h,i,j,k} gives the number of subjects who chose object \eqn{k} when
+#' presented with choice set \eqn{j} of domain \eqn{h}, in their \eqn{i}'th block
+#' of 16 trials.
+#' The choice set index \eqn{j=1,...,15} encodes a non-empty subset of the universe
 #' of the four choice objects a, b, c, and d, numbered 1, 2, 3, 4.
-#' Each digit (or bit) in the binary representation of j is an inclusion indicator: object k
-#' is in the set if and only if the k'th digit from the right is 1.
-#' For example, the set with b, c, and d (but not a) is encoded as binary 1110 (decimal 14)
-#' Whenever k is not an element of j, the value is NA.
+#' Whenever \eqn{k} is not an element of \eqn{j}, the value is \code{NA}.
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
 #' \code{\link{YG_trials}}, a table of choice trial data,
 #' \code{\link{YG_demographics}}, a table of demographic information, and
 #' \code{\link{YG_raw}}, a table of raw data.
+#' \code{\link{set_index}} describes how the choice set index encodes the choice set.
 "YG_counts"
 
 #' Table of demographic information from the YouGov experiment

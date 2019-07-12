@@ -25,14 +25,11 @@
 
 #' Array of choice count data from the Population Choice experiment
 #'
-#' A three dimensional array, 32 by 31 by 5, of count data.
+#' A 32 by 31 by 5 array of count data.
 #' Element \eqn{i,j,k} gives the number of subjects that chose object \eqn{k} when
 #' presented with choice set \eqn{j} of domain \eqn{i}.
-#' The choice set index \eqn{j\in\{1,...,31\}} encodes a non-empty subset of the universe
-#' of the five choice objects \eqn{a}, \eqn{b}, \eqn{c}, \eqn{d} and \eqn{e}, numbered 1, 2, 3, 4, 5.
-#' Each digit (or bit) in the binary representation of \eqn{j} is an inclusion indicator: object k
-#' is in the set if and only if the \eqn{k}'th digit from the right is 1.
-#' For example, the set \eqn{\{b, c, d, e\}} is encoded as binary 11110 (decimal 30)
+#' The choice set index j=1,...,31 encodes a non-empty subset of the universe
+#' of the five choice objects a, b, c, d and e, numbered 1, 2, 3, 4, 5.
 #' Whenever \eqn{k} is not an element of \eqn{j}, the value is \code{NA}.
 #'
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
@@ -40,6 +37,7 @@
 #' \code{\link{PC_trials}}, a table of choice trial data,
 #' \code{\link{PC_demographics}}, a table of demographic information, and
 #' \code{\link{PC_raw}}, a table of raw data.
+#' \code{\link{set_index}} describes how the choice set index encodes the choice set.
 "PC_counts"
 
 #' Table of demographic information from the Population Choice experiment

@@ -23,20 +23,18 @@
 
 #' Choice counts in multiple choice experiment
 #'
-#' A three dimensional array, 141 by 31 by 5, of count data.
-#' Element i,j,k gives the number of times subject i chose object k when
-#' presented with choice set j.
+#' A 141 by 31 by 5 array of count data.
+#' Element \eqn{i,j,k} gives the number of times subject \eqn{i} chose object \eqn{k} when
+#' presented with choice set \eqn{j}.
 #' The choice set index j=1,...,31 encodes a non-empty subset of the universe
 #' of the five choice objects a, b, c, d and e, numbered 1, 2, 3, 4, 5.
-#' Each digit (or bit) in the binary representation of j is an inclusion indicator: object k
-#' is in the set if and only if the k'th digit from the right is 1.
-#' For example, the set with b, c, d and e (but not a) is encoded as binary 11110 (decimal 30).
-#' Whenever k is not an element of j, the value is NA.
+#' Whenever \eqn{k} is not an element of \eqn{j}, the value is \code{NA}.
 #' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
 #' \code{\link{MC_trials}}, a table of choice trial data, and
 # \code{\link{MC_demographics}}, a table of demographic information and
 #' \code{\link{MC_raw}}, a table of raw data.
+#' \code{\link{set_index}} describes how the choice set index encodes the choice set.
 "MC_counts"
 
 #' Multiple Choice experiment data
