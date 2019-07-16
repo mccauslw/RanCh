@@ -4,12 +4,12 @@
 \alias{log_ML_Dir_mult}
 \title{Log marginal likelihood for Dirichlet-multinomial model}
 \usage{
-log_ML_Dir_mult(alpha, N, log = TRUE)
+log_ML_Dir_mult(alpha, n, log = TRUE)
 }
 \arguments{
 \item{alpha}{vector of Dirichlet parameters}
 
-\item{N}{vector of multinomial counts}
+\item{n}{vector of multinomial counts}
 
 \item{log}{logical; if \code{TRUE}, return the log marginal likelihood;
 if \code{FALSE}, the marginal likelihood.

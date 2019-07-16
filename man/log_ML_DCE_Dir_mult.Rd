@@ -2,7 +2,7 @@
 % Please edit documentation in R/HPD.R
 \name{log_ML_DCE_Dir_mult}
 \alias{log_ML_DCE_Dir_mult}
-\title{Marginal likelihood for discrete choice experiment, Dirichlet-multinomial model}
+\title{Marginal likelihood for DCE, Dirichlet-multinomial model}
 \usage{
 log_ML_DCE_Dir_mult(Alpha, N, log = TRUE)
 }

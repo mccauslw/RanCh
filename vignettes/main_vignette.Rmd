@@ -118,7 +118,7 @@ The first dimension is indexed by choice domain, the second by choice subset and
 For example, the number of times any of the subjects choose object $a$ from choice set $\{a,b\}$ of domain `Beer` is `PC_counts['Beer', 'ab', 'a']` or `PC_counts['Beer', 3, 1]`.
 Again, counts of impossible events have the value `NA`.
 
-We can take cross sections of count data using the function `margiinalize`.
+We can take cross sections of count data using the function `marginalize`.
 Here is a cross section of counts for the 2nd, 3rd and 5th objects of the `Beer` domain.
 For example, the number of times any subject choose beer $b$ when presented with a choice between beers $b$ and $c$ is `r PC_counts['Beer', 6, 2]`.
 ```{r counts}
@@ -369,12 +369,20 @@ triplot(label=c('b', 'c', 'e'))
 plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))
 ```
 
-We can also compute the log marginal likelihood for the given data and prior, as follows.
+### Marginal likelihoods for some simple models
+
+We can also compute the log marginal likelihood for various simple models, as follows.
 ```{r logML}
-print(log_ML_DCE_Dir_mult(prior_Alpha, N_bce, log=TRUE))
+N = PC_counts['Colours',,]
+# Zero parameter models
+print(log_ML_DCE_uniform(N))
+print(log_ML_DCE_uniform_mult(N))
+# One parameter models
+print(log_ML_DCE_scalar_alpha_Dir_mult(2.0, N))
+# n-parameter models
+print(log_ML_DCE_vector_alpha_Dir_mult(c(1.0, 2.0, 1.0, 2.0, 1.0), N))
 ```
-The conjugate model, because of prior independence of choice probabily vectors across choice sets, cannot borrow strength across choice sets.
-However, the marginal likelihood serves as a useful benchmark.
+These marginal likelihoods serve as useful benchmarks.
 
 ## References
 

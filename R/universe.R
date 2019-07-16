@@ -9,7 +9,7 @@ for (subset in seq(1, n_subsets)) {
   name = ''
   card = 0
   for (i in seq(1, n_objects)) {
-    if (bitwAnd(subset, bitShiftL(1, i-1))) {
+    if (bitwAnd(subset, bitwShiftL(1, i-1))) {
       name = paste(name, object_names[i], sep='')
       card = card+1
     }
@@ -49,7 +49,7 @@ for (subset in seq(1, n_subsets)) {
     if (bitwAnd(doubletons[d], subset)==doubletons[d]) {
       # Do this if doubleton is a subset of subset
       for (i in seq(1, n_objects)) {
-        singleton = bitShiftL(1, i-1)
+        singleton = bitwShiftL(1, i-1)
         if (bitwAnd(singleton, bitwAnd(doubletons[d], subset)) > 0)
           RP_table[subset, i, d] =
             ifelse ((doubletons[d] - singleton > singleton), 1, -1)
@@ -62,7 +62,7 @@ for (subset in seq(1, n_subsets)) {
 #  - membership function returns one if object obj in in subset sub, NA otherwise
 #  - vmembership vectorizes membership function in both dimensions
 #  - member_table gives 1 or NA for every element of subset X object table
-membership = function(subs, obj) {ifelse(bitwAnd(subs, bitShiftL(1, obj-1)) > 0, 1, NA)}
+membership = function(subs, obj) {ifelse(bitwAnd(subs, bitwShiftL(1, obj-1)) > 0, 1, NA)}
 vmembership = Vectorize(membership)
 member_table = outer(1:n_subsets, 1:n_objects, vmembership)
 

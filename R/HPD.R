@@ -85,24 +85,24 @@ dDir_max <- function(alpha, log=FALSE) {
 #' \code{log_ML_Dir_mult} computes the log marginal likelihood for a multinomial
 #' data generating process and a Dirichlet prior over choice probabilities.
 #' @param alpha vector of Dirichlet parameters
-#' @param N vector of multinomial counts
+#' @param n vector of multinomial counts
 #' @param log logical; if \code{TRUE}, return the log marginal likelihood;
 #' if \code{FALSE}, the marginal likelihood.
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
 #' @importFrom stats na.omit
 #' @export
 #' @return Marginal likelihood or log marginal likelihood
-log_ML_Dir_mult <- function(alpha, N, log=TRUE) {
+log_ML_Dir_mult <- function(alpha, n, log=TRUE) {
   # Compute prior and posterior normalization constants
   alpha <- na.omit(alpha)
-  N <- na.omit(N)
+  n <- na.omit(n)
   ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
-  ln_post_nc <- lgamma(sum(alpha + N)) - sum(lgamma(alpha + N))
+  ln_post_nc <- lgamma(sum(alpha + n)) - sum(lgamma(alpha + n))
   ln_ML <- ln_prior_nc - ln_post_nc
   if (log) ln_ML else exp(ln_ML)
 }
 
-#' Marginal likelihood for discrete choice experiment, Dirichlet-multinomial model
+#' Marginal likelihood for DCE, Dirichlet-multinomial model
 #'
 #' \code{log_ML_DCE_Dir_mult} computes the marginal likelihood for a model
 #' where choice count vectors are independent multinomial across choice sets
@@ -123,6 +123,55 @@ log_ML_DCE_Dir_mult <- function(Alpha, N, log=TRUE) {
   if (log) ln_ML else exp(ln_ML)
 }
 
+## Zero parameter models
+
+#' Marginal likelihood for DCE, discrete uniform model
+#'
+#' \code{log_ML_DCE_uniform} computes the marginal likelihood for a model
+#' (without parameters) where choices are mutually independent and for each choice set
+#' choices are discrete uniform on the choice set.
+#' @param N count matrix
+#' @param log logical; if TRUE, return the log Bayes factor
+#' @export
+log_ML_DCE_uniform <- function(N, log=TRUE) {
+  ln_ML <- 0
+  for (i in 1:nrow(N)) {
+    card = subset_card[i]
+    if (card > 1)
+      ln_ML <- ln_ML - sum(N[i, ], na.rm=TRUE) * log(card)
+  }
+  if (log) ln_ML else exp(ln_ML)
+}
+
+#' Uniform prior for a RCS
+#'
+#' \code{prior_DCE_uniform} computes a matrix of Dirichlet parameters for the
+#' uniform prior over a random choice structure.
+#' @param n_objects number of objects in the universe.
+#' @export
+#' @return a matrix of Dirichlet parameters all set to one, so that all choice
+#' probability vectors are uniformly distributed.
+prior_DCE_uniform <- function(n_objects) {
+  n_subsets <- 2^n_objects-1
+  member_table[1:n_subsets, 1:n_objects]
+}
+
+#' Marginal likelihood for DCE, uniform multinomial model
+#'
+#' \code{log_ML_DCE_uniform_mult} computes the marginal likelihood for a model
+#' (without parameters) where choice probability vectors are mutually independent
+#' and uniformly distributed, choices are conditionally independent multinomial.
+#' @param N count matrix
+#' @param log logical; if TRUE, return the log Bayes factor
+#' @export
+log_ML_DCE_uniform_mult <- function(N, log=TRUE) {
+  Alpha_prior = prior_DCE_uniform(ncol(N))
+  ln_ML = log_ML_DCE_Dir_mult(Alpha_prior, N)
+  if (log) ln_ML else exp(ln_ML)
+}
+
+## One parameter models
+
 #' One-parameter Dirichlet prior for a RCS
 #'
 #' \code{prior_DCE_scalar_alpha} computes a matrix of Dirichlet parameters for a
@@ -134,7 +183,62 @@ log_ML_DCE_Dir_mult <- function(Alpha, N, log=TRUE) {
 #' count matrix for a universe of the same size.
 prior_DCE_scalar_alpha <- function(alpha, n_objects) {
   n_subsets <- 2^n_objects-1
-  (alpha/subset_card[1:n_subsets]) * member_table[1:n_subsets, 1:n_objects]
+  Alpha = matrix(0, nrow=n_subsets, ncol=n_objects)
+  for (i in 1:n_subsets) {
+    Alpha[i, ] = alpha/subset_card[i]
+  }
+  Alpha * member_table[1:n_subsets, 1:n_objects]
+}
+
+#' Marginal likelihood for DCE, scalar Dirichlet multinomial model
+#'
+#' \code{log_ML_DCE_scalar_alpha_Dir_mult} computes the marginal likelihood for a model
+#' where choice probability vectors \eqn{P_A} are mutually independent, and
+#' \deqn{P_A(x_1,\ldots,x_{|A|}) \sim \mathrm{Di}(\alpha/|A|,\ldots,\alpha/|A|)},
+#' and choices are conditionally independent multinomial.
+#' @param alpha scalar determining Dirichlet parameters
+#' @param N count matrix
+#' @param log logical; if TRUE, return the log Bayes factor
+#' @export
+log_ML_DCE_scalar_alpha_Dir_mult <- function(alpha, N, log=TRUE) {
+  Alpha_prior = prior_DCE_scalar_alpha(alpha, ncol(N))
+  ln_ML = log_ML_DCE_Dir_mult(Alpha_prior, N)
+  if (log) ln_ML else exp(ln_ML)
+}
+
+## n-parameter models
+
+#' Vector Dirichlet prior for a RCS
+#'
+#' \code{prior_DCE_vector_alpha} computes a matrix of Dirichlet parameters for a
+#' vector Dirichlet prior for a random choice structure.
+#' @param u vector parameter for the vector Dirichlet prior.
+#' @export
+#' @return a matrix of Dirichlet parameters for the vector Dirichlet prior.
+prior_DCE_vector_alpha <- function(u) {
+  n_objects = length(u)
+  n_subsets = 2^n_objects-1
+  Alpha = matrix(0, nrow=n_subsets, ncol=n_objects)
+  for (i in 1:n_subsets) {
+    Alpha[i, ] = u
+  }
+  Alpha * member_table[1:n_subsets, 1:n_objects]
+}
+
+#' Marginal likelihood for DCE, vector Dirichlet multinomial model
+#'
+#' \code{log_ML_DCE_vector_alpha_Dir_mult} computes the marginal likelihood for a model
+#' where choice probability vectors \eqn{P_A} are mutually independent, and
+#' \deqn{P_A(x_1,\ldots,x_{|A|}) \sim \mathrm{Di}(u_1,\ldots,u_|A|)},
+#' and choices are conditionally independent multinomial.
+#' @param u vector determining Dirichlet parameters
+#' @param N count matrix
+#' @param log logical; if TRUE, return the log Bayes factor
+#' @export
+log_ML_DCE_vector_alpha_Dir_mult <- function(u, N, log=TRUE) {
+  Alpha_prior = prior_DCE_vector_alpha(u)
+  ln_ML = log_ML_DCE_Dir_mult(Alpha_prior, N)
+  if (log) ln_ML else exp(ln_ML)
 }
 
 # Moments of Dirichlet density values
