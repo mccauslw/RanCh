@@ -3,7 +3,7 @@
 \docType{data}
 \name{YG_demographics}
 \alias{YG_demographics}
-\title{Demographic information for subjects}
+\title{Table of demographic information from the YouGov experiment}
 \format{A data frame with demographic information on subjects
 \describe{
 \item{\code{sex}}{Sex of subject}
@@ -16,6 +16,13 @@
 YG_demographics
 }
 \description{
-Demographic information for subjects
+Table of demographic information from the YouGov experiment
+}
+\seealso{
+{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{YG_trials}}, a table of choice trial data,
+\code{\link{YG_counts}}, a matrix of choice count data, and
+\code{\link{YG_raw}}, a table of raw data.
 }
 \keyword{datasets}

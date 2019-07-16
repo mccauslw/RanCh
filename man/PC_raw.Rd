@@ -3,16 +3,46 @@
 \docType{data}
 \name{PC_raw}
 \alias{PC_raw}
-\title{Population Choice experiment data}
-\format{A data frame with 17 variables:
+\title{Table of raw data from Population Choice experiment}
+\format{A data frame with 23 variables
 \describe{
-\item{\code{design}}{}
-\item{\code{gender}}{Sex of respondant: 1 for male, 2 for female}
+\item{\code{responseid}}{Unused subject identifier}
+\item{\code{gender}}{Sex of subject: 1 for male, 2 for female}
+\item{\code{age}}{Age of subject in years}
+\item{\code{location}}{Province or territory in Canada, 1=Alberta, 2=British Columbia,
+3=Manitoba, 4=New Brunswick, 5=Newfoundland/Labrador, 6=Northwest Territories,
+7=Nova Scotia, 8=Ontario, 9=Prince Edward Island, 10=Quebec, 11=Saskatchewan, 12=Yukon}
+\item{\code{set}}{}
+\item{\code{block}}{Index (1,...,1024) of pre-constructed random design assigned to subject}
+\item{\code{consent}}{Whether or not subjects gives consent (1) or not(2). All subjects give consent.}
+\item{\code{domain}}{Index of choice domain}
+\item{\code{counts}}{Cardinality of choice set presented}
+\item{\code{obj1}}{Object in position 1}
+\item{\code{obj2}}{Object in position 2}
+\item{\code{obj3}}{Object in position 3, possibly NA}
+\item{\code{obj4}}{Object in position 4, possibly NA}
+\item{\code{obj5}}{Object in position 5, possibly NA}
+\item{\code{obj1_text}}{Complete text describing object 1}
+\item{\code{obj2_text}}{Complete text describing object 2}
+\item{\code{obj3_text}}{Complete text describing object 3}
+\item{\code{obj4_text}}{Complete text describing object 4}
+\item{\code{obj5_text}}{Complete text describing object 5}
+\item{\code{choice}}{Position of object chosen}
+\item{\code{expdur}}{Trial duration in ms}
+\item{\code{intdur}}{Survey duration in minutes}
+\item{\code{feedback}}{Subject's response to "Please provide any additional feedback about the survey you have just completed."}
 }}
 \usage{
 PC_raw
 }
 \description{
-Record of trials in population choice experiment
+Table of raw data from Population Choice experiment
+}
+\seealso{
+{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{PC_trials}}, a table of choice trial data,
+\code{\link{PC_counts}}, a matrix of choice count data, and
+\code{\link{PC_demographics}}, a table of demographic information
 }
 \keyword{datasets}

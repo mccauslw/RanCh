@@ -2,9 +2,9 @@
 % Please edit documentation in R/HPD.R
 \name{dDir}
 \alias{dDir}
-\title{Dirichlet density}
+\title{Dirichlet density function}
 \usage{
-dDir(p, alpha, log = TRUE)
+dDir(p, alpha, log = FALSE)
 }
 \arguments{
 \item{p}{vector of probabilities on the regular simplex}
@@ -19,4 +19,7 @@ density or log density value
 \description{
 \code{dDir} computes the Dirichlet density at a point \code{p} in the
 regular simplex, for a vector \code{alpha} of Dirichlet parameters.
+}
+\examples{
+f <- dDir(c(0.1, 0.3, 0.6), c(2.5, 0.5, 1.0))
 }

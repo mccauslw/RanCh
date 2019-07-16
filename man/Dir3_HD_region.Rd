@@ -2,20 +2,24 @@
 % Please edit documentation in R/HPD.R
 \name{Dir3_HD_region}
 \alias{Dir3_HD_region}
-\title{Compute highest density (HD) region for a third order Dirichlet distribution}
+\title{Highest Density (HD) region for a third order Dirichlet distribution}
 \usage{
 Dir3_HD_region(alpha, HD_probability)
 }
 \arguments{
-\item{alpha}{a vector of three (positive) Dirichlet parameters.}
+\item{alpha}{vector of three (positive) Dirichlet parameters.}
 
-\item{HD_probability}{probability of region to construct}
+\item{HD_probability}{scalar in [0,1] giving the probability of the HD region}
 }
 \value{
-polygon approximation of HD region.
+matrix giving polygon approximation of HD region.
+Each row gives a polygon vertex.
+The three columns correspond to coordinates in a barycentric coordinate system.
 }
 \description{
-This function computes a polygon approximating the highest density region
-of a third order Dirichlet distribution. This can be used to compute highest
-prior density and highest posterior density (HPD) regions.
+\code{Dir3_HD_region} constructs a polygon approximating the highest density
+region of a third order Dirichlet distribution.
+The polygon is in a three-dimensional barycentric coordinate system.
+This can be used to construct approximate highest prior density and
+highest posterior density (HPD) regions for a Dirichlet-multinomial model.
 }

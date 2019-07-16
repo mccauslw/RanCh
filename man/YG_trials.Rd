@@ -3,7 +3,7 @@
 \docType{data}
 \name{YG_trials}
 \alias{YG_trials}
-\title{Table of choice trials, population choice experiment}
+\title{Table of choice trials data from the YouGov experiment}
 \format{A tibble with 17 variables
 \describe{
 \item{\code{domain}}{factor, name of choice domain}
@@ -18,13 +18,20 @@ in alphabetical order}
 \item{\code{set_card}}{Integer, cardinality of choice set (i.e. number of available options)}
 \item{\code{set_bin}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
 \item{\code{choice_int}}{Integer code for chosen object: a=1, b=2, ..., d=4}
-\item{\code{ab}, \code{ac}, \ldots \code{cd}}{revealed preference indicator: taking column ab as an example,
+\item{\code{ab}, \code{ac}, \ldots, \code{cd}}{revealed preference indicator: taking column ab as an example,
 value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 0 otherwise.}
 }}
 \usage{
 YG_trials
 }
 \description{
-Table of choice trials, population choice experiment
+Table of choice trials data from the YouGov experiment
+}
+\seealso{
+\code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{YG_counts}}, an array of choice count data,
+\code{\link{YG_demographics}}, a table of demographic information, and
+\code{\link{YG_raw}}, a table of raw data.
 }
 \keyword{datasets}

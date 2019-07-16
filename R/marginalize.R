@@ -10,19 +10,20 @@
 #' @return A count matrix
 #' @export
 #' @examples
-#' N_bce = marginalize(PC_counts, c(2,3,5))
-#' P_abd = marginalize()
-#' N
+#' N_bce <- marginalize(PC_counts['Beer',,], c(2, 3, 5)) # Marginalize data first
+#' P_bce_1 <- proportions(N_bce)                         # then compute proportions
+#' P <- proportions(PC_counts['Beer',,])   # Compute proportions first
+#' P_bce_2 <- marginalize(P, c(2, 3, 5))   # then marginalize. Gives same result.
 marginalize <- function(input_N, objects) {
-  d = dim(input_N)
-  n = d[2]               # Number of objects in universe
-  T = 2^n-1              # Universe of objects in binary set notation
-  input_subsets = 1:T    # Vector of non-empty subsets of T
-  A=sum(2^(objects-1))   # User provided subset of objects to retain
-  Ac = T-A               # Complement of A in T
+  d <- dim(input_N)
+  n <- d[2]               # Number of objects in universe
+  T <- 2^n-1              # Universe of objects in binary set notation
+  input_subsets <- 1:T    # Vector of non-empty subsets of T
+  A <- sum(2^(objects-1)) # User provided subset of objects to retain
+  Ac <- T-A               # Complement of A in T
 
   # Form vector of those subsets of T with an empty intersection with Ac
-  output_subsets = input_subsets[bitwAnd(input_subsets, Ac) == 0]
+  output_subsets <- input_subsets[bitwAnd(input_subsets, Ac) == 0]
   # Select elements of input
-  output_N = input_N[output_subsets, objects]
+  output_N <- input_N[output_subsets, objects]
 }

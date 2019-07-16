@@ -2,7 +2,7 @@
 % Please edit documentation in R/HPD.R
 \name{dDir3_quantile}
 \alias{dDir3_quantile}
-\title{Quantile of third order Dirichlet density value}
+\title{Quantile of density value for third order Dirichlet}
 \usage{
 dDir3_quantile(quantile, alpha, normalized = FALSE)
 }

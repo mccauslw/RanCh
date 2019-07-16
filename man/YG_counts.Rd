@@ -3,12 +3,26 @@
 \docType{data}
 \name{YG_counts}
 \alias{YG_counts}
-\title{Counts}
+\title{Array of choice count data from the YouGov experiment}
 \format{An object of class \code{array} of dimension 16 x 2 x 15 x 4.}
 \usage{
 YG_counts
 }
 \description{
-A 3x16x15x4 matrix with count data.
+A four dimensional array, 16 by 2 by 15 by 4, of count data.
+Element \eqn{h,i,j,k} gives the number of subjects who chose object \eqn{k} when
+presented with choice set \eqn{j} of domain \eqn{h}, in their \eqn{i}'th block
+of 16 trials.
+The choice set index \eqn{j=1,...,15} encodes a non-empty subset of the universe
+of the four choice objects a, b, c, and d, numbered 1, 2, 3, 4.
+Whenever \eqn{k} is not an element of \eqn{j}, the value is \code{NA}.
+}
+\seealso{
+{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+Other data objects for the experiment include
+\code{\link{YG_trials}}, a table of choice trial data,
+\code{\link{YG_demographics}}, a table of demographic information, and
+\code{\link{YG_raw}}, a table of raw data.
+\code{\link{set_index}} describes how the choice set index encodes the choice set.
 }
 \keyword{datasets}

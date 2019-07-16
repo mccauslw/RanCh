@@ -1,6 +1,64 @@
-#' YouGov Experiment data
+#' Table of choice trials data from the YouGov experiment
 #'
-#' Record of every choice made by every respondant.
+#' @format A tibble with 17 variables
+#' \describe{
+#' \item{\code{domain}}{factor, name of choice domain}
+#' \item{\code{subject}}{subject identifier}
+#' \item{\code{block}}{block, equal to 1 or 2, identifying the first or second pass a subject makes through the domains.}
+#' \item{\code{trial}}{trial identifier (gives the order in which a subject sees choice sets)}
+#' \item{\code{duration}}{duration of trial in seconds}
+#' \item{\code{set}}{factor, name of choice set presented: 'ab', 'bcd', etc., with objects
+#' in alphabetical order}
+#' \item{\code{choice}}{factor, choice made by subject: 'a', 'b', 'c', or 'd'}
+#' \item{\code{set_perm}}{factor, order of presentation of objects on screen, left to right}
+#' \item{\code{set_card}}{Integer, cardinality of choice set (i.e. number of available options)}
+#' \item{\code{set_bin}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
+#' \item{\code{choice_int}}{Integer code for chosen object: a=1, b=2, ..., d=4}
+#' \item{\code{ab}, \code{ac}, \ldots, \code{cd}}{revealed preference indicator: taking column ab as an example,
+#' value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 0 otherwise.}
+#' }
+#' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
+#' Other data objects for the experiment include
+#' \code{\link{YG_counts}}, an array of choice count data,
+#' \code{\link{YG_demographics}}, a table of demographic information, and
+#' \code{\link{YG_raw}}, a table of raw data.
+"YG_trials"
+
+#' Array of choice count data from the YouGov experiment
+#'
+#' A four dimensional array, 16 by 2 by 15 by 4, of count data.
+#' Element \eqn{h,i,j,k} gives the number of subjects who chose object \eqn{k} when
+#' presented with choice set \eqn{j} of domain \eqn{h}, in their \eqn{i}'th block
+#' of 16 trials.
+#' The choice set index \eqn{j=1,...,15} encodes a non-empty subset of the universe
+#' of the four choice objects a, b, c, and d, numbered 1, 2, 3, 4.
+#' Whenever \eqn{k} is not an element of \eqn{j}, the value is \code{NA}.
+#' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+#' Other data objects for the experiment include
+#' \code{\link{YG_trials}}, a table of choice trial data,
+#' \code{\link{YG_demographics}}, a table of demographic information, and
+#' \code{\link{YG_raw}}, a table of raw data.
+#' \code{\link{set_index}} describes how the choice set index encodes the choice set.
+"YG_counts"
+
+#' Table of demographic information from the YouGov experiment
+#'
+#' @format A data frame with demographic information on subjects
+#' \describe{
+#' \item{\code{sex}}{Sex of subject}
+#' \item{\code{educ}}{Educational attainment by subject}
+#' \item{\code{region}}{Region of subject's residence in US}
+#' \item{\code{race}}{Race of subject}
+#' \item{\code{age_range}}{Age range of subject}
+#' }
+#' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+#' Other data objects for the experiment include
+#' \code{\link{YG_trials}}, a table of choice trial data,
+#' \code{\link{YG_counts}}, a matrix of choice count data, and
+#' \code{\link{YG_raw}}, a table of raw data.
+"YG_demographics"
+
+#' Table of choice trial data from the YouGov experiment
 #'
 #' @format A data frame with 17 variables:
 #' \describe{
@@ -24,43 +82,9 @@
 #' 5 for Native American, 6 for Mixed, 7 for Other, 8 for Middle Eastern}
 #' \item{\code{age_cross}}{Age category of respondant: 1 for 18-34, 2 for 35-54, 3 for 55 and over}
 #' }
+#' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
+#' Other data objects for the experiment include
+#' \code{\link{YG_trials}}, a table of choice trial data,
+#' \code{\link{YG_counts}}, a matrix of choice count data, and
+#' \code{\link{YG_demographics}}, a table of demographic information
 "YG_raw"
-
-#' Demographic information for subjects
-#'
-#' @format A data frame with demographic information on subjects
-#' \describe{
-#' \item{\code{sex}}{Sex of subject}
-#' \item{\code{educ}}{Educational attainment by subject}
-#' \item{\code{region}}{Region of subject's residence in US}
-#' \item{\code{race}}{Race of subject}
-#' \item{\code{age_range}}{Age range of subject}
-#' }
-"YG_demographics"
-
-#' Table of choice trials, population choice experiment
-#'
-#' @format A tibble with 17 variables
-#' \describe{
-#' \item{\code{domain}}{factor, name of choice domain}
-#' \item{\code{subject}}{subject identifier}
-#' \item{\code{block}}{block, equal to 1 or 2, identifying the first or second pass a subject makes through the domains.}
-#' \item{\code{trial}}{trial identifier (gives the order in which a subject sees choice sets)}
-#' \item{\code{duration}}{duration of trial in seconds}
-#' \item{\code{set}}{factor, name of choice set presented: 'ab', 'bcd', etc., with objects
-#' in alphabetical order}
-#' \item{\code{choice}}{factor, choice made by subject: 'a', 'b', 'c', or 'd'}
-#' \item{\code{set_perm}}{factor, order of presentation of objects on screen, left to right}
-#' \item{\code{set_card}}{Integer, cardinality of choice set (i.e. number of available options)}
-#' \item{\code{set_bin}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
-#' \item{\code{choice_int}}{Integer code for chosen object: a=1, b=2, ..., d=4}
-#' \item{\code{ab}, \code{ac}, \ldots \code{cd}}{revealed preference indicator: taking column ab as an example,
-#' value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 0 otherwise.}
-#' }
-"YG_trials"
-
-#' Counts
-#'
-#' A 3x16x15x4 matrix with count data.
-#'
-"YG_counts"

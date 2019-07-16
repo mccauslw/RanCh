@@ -9,14 +9,14 @@ plot_P3(P, perm = c(1, 2, 3), binary_pch = 1, ternary_pch = 20)
 \arguments{
 \item{P}{A random choice structure for a universe of three objects}
 
-\item{perm}{A permutation of (1, 2, 3) specifying which objects in the universe
+\item{perm}{A permutation of \eqn{(1, 2, 3)} specifying which objects in the universe
 correspond to the bottom left, top, and bottom right vertex, respectively of
 the ternary plot.}
 
-\item{binary_pch}{Plotting character (pch) for binary choice probabilities. Defaults
+\item{binary_pch}{Plotting character (\code{pch}) for binary choice probabilities. Defaults
 to a hollow circle.}
 
-\item{ternary_pch}{Plotting character (pch) for ternary choice probability. Defaults
+\item{ternary_pch}{Plotting character (\code{pch}) for ternary choice probability. Defaults
 to a solid circle. The convention established with the defaults for binary_pch and
 ternary_pch allow one to distinguish between a binary choice probability and a ternary
 choice probability that happens to be on the boundary of the triangle.}
@@ -26,6 +26,6 @@ choice probability that happens to be on the boundary of the triangle.}
 a universe of three objects.
 }
 \examples{
-P = create_P(0.7, 0.6, 0.8, 0.6, 0.3, 0.1, names = c('x', 'y', 'z'))
+P <- create_P3(0.7, 0.6, 0.8, 0.6, 0.3, names = c('x', 'y', 'z'))
 plot_P3(P)
 }
