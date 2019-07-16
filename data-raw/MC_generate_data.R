@@ -1,5 +1,6 @@
 library(bitops)
 library(tidyverse)
+source('data-raw/trial.R')
 
 # There is one data file for each experimental subject.
 # File names consist of subject number, letter code, extension .txt

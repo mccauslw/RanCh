@@ -6,12 +6,13 @@ domain_names <- c("Dots", "Gambles", "Applicants")
 n_domains <- length(domain_names)
 n_subjects <- 8
 
-object_names <- c('x', 'y', 'z')
-subset_names <- c('x', 'y', 'xy', 'z', 'xz', 'yz', 'xyz')
+local_object_names <- c('x', 'y', 'z')
+local_subset_names <- c('x', 'y', 'xy', 'z', 'xz', 'yz', 'xyz')
 
 T_1972_counts <- array(0, dim=c(n_domains, n_subjects, n_subsets, n_objects),
                        dimnames=list(Domain=domain_names, NULL,
-                                     Subset=subset_names, Object=object_names))
+                                     Subset=local_subset_names,
+                                     Object=local_object_names))
 
 T_1972_counts <- T_1972_counts * outer(outer(rep(1, n_domains), rep(1, n_subjects)),
                                        member_table[1:n_subsets, 1:n_objects])

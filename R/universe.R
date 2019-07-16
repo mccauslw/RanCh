@@ -5,17 +5,21 @@ n_subsets = 2^n_objects - 1
 # Compute names and cardinality of all subsets of {1,2,...,n_objects}
 subset_names = vector(mode='character', length=n_subsets)
 subset_card = vector(mode='integer', length=n_subsets)
+subset_vectors = vector(mode='list', length=n_subsets)
 for (subset in seq(1, n_subsets)) {
   name = ''
   card = 0
+  v = c()
   for (i in seq(1, n_objects)) {
     if (bitwAnd(subset, bitwShiftL(1, i-1))) {
       name = paste(name, object_names[i], sep='')
       card = card+1
+      v = c(v, i)
     }
   }
   subset_names[subset] = name
   subset_card[subset] = card
+  subset_vectors[[subset]] = v
 }
 
 # Singletons are special because we can set choice probability to one
@@ -69,6 +73,7 @@ member_table = outer(1:n_subsets, 1:n_objects, vmembership)
 usethis::use_data(object_names,
                   subset_names,
                   subset_card,
+                  subset_vectors,
                   singletons,
                   doubletons,
                   tripletons,

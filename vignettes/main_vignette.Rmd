@@ -352,7 +352,7 @@ The marginal likelihood is also the marginal probability of seeing the data $N$;
 In general, we can specify the conjugate prior in the form of a matrix of Dirichlet parameters, with the same dimensions as $P$ and $N$.
 The simplest way of doing this is to set, for each choice set $A$, all Dirichlet parameters to $\alpha/|A|$.
 See @McCaMarl13 for some justification for this choice.
-The function `prior_DCE_scalar_alpha` does just this, setting `prior_Alpha`.
+The function `DCS_scalar_alpha_prior` does just this, setting `prior_Alpha`.
 Here, $\alpha=2$, which implies that all binary choice probabilities are uniform on $[0,1]$.
 
 The posterior distribution takes the same form as the prior: rows are *a posteriori* independent and Dirichlet.
@@ -363,7 +363,7 @@ Here the matrix of Dirichlet parameters is `post_Alpha`, the sum of `prior_Alpha
 The code below constructs and then displays 0.95 High Posterior Density (HPD) regions for the three binary choice probabilities (in the form of intervals on the three sides of the triangle) and the ternary choice probability vector (in the form of the green shape in the interior of the triangle.
 
 ```{r HPD}
-prior_Alpha <- prior_DCE_scalar_alpha(2.0, ncol(N_bce))
+prior_Alpha <- RCS_scalar_alpha_prior(2.0, ncol(N_bce))
 post_Alpha <- prior_Alpha + N_bce
 triplot(label=c('b', 'c', 'e'))
 plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))
@@ -374,13 +374,17 @@ plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))
 We can also compute the log marginal likelihood for various simple models, as follows.
 ```{r logML}
 N = PC_counts['Colours',,]
+n_objects = ncol(N)
+
 # Zero parameter models
-print(log_ML_DCE_uniform(N))
-print(log_ML_DCE_uniform_mult(N))
+print(log_L_DCE_multinomial(P_uniform(n_objects), N))
+print(log_L_DCE_Dir_mult(RCS_uniform_prior(n_objects), N))
+
 # One parameter models
-print(log_ML_DCE_scalar_alpha_Dir_mult(2.0, N))
+print(log_L_DCE_Dir_mult(RCS_scalar_alpha_prior(2.0, n_objects), N))
+
 # n-parameter models
-print(log_ML_DCE_vector_alpha_Dir_mult(c(1.0, 2.0, 1.0, 2.0, 1.0), N))
+print(log_L_DCE_Dir_mult(RCS_vector_alpha_prior(4.0, c(1.0, 2.0, 1.0, 2.0, 1.0)), N))
 ```
 These marginal likelihoods serve as useful benchmarks.
 
