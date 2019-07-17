@@ -3,3 +3,5 @@
 ^data-raw$
 ^\.Rd2pdf[0-9]*
 ^manual\.pdf$
+^doc$
+^Meta$
