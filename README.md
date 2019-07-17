@@ -17,11 +17,19 @@ install_github("mccauslw/RanCh", build_vignettes=TRUE)
 ```R
 library(RanCh)
 ```
-4. To get help with RanCh package:
+4. To get help for RanCh package:
 ```R
 help(RanCh)
 ```
-5. To read vignette:
+5. To get list of all functions with short descriptions
 ```R
-vignette(package=RanCh)
+library(help='RanCh')
+```
+6. To get help on a particular function
+```R
+help('regularity')
+```
+7. To read vignette:
+```R
+vignette('main_vignette', package='RanCh')
 ```

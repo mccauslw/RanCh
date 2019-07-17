@@ -5,7 +5,6 @@ knitr::opts_chunk$set(
 )
 library(RanCh)
 library(klaR)
-library(bitops)
 library(Smisc)
 library(tidyverse)
 

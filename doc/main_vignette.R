@@ -5,7 +5,6 @@ knitr::opts_chunk$set(
 )
 library(RanCh)
 library(klaR)
-library(bitops)
 library(Smisc)
 library(tidyverse)
 
@@ -49,11 +48,11 @@ P_bce                        # and display.
 
 ## ----plot_RCS------------------------------------------------------------
 triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
-plot_P3(P_bce)                  # Plot points 
+plot_P3(P_bce)                  # Plot points
 
 ## ----regularity----------------------------------------------------------
 triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
-plot_P3(P_bce)                  # Plot points 
+plot_P3(P_bce)                  # Plot points
 polygon(tritrafo(regularity_X3(P_bce)), border='blue')
 polygon(tritrafo(multiplicative_X3(P_bce)), border='red')
 
