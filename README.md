@@ -14,7 +14,7 @@ library(devtools)
 ```
 3. Install RanCh package
 ```R
-install_github("mccauslw/RanCh")
+install_github("mccauslw/RanCh", build_vignettes=TRUE)
 ```
 4. Load RanCh package
 ```R
