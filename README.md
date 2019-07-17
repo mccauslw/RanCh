@@ -2,7 +2,7 @@
 
 An R project providing tools and data for abstract discrete Random Choice analysis.
 
-To install, open R, then at the R prompt:
+To install, update R to at least version 3.6.0, then at the R prompt:
 
 1. Install devtools package (if not already installed) and load it
 ```R
