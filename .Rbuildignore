@@ -1,6 +1,5 @@
 ^RanCh\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
-^Meta$
 ^\.Rd2pdf[0-9]*
 ^manual\.pdf$
