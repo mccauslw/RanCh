@@ -12,7 +12,6 @@ Description: This package provides tools for a research project whose purpose is
     defined by various stochastic choice axioms, context effects and other conditions.
 Imports:
     tidyverse,
-    knitr,
     klaR,
     MASS,
     Smisc
