@@ -18,10 +18,9 @@
 #' @param v vector of object indices, in any order
 #' @return An integer index corresponding to the set of objects whose indices are
 #' elements of \code{v}.
-#' @importFrom bitops bitShiftL
 #' @export
 #' @examples
 #' A <- set_index(c(1,3,4)) # Returns (decimal) 13, equal to binary 1101.
 set_index <- function(v) {
-  set <- sum(bitShiftL(1, v-1))
+  set <- sum(bitwShiftL(1, v-1))
 }

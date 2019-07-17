@@ -1,4 +1,3 @@
-library(bitops)
 library(tidyverse)
 source('./data-raw/trial.R')
 

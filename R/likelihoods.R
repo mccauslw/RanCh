@@ -168,21 +168,3 @@ RCS_vector_alpha_prior <- function(alpha, v) {
   }
   Alpha * member_table[1:n_subsets, 1:n_objects]
 }
-
-#' Marginal likelihood for DCE, vector Dirichlet multinomial model
-#'
-#' \code{log_ML_DCE_vector_alpha_Dir_mult} computes the marginal likelihood for a model
-#' where choice probability vectors \eqn{P_A} are mutually independent, and
-#' \deqn{P_A(x_1,\ldots,x_{|A|}) \sim \mathrm{Di}(u_1,\ldots,u_|A|)},
-#' and choices are conditionally independent multinomial.
-#' @param u vector determining Dirichlet parameters
-#' @param N count matrix
-#' @param log logical; if \code{TRUE}, return the log marginal likelihood;
-#' if \code{FALSE}, the marginal likelihood.
-#' \code{log=FALSE} is usually not recommendend, as underflow is likely.
-#' @export
-log_ML_DCE_vector_alpha_Dir_mult <- function(u, N, log=TRUE) {
-  Alpha_prior = prior_DCE_vector_alpha(u)
-  ln_ML = log_ML_DCE_Dir_mult(Alpha_prior, N)
-  if (log) ln_ML else exp(ln_ML)
-}

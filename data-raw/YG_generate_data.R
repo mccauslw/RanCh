@@ -1,4 +1,3 @@
-library(bitops)
 library(tidyverse)
 
 YG_raw <- read.csv('data-raw/YouGov.csv')
