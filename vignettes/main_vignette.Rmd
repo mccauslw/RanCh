@@ -366,7 +366,8 @@ The code below constructs and then displays 0.95 High Posterior Density (HPD) re
 prior_Alpha <- RCS_scalar_alpha_prior(2.0, ncol(N_bce))
 post_Alpha <- prior_Alpha + N_bce
 triplot(label=c('b', 'c', 'e'))
-plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))
+plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3)) # Plot regions
+plot_P3(P_bce)                           # Plot proportions from data
 ```
 
 ### Marginal likelihoods for some simple models
