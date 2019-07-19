@@ -1,5 +1,7 @@
 .Rproj.user
-inst/doc
-Meta
 .Rd2pdf*
-doc
+man
+doc/main_vignette.html
+doc/main_vignette.R
+.DS_Store
+data-raw/.DS_Store
