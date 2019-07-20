@@ -18,3 +18,7 @@ a matrix of Dirichlet parameters for the scalar alpha prior
 \code{RCS_scalar_alpha_prior} constructs a matrix of Dirichlet parameters
 for a one-parameter Dirichlet prior for a random choice structure.
 }
+\examples{
+Alpha <- RCS_scalar_alpha_prior(2.5, 3)
+P <- sim_RCS_Dirichlet(10, Alpha)
+}

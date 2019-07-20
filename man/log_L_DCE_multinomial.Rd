@@ -29,9 +29,9 @@ N_total = vector(mode="integer", length=n_subsets)
 N_total[singletons[1:3]] = 0
 N_total[doubletons[1:3]] = 10
 N_total[tripletons[1]] = 10
-N = sim_DCE_multinomial(P, N_total)
-print(N, na.print='-')
-log_L_DCE_multinomial(P, N, log=TRUE)
+N = sim_DCE_multinomial(1, P, N_total) # Random count matrix
+print(N[1,,], na.print='-') # Print first drawn count matrix
+log_L_DCE_multinomial(P, N[1,,], log=TRUE) # Evaluate log liklihood
 }
 \seealso{
 \code{\link{sim_DCE_multinomial}} which simulates a count matrix under the

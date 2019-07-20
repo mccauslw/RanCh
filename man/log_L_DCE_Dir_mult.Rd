@@ -15,8 +15,20 @@ universe of objects.}
 
 \item{log}{logical; if TRUE, return the log Bayes factor}
 }
+\value{
+Likelihood or log likelihood value
+}
 \description{
 \code{log_L_DCE_Dir_mult} computes the marginal likelihood for a model
 where choice count vectors are independent multinomial across choice sets
 and choice probability vectors are independent Dirichlet across choice sets.
+}
+\examples{
+Alpha = RCS_scalar_alpha_prior(2.0, 3)
+N = T_1972_counts['Dots', 6,,]
+log_L_DCE_Dir_mult(Alpha, N)
+}
+\seealso{
+\code{\link{sim_DCE_Dir_mult}}, which simulates a count matrix under
+this model, given the total number of trials for each choice subset.
 }

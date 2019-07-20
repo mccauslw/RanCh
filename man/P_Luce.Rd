@@ -16,3 +16,6 @@ RCS with choice probabilities given by Luce weights
 \code{P_Luce} constructs a random choice structure (RCS) from a Luce
 model.
 }
+\examples{
+P = P_Luce(c(1.2,2.5,3.3))
+}

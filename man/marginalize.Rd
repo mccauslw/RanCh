@@ -2,22 +2,19 @@
 % Please edit documentation in R/marginalize.R
 \name{marginalize}
 \alias{marginalize}
-\title{Routines for simple manipulations of count matrices and random choice structures.}
+\title{Marginalize a count matrix or random choice structure}
 \usage{
-marginalize(input_N, objects)
+marginalize(input, objects)
 }
 \arguments{
-\item{input_N}{A count matrix}
+\item{input}{A count matrix or}
 
 \item{objects}{A vector of objects to retain}
 }
 \value{
-A count matrix
+A count matrix or RCS
 }
 \description{
-Marginalize a count matrix or random choice structure
-}
-\details{
 This function takes as input a count matrix or random choice structure on a
 universe of objects and returns a marginalization of it to a universe that is a
 subset of the original universe.

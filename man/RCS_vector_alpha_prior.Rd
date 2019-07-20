@@ -18,3 +18,7 @@ a matrix of Dirichlet parameters for the vector Dirichlet prior.
 \code{RCS_vector_alpha_prior} computes a matrix of Dirichlet parameters
 for a vector Dirichlet prior for a random choice structure.
 }
+\examples{
+Alpha <- RCS_vector_alpha_prior(5.2, c(2.5, 1.2, 3.3))
+P <- sim_RCS_Dirichlet(10, Alpha)
+}

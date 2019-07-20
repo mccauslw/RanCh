@@ -17,3 +17,7 @@ probability vectors are uniformly distributed.
 \code{RCS_uniform_prior} constructs a matrix of Dirichlet parameters for the
 uniform prior over a random choice structure.
 }
+\examples{
+Alpha <- RCS_uniform_prior(3)
+P <- sim_RCS_Dirichlet(10, Alpha)
+}

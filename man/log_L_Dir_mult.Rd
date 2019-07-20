@@ -16,7 +16,7 @@ if \code{FALSE}, the likelihood.
 \code{log=FALSE} is usually not recommendend, as underflow is likely.}
 }
 \value{
-Marginal likelihood or log marginal likelihood
+Likelihood or log likelihood
 }
 \description{
 \code{log_L_Dir_mult} computes the log marginal likelihood for a multinomial

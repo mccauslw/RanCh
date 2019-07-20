@@ -16,3 +16,6 @@ RCS where all choice probabilities are discrete uniform
 \code{P_uniform} constructs a random choice structure (RCS) where all
 choice probabilities are discrete uniform
 }
+\examples{
+P = P_uniform(3)
+}
