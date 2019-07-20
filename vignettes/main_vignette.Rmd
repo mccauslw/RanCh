@@ -329,7 +329,7 @@ We note that the retained points fall in the regions `Sxy` and `Cxz` from the `s
 ```{r check_sim_comp}
 n <- 500
 filt1 <- vector('logical', n); filt2 <- vector('logical', n)
-p <- rDir(n, c(1, 1, 1)) # Uniform distribution on 2-simplex
+p <- rDirichlet(n, c(1, 1, 1)) # Uniform distribution on 2-simplex
 for (i in 1:n) {
   P <- create_P3(0.4, 0.4, 0.6, p[i,1], p[i,2])
   filt1[i] <- similarity(P, target=1, decoy=2, competitor=3, two_sided=TRUE)

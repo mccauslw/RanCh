@@ -22,3 +22,6 @@ Marginal likelihood or log marginal likelihood
 \code{log_L_Dir_mult} computes the log marginal likelihood for a multinomial
 data generating process and a Dirichlet prior over choice probabilities.
 }
+\examples{
+log_L_Dir_mult(c(2.4, 1.5, 3.2), c(45, 20, 33))
+}

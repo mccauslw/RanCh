@@ -22,7 +22,7 @@ dDir3_quantile <- function(quantile, alpha, normalized=FALSE) {
 
 #' Dirichlet density function
 #'
-#' \code{dDir} computes the Dirichlet density at a point \code{p} in the
+#' \code{dDirichlet} computes the Dirichlet density at a point \code{p} in the
 #' regular simplex, for a vector \code{alpha} of Dirichlet parameters.
 #' @param p vector of probabilities on the regular simplex
 #' @param alpha vector of Dirichlet parameters
@@ -30,8 +30,8 @@ dDir3_quantile <- function(quantile, alpha, normalized=FALSE) {
 #' @return density or log density value
 #' @export
 #' @examples
-#' f <- dDir(c(0.1, 0.3, 0.6), c(2.5, 0.5, 1.0))
-dDir <- function(p, alpha, log=FALSE) {
+#' f <- dDirichlet(c(0.1, 0.3, 0.6), c(2.5, 0.5, 1.0))
+dDirichlet <- function(p, alpha, log=FALSE) {
   ln_f <- lgamma(sum(alpha)) - sum(lgamma(alpha))
   ln_f <- ln_f + sum((alpha-1)*log(p))
   if (log) ln_f else exp(ln_f)
@@ -39,7 +39,7 @@ dDir <- function(p, alpha, log=FALSE) {
 
 #' Dirichlet random variates
 #'
-#' \code{rDir} draws from the Dirichlet distribution
+#' \code{rDirichlet} draws from the Dirichlet distribution
 #' @param n number of draws
 #' @param alpha vector of Dirichlet parameters
 #' @return matrix with n rows, each a draw from the Dirichlet distribution
@@ -47,10 +47,10 @@ dDir <- function(p, alpha, log=FALSE) {
 #' @export
 #' @examples
 #' library(klaR)
-#' p <- rDir(1000, c(1, 1, 1)) # Uniform distribution on 2-simplex
+#' p <- rDirichlet(1000, c(1, 1, 1)) # Uniform distribution on 2-simplex
 #' triplot(label=c('x', 'y', 'z'))
 #' plot(tritrafo(p))
-rDir <-function(n, alpha) {
+rDirichlet <-function(n, alpha) {
   K <- length(alpha)
   p <- matrix(0, nrow=n, ncol=K)
   for (i in 1:K) p[, i] <- rgamma(n, alpha[i])

@@ -16,7 +16,7 @@ universe of objects.}
 \item{log}{logical; if TRUE, return the log Bayes factor}
 }
 \description{
-\code{log_ML_DCE_Dir_mult} computes the marginal likelihood for a model
+\code{log_L_DCE_Dir_mult} computes the marginal likelihood for a model
 where choice count vectors are independent multinomial across choice sets
 and choice probability vectors are independent Dirichlet across choice sets.
 }

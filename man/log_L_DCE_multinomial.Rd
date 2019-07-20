@@ -22,3 +22,18 @@ log likelihood or likelihood
 \code{log_L_DCE_multinomial} computes the log likelihood function for a count matrix
 as a function of a RCS.
 }
+\examples{
+u = c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
+P = P_Luce(u)
+N_total = vector(mode="integer", length=n_subsets)
+N_total[singletons[1:3]] = 0
+N_total[doubletons[1:3]] = 10
+N_total[tripletons[1]] = 10
+N = sim_DCE_multinomial(P, N_total)
+print(N, na.print='-')
+log_L_DCE_multinomial(P, N, log=TRUE)
+}
+\seealso{
+\code{\link{sim_DCE_multinomial}} which simulates a count matrix under the
+model, given the total number of trials for each choice subset.
+}

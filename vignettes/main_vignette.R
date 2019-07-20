@@ -1,7 +1,7 @@
 ## ---- include = FALSE----------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = " "
 )
 library(RanCh)
 library(klaR)
@@ -9,10 +9,12 @@ library(Smisc)
 library(tidyverse)
 
 ## ----counts_T_1972-------------------------------------------------------
-T_1972_counts['Gambles', 1, c('xz', 'yz', 'xyz'), ]
+print(T_1972_counts['Gambles', 1, c('xz', 'yz', 'xyz'), ], na.print='-')
 
 ## ----counts_RDS_2011-----------------------------------------------------
-RDS_2011_counts['Cash 1', 5, c(3, 5, 6, 9, 10, 12, 17, 18, 20, 24), ]
+print(RDS_2011_counts['Cash 1', 5, c(3, 5, 6, 9, 10, 12, 17, 18, 20, 24), ], na.print='-')
+#n_objects = 5
+#print(RDS_2011_counts['Cash 1', n_objects, doubletons[1:choose(n_objects, 2)], ], na.print='-')
 
 ## ----trials--------------------------------------------------------------
 head(PC_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set_bin', 'choice_int')], 5)
@@ -25,7 +27,7 @@ PC_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSu
 
 ## ----counts--------------------------------------------------------------
 N_bce <- marginalize(PC_counts['Beer', , ], c(2, 3, 5))
-N_bce
+print(N_bce, na.print='-')
 
 ## ----demographic---------------------------------------------------------
 head(PC_demographics, 5)
@@ -44,7 +46,7 @@ hist(M, 20)
 
 ## ----write_RCS-----------------------------------------------------------
 P_bce <- proportions(N_bce)  # Compute proportions from count data
-P_bce                        # and display.
+print(P_bce, na.print='-')   # and display.
 
 ## ----plot_RCS------------------------------------------------------------
 triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
@@ -60,7 +62,8 @@ polygon(tritrafo(multiplicative_X3(P_bce)), border='red')
 print(regularity(P_bce))
 
 ## ----check regularity xyz------------------------------------------------
-P_xyz <- create_P3(p12=2/5, p13=2/7, p23=3/8, P1=2/10, P2=3/10)
+P_xyz <- P_Luce(c(2, 3, 5))
+print(P_xyz, na.print='-')
 print(regularity(P_xyz))
 
 ## ----similarity----------------------------------------------------------
@@ -88,7 +91,7 @@ polygon(tritrafo(C$Cxz), col=grey(0.8)); text(tritrafo(colMeans(C$Cxz)), 'Cxz')
 ## ----check_sim_comp------------------------------------------------------
 n <- 500
 filt1 <- vector('logical', n); filt2 <- vector('logical', n)
-p <- rDir(n, c(1, 1, 1)) # Uniform distribution on 2-simplex
+p <- rDirichlet(n, c(1, 1, 1)) # Uniform distribution on 2-simplex
 for (i in 1:n) {
   P <- create_P3(0.4, 0.4, 0.6, p[i,1], p[i,2])
   filt1[i] <- similarity(P, target=1, decoy=2, competitor=3, two_sided=TRUE)
@@ -103,7 +106,8 @@ points(tritrafo(p[filt2, ]), pch=20)
 prior_Alpha <- RCS_scalar_alpha_prior(2.0, ncol(N_bce))
 post_Alpha <- prior_Alpha + N_bce
 triplot(label=c('b', 'c', 'e'))
-plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))
+plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3)) # Plot regions
+plot_P3(P_bce)                           # Plot proportions from data
 
 ## ----logML---------------------------------------------------------------
 N = PC_counts['Colours',,]

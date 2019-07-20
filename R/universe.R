@@ -70,6 +70,37 @@ membership = function(subs, obj) {ifelse(bitwAnd(subs, bitwShiftL(1, obj-1)) > 0
 vmembership = Vectorize(membership)
 member_table = outer(1:n_subsets, 1:n_objects, vmembership)
 
+#' Vector of default object names, corresponding to \code{\link{subset_names}}
+"object_names"
+
+#' Vector of default subset names, corresponding to \code{\link{object_names}}
+"subset_names"
+
+#' Cardinality of subsets up to the set 111111 of six objects.
+"subset_card"
+
+#' List of vectors of choice objects in each choice subset.
+"subset_vectors"
+
+#' Vector of singleton subset indices, for universes up to size six
+"singletons"
+
+#' Vector of doubleton subset indices, for universes up to size six
+"doubletons"
+
+#' Vector of tripleton subset indices, for universes up to size six
+"tripletons"
+
+#' Vector of doubleton names, for universes up to size six
+#'
+#' Names correspond to \code{\link{object_names}}
+"doubleton_names"
+
+#' Vector of tripleton names, for universes up to size six
+#'
+#' Names correspond to \code{\link{object_names}}
+"tripleton_names"
+
 usethis::use_data(object_names,
                   subset_names,
                   subset_card,
@@ -79,7 +110,9 @@ usethis::use_data(object_names,
                   tripletons,
                   doubleton_names,
                   tripleton_names,
-                  member_table,
+                  overwrite = TRUE)
+
+usethis::use_data(member_table,
                   RP_table,
                   internal = TRUE,
                   overwrite = TRUE)

@@ -1,22 +1,35 @@
-## Basic likelihoods, as functions of RCS P or multiple Dirichlet Alpha
+## Basic likelihoods, as functions of RCS P or multiple Dirichlet Alpha,
+## as well as correponding simulation routines
 
-#' Log likelihood for multinomial model
+#' Simulation for DCE, multiple multinomial model
 #'
-#' \code{log_L_multinomial} computes the log likelihood function for a
-#' multinomial model
-#' @param p vector of probabilities
-#' @param n vector of counts
-#' @param log logical; if \code{TRUE}, return the log likelihood;
-#' if \code{FALSE}, the likelihood.
-#' \code{log=FALSE} is usually not recommendend, as underflow is likely.
-#' @importFrom stats na.omit
+#' \code{sim_DCE_multinomial} draws random counts given probabilities in a RCS \code{P}.
+#' Total counts for each choice subset are specified in the vector \code{N_total}.
+#' @param P matrix containing a random choice structure (RCS)
+#' @param N_total vector containing count totals (i.e. number of trials) for each
+#' subset of the universe of choice objects.
+#' @return a random count matrix
+#' @examples
+#' u = c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
+#' P = P_Luce(u)
+#' N_total = vector(mode="integer", length=n_subsets)
+#' N_total[singletons[1:3]] = 0
+#' N_total[doubletons[1:3]] = 10
+#' N_total[tripletons[1]] = 10
+#' N = sim_DCE_multinomial(P, N_total)
+#' print(N, na.print='-')
+#' log_L_DCE_multinomial(P, N, log=TRUE)
+#' @seealso \code{\link{log_L_DCE_multinomial}}, which computes the log-likelihood
+#' for this model.
+#' @importFrom stats rmultinom
 #' @export
-#' @return log likelihood or likelihood
-log_L_multinomial <- function(p, n, log=TRUE) {
-  p <- na.omit(p)
-  n <- na.omit(n)
-  ln_L <- sum(n * log(p))
-  if (log) ln_L else exp(ln_L)
+sim_DCE_multinomial <- function(P, N_total) {
+  N <- matrix(nrow=n_subsets, ncol=n_objects)
+  for (i in 1:nrow(P)) {
+    v <- subset_vectors[[i]]
+    N[i, v] <- rmultinom(1, N_total[i], P[i, v])
+  }
+  N
 }
 
 #' Log likelihood for DCE, multiple multinomial model
@@ -28,16 +41,51 @@ log_L_multinomial <- function(p, n, log=TRUE) {
 #' @param log logical; if \code{TRUE}, return the log likelihood;
 #' if \code{FALSE}, the likelihood.
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
-#' @export
 #' @return log likelihood or likelihood
+#' @examples
+#' u = c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
+#' P = P_Luce(u)
+#' N_total = vector(mode="integer", length=n_subsets)
+#' N_total[singletons[1:3]] = 0
+#' N_total[doubletons[1:3]] = 10
+#' N_total[tripletons[1]] = 10
+#' N = sim_DCE_multinomial(P, N_total)
+#' print(N, na.print='-')
+#' log_L_DCE_multinomial(P, N, log=TRUE)
+#' @seealso \code{\link{sim_DCE_multinomial}} which simulates a count matrix under the
+#' model, given the total number of trials for each choice subset.
+#' @importFrom stats dmultinom
+#' @export
 log_L_DCE_multinomial <- function(P, N, log=TRUE) {
+  n_objects <- ncol(P)
   ln_L <- 0
   for (i in 1:nrow(P)) {
     if (subset_card[i] > 1) {
-      ln_L <- ln_L + log_L_multinomial(P[i, ], N[i, ], log=TRUE)
+      v <- subset_vectors[[i]]
+      ln_L <- ln_L + dmultinom(N[i, v], prob=P[i, v], log=TRUE)
     }
   }
   if (log) ln_L else exp(ln_L)
+}
+
+#' Simulation for Dirichlet-multinomial model
+#'
+#' \code{sim_Dir_mult} draws from a Dirichlet-multinomial distribution
+#' @param n number of random vectors to draw
+#' @param alpha vector of Dirichlet parameters
+#' @param n_total total count over all categories
+#' @return a \code{n} by \code{length(alpha)} matrix of counts.
+#' @examples
+#' n = sim_Dir_mult(10, c(2.4, 1.5, 3.2), 100)
+#' @importFrom stats rmultinom
+#' @export
+sim_Dir_mult <- function(n, alpha, n_total) {
+  N = matrix(nrow=n, ncol=length(alpha))
+  for (d in 1:n) { # WJM: avoid loop?
+    p <- rDirichlet(1, alpha)
+    N[d, ] = rmultinom(1, n_total, p)
+  }
+  N
 }
 
 #' Log likelihood, Dirichlet-multinomial model
@@ -49,22 +97,74 @@ log_L_DCE_multinomial <- function(P, N, log=TRUE) {
 #' @param log logical; if \code{TRUE}, return the log likelihood;
 #' if \code{FALSE}, the likelihood.
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
-#' @importFrom stats na.omit
-#' @export
 #' @return Marginal likelihood or log marginal likelihood
+#' @examples
+#' log_L_Dir_mult(c(2.4, 1.5, 3.2), c(45, 20, 33))
+#' @export
 log_L_Dir_mult <- function(alpha, n, log=TRUE) {
   # Compute prior and posterior normalization constants
-  alpha <- na.omit(alpha)
-  n <- na.omit(n)
   ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
   ln_post_nc <- lgamma(sum(alpha + n)) - sum(lgamma(alpha + n))
   ln_L <- ln_prior_nc - ln_post_nc
   if (log) ln_L else exp(ln_L)
 }
 
+#' Simulation of RCSs under a multiple Dirichlet distribution
+#'
+#' \code{sim_RCS_Dirichlet} draws RCSs from a multiple Dirichlet distribution.
+#' @param n number of random choice structures (RCSs) to draw.
+#' @param Alpha matrix of Dirichlet parameters, each row giving the Dirichlet
+#' distribution of the corresponding row of an RCS.
+#' @return a \code{n} by \code{nrow(Alpha)} by \code{ncol{Alpha}} array.
+#' If the returned matrix is \code{P}, \code{P[i,,]} is the \eqn{i}'th draw
+#' of a RCS.
+#' @export
+sim_RCS_Dirichlet <- function(n, Alpha) {
+  P <- array(dim=c(n, dim(Alpha)), dimnames=c(list(NULL), dimnames(Alpha)))
+  for (i in 1:nrow(Alpha)) {
+    v <- subset_vectors[[i]]
+    if (subset_card[i] > 1) {
+      P[, i, v] <- rDirichlet(n, Alpha[i, v])
+    } else {
+      P[, i, v] <- 1.0
+    }
+  }
+  P
+}
+
+#' Simulation of DCE, multiple Dirichlet-multinomial model
+#'
+#' \code{sim_DCE_Dir_mult} draws random counts given a multiple Dirichlet
+#' prior distribution over the probabilities in an RCS.
+#' Total counts for each choice subset are specified in the vector
+#' \code{N_total}.
+#' @param n number of count matrices to draw
+#' @param Alpha matrix of Dirichlet parameters, each row giving the Dirichlet
+#' distribution of the corresponding row of a random choice structure.
+#' @param N_total vector containing count totals (i.e. number of trials) for
+#' each subset of the universe of choice objects.
+#' @return a random count matrix from the multiple Dirichlet-multinomial model
+#' @importFrom stats rmultinom
+#' @export
+sim_DCE_Dir_mult <- function(n, Alpha, N_total) {
+  N <- array(dim=c(n,dim(Alpha)), dimnames=c(list(NULL), dimnames(Alpha)))
+  for (i in 1:nrow(Alpha)) {
+    v <- subset_vectors[[i]]
+    if (subset_card[i] > 1) {
+      for (draw in 1:n) { # Need fresh draw of p, saving memory at cost of speed
+        p <- rDirichlet(1, Alpha[i, v])
+        N[draw, i, v] <- rmultinom(1, N_total[i], p)
+      }
+    } else {
+      N[, i, v] <- N_total[i]
+    }
+  }
+  N
+}
+
 #' Log likelihood for DCE, multiple Dirichlet-multinomial model
 #'
-#' \code{log_ML_DCE_Dir_mult} computes the marginal likelihood for a model
+#' \code{log_L_DCE_Dir_mult} computes the marginal likelihood for a model
 #' where choice count vectors are independent multinomial across choice sets
 #' and choice probability vectors are independent Dirichlet across choice sets.
 #' @param Alpha matrix of Dirichlet parameters, each row giving the Dirichlet
@@ -77,7 +177,8 @@ log_L_DCE_Dir_mult <- function(Alpha, N, log=TRUE) {
   ln_L <- 0
   for (i in 1:nrow(Alpha)) {
     if (subset_card[i] > 1) {
-      ln_L <- ln_L + log_L_Dir_mult(Alpha[i, ], N[i, ], log=TRUE)
+      v <- subset_vectors[[i]]
+      ln_L <- ln_L + log_L_Dir_mult(Alpha[i, v], N[i, v], log=TRUE)
     }
   }
   if (log) ln_L else exp(ln_L)
