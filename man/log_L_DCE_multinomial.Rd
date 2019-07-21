@@ -19,8 +19,8 @@ if \code{FALSE}, the likelihood.
 log likelihood or likelihood
 }
 \description{
-\code{log_L_DCE_multinomial} computes the log likelihood function for a count matrix
-as a function of a RCS.
+\code{log_L_DCE_multinomial} computes the log likelihood function for a
+count matrix as a function of a RCS.
 }
 \examples{
 u = c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;

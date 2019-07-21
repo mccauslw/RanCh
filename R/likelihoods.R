@@ -25,6 +25,7 @@
 #' @importFrom stats rmultinom
 #' @export
 sim_DCE_multinomial <- function(n, P, N_total) {
+  stopifnot(nrow(P)==length(N_total))
   N <- array(dim=c(n, dim(P)), dimnames=c(list(NULL), dimnames(P)))
   for (i in 1:nrow(P)) {
     v <- subset_vectors[[i]]
@@ -58,6 +59,7 @@ sim_DCE_multinomial <- function(n, P, N_total) {
 #' @importFrom stats dmultinom
 #' @export
 log_L_DCE_multinomial <- function(P, N, log=TRUE) {
+  stopifnot(identical(dim(P), dim(N)))
   n_objects <- ncol(P)
   ln_L <- 0
   for (i in 1:nrow(P)) {
@@ -103,6 +105,7 @@ sim_Dir_mult <- function(n, alpha, n_total) {
 #' log_L_Dir_mult(c(2.4, 1.5, 3.2), c(45, 20, 33))
 #' @export
 log_L_Dir_mult <- function(alpha, n, log=TRUE) {
+  stopifnot(length(alpha)==length(n))
   # Compute prior and posterior normalization constants
   ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
   ln_post_nc <- lgamma(sum(alpha + n)) - sum(lgamma(alpha + n))
@@ -160,6 +163,7 @@ sim_RCS_Dirichlet <- function(n, Alpha) {
 #' @importFrom stats rmultinom
 #' @export
 sim_DCE_Dir_mult <- function(n, Alpha, N_total) {
+  stopifnot(nrow(Alpha)==length(N_total))
   N <- array(dim=c(n, dim(Alpha)), dimnames=c(list(NULL), dimnames(Alpha)))
   for (i in 1:nrow(Alpha)) {
     v <- subset_vectors[[i]]
@@ -194,6 +198,7 @@ sim_DCE_Dir_mult <- function(n, Alpha, N_total) {
 #' this model, given the total number of trials for each choice subset.
 #' @export
 log_L_DCE_Dir_mult <- function(Alpha, N, log=TRUE) {
+  stopifnot(identical(dim(Alpha), dim(N)))
   ln_L <- 0
   for (i in 1:nrow(Alpha)) {
     if (subset_card[i] > 1) {
