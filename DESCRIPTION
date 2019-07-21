@@ -2,8 +2,10 @@ Package: RanCh
 Title: Tools for abstract discrete Random Choice
 URL: http://github.com/mccauslw/RanCh
 BugReports: http://github.com/mccauslw/RanCh/issues
-Version: 0.0.0.9000
-Authors@R: person("William", "McCausland", email = "mccauslw@mac.com", role = c("aut", "cre"))
+Version: 1.0.0
+Authors@R: c(
+    person("William", "McCausland", email = "mccauslw@mac.com", role = c("aut", "cre"),
+    person("Laure-Anna", "Baumol", email= = "laureanna.bomal@gmail.com", role=c("aut")))
 Description: This package provides tools for a research project whose purpose is to help us
     better understand the foundations of stochastic discrete choice. It includes datasets
     compiled from the literature on context effects and stochastic intransitivity and from
@@ -16,7 +18,7 @@ Imports:
     MASS,
     Smisc
 Depends: R (>= 3.6.0)
-License: CC0
+License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1

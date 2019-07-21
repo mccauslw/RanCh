@@ -398,4 +398,5 @@ These marginal likelihoods serve as useful benchmarks.
 [terW]: https://en.wikipedia.org/wiki/Ternary_plot
 [barW]: https://en.wikipedia.org/wiki/Barycentric_coordinate_system
 [DirW]: https://en.wikipedia.org/wiki/Dirichlet_distribution
+[DiMW]: https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution
 [betW]: https://en.wikipedia.org/wiki/Beta_distribution
