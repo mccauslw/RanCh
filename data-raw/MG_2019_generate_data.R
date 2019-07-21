@@ -1,7 +1,8 @@
 library(tidyverse)
+source('./data-raw/trial.R')
 
-YG_raw <- read.csv('data-raw/YouGov.csv')
-n_lines <- nrow(YG_raw)
+MG_2019_raw <- read.csv('data-raw/MG_2019.csv')
+n_lines <- nrow(MG_2019_raw)
 
 # Names of the 16 domains in the experiment
 domain_names <- c('Art',         # 1
@@ -28,6 +29,7 @@ n_subsets <- 2^n_objects-1
 n_blocks <- 2 # Number of times a subject sees each domain
 n_subjects_per_set <- 10
 n_subjects <- (n_subsets - n_objects) * n_domains * n_subjects_per_set
+n_waves <- 2
 
 # Demographic categories
 sex_names <- c('Male', 'Female')
@@ -38,8 +40,8 @@ race_names <- c('White', 'Black', 'Hispanic', 'Asian', 'Native American',
 region_names <- c('Northeast', 'Midwest', 'South', 'West')
 age_names <- c('18 to 34', '35-54', '55+')
 
-# Create YG_trials tibble, a database of all trials
-YG_trials <- YG_raw %>% as_tibble() %>%
+# Create MG_2019_trials tibble, a database of all trials
+MG_2019_trials <- MG_2019_raw %>% as_tibble() %>%
 
   # Compute standard variables
   mutate(
@@ -56,33 +58,39 @@ YG_trials <- YG_raw %>% as_tibble() %>%
   # Put standard variables in order for easy reading
   arrange_set_choice_vars()
 
-# Add revealed preference information to YG_trials
-YG_trials[doubleton_names[1:choose(n_objects, 2)]] =
-  t(apply(YG_trials[c('set_bin', 'choice_int')], 1,
-          function(v) as.integer(RP_table[v['set_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
+# Add revealed preference information to MG_2019_trials
+MG_2019_trials[doubleton_names[1:choose(n_objects, 2)]] =
+  t(apply(MG_2019_trials[c('set_index', 'choice_int')], 1,
+          function(v) as.integer(RP_table[v['set_index'], v['choice_int'],
+                                          1:choose(n_objects, 2)])))
 
-# Set up YG_demographics database
+# Set up MG_2019_demographics database
 subj_seq = seq(from=1, by=32, length.out=n_subjects)
-YG_demographics =
-  tibble(sex = as.factor(sex_names[YG_raw[subj_seq, 'gender']]),
-         educ = as.factor(educ_names[YG_raw[subj_seq, 'educ']]),
-         region = as.factor(region_names[YG_raw[subj_seq, 'region']]),
-         race = as.factor(race_names[YG_raw[subj_seq, 'race']]),
-         age_range = as.factor(age_names[YG_raw[subj_seq, 'age_cross']]))
+MG_2019_demographics =
+  tibble(sex = as.factor(sex_names[MG_2019_raw[subj_seq, 'gender']]),
+         educ = as.factor(educ_names[MG_2019_raw[subj_seq, 'educ']]),
+         region = as.factor(region_names[MG_2019_raw[subj_seq, 'region']]),
+         race = as.factor(race_names[MG_2019_raw[subj_seq, 'race']]),
+         age = as.factor(age_names[MG_2019_raw[subj_seq, 'age_cross']]))
 
 # Compute choice counts by domain, subset and choice object
-YG_table <- table(YG_trials[c('domain', 'block', 'set_bin', 'choice_int')])
-# Dimension naming for MC_counts
-YG_count_dimnames <- dimnames(YG_table)
-names(YG_count_dimnames) <- c('Domain', 'Block', 'Subset', 'Object')
-YG_count_dimnames$Block <- c('1st wave', '2nd wave')
-YG_count_dimnames$Subset <- subset_names[1:n_subsets]
-YG_count_dimnames$Object <- object_names[1:n_objects]
+MG_2019_table <- table(MG_2019_trials[c('domain', 'block', 'set_index', 'choice_int')])
+
+# Dimension naming for MG_2019_counts
+MG_2019_count_dimnames <- dimnames(MG_2019_table)
+names(MG_2019_count_dimnames) <- c('Domain', 'Block', 'Subset', 'Object')
+MG_2019_count_dimnames$Block <- c('1st wave', '2nd wave')
+MG_2019_count_dimnames$Subset <- subset_names[1:n_subsets]
+MG_2019_count_dimnames$Object <- object_names[1:n_objects]
+
 # Create matrix with correct names, fill in counts for all subsets, even singletons
-YG_counts <- array(0, dim=c(n_domains, n_waves, n_subsets, n_objects), dimnames = YG_count_dimnames)
-YG_counts[, , (1:n_subsets)[subset_card[1:n_subsets]>1], ] = YG_table
+MG_2019_counts <- array(0, dim=c(n_domains, n_waves, n_subsets, n_objects),
+                        dimnames = MG_2019_count_dimnames)
+MG_2019_counts[, , (1:n_subsets)[subset_card[1:n_subsets]>1], ] = MG_2019_table
+
 # Set counts that don't make sense (e.g. number of times a chosen from {b,c}) to NA
-YG_counts <- YG_counts * outer(rep(1, n_domains) %o% rep(1, n_waves),
+MG_2019_counts <- MG_2019_counts * outer(rep(1, n_domains) %o% rep(1, n_waves),
                               member_table[1:n_subsets, 1:n_objects])
 
-usethis::use_data(YG_raw, YG_counts, YG_trials, YG_demographics, overwrite=TRUE)
+usethis::use_data(MG_2019_raw, MG_2019_counts, MG_2019_trials, MG_2019_demographics,
+                  overwrite=TRUE)

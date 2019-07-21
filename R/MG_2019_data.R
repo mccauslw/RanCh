@@ -1,4 +1,4 @@
-#' Table of choice trials data from the YouGov experiment
+#' Table of choice trials data from McCausland and Gerringer (2019)
 #'
 #' @format A tibble with 17 variables
 #' \describe{
@@ -12,19 +12,19 @@
 #' \item{\code{choice}}{factor, choice made by subject: 'a', 'b', 'c', or 'd'}
 #' \item{\code{set_perm}}{factor, order of presentation of objects on screen, left to right}
 #' \item{\code{set_card}}{Integer, cardinality of choice set (i.e. number of available options)}
-#' \item{\code{set_bin}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
+#' \item{\code{set_index}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
 #' \item{\code{choice_int}}{Integer code for chosen object: a=1, b=2, ..., d=4}
 #' \item{\code{ab}, \code{ac}, \ldots, \code{cd}}{revealed preference indicator: taking column ab as an example,
 #' value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 0 otherwise.}
 #' }
 #' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{YG_counts}}, an array of choice count data,
-#' \code{\link{YG_demographics}}, a table of demographic information, and
-#' \code{\link{YG_raw}}, a table of raw data.
-"YG_trials"
+#' \code{\link{MG_2019_counts}}, an array of choice count data,
+#' \code{\link{MG_2019_demographics}}, a table of demographic information, and
+#' \code{\link{MG_2019_raw}}, a table of raw data.
+"MG_2019_trials"
 
-#' Array of choice count data from the YouGov experiment
+#' Array of choice count data from McCausland and Gerringer (2019)
 #'
 #' A four dimensional array, 16 by 2 by 15 by 4, of count data.
 #' Element \eqn{h,i,j,k} gives the number of subjects who chose object \eqn{k} when
@@ -35,13 +35,13 @@
 #' Whenever \eqn{k} is not an element of \eqn{j}, the value is \code{NA}.
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{YG_trials}}, a table of choice trial data,
-#' \code{\link{YG_demographics}}, a table of demographic information, and
-#' \code{\link{YG_raw}}, a table of raw data.
+#' \code{\link{MG_2019_trials}}, a table of choice trial data,
+#' \code{\link{MG_2019_demographics}}, a table of demographic information, and
+#' \code{\link{MG_2019_raw}}, a table of raw data.
 #' \code{\link{set_index}} describes how the choice set index encodes the choice set.
-"YG_counts"
+"MG_2019_counts"
 
-#' Table of demographic information from the YouGov experiment
+#' Table of demographic information from McCausland and Gerringer (2019)
 #'
 #' @format A data frame with demographic information on subjects
 #' \describe{
@@ -49,16 +49,16 @@
 #' \item{\code{educ}}{Educational attainment by subject}
 #' \item{\code{region}}{Region of subject's residence in US}
 #' \item{\code{race}}{Race of subject}
-#' \item{\code{age_range}}{Age range of subject}
+#' \item{\code{age}}{Age range of subject}
 #' }
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{YG_trials}}, a table of choice trial data,
-#' \code{\link{YG_counts}}, a matrix of choice count data, and
-#' \code{\link{YG_raw}}, a table of raw data.
-"YG_demographics"
+#' \code{\link{MG_2019_trials}}, a table of choice trial data,
+#' \code{\link{MG_2019_counts}}, a matrix of choice count data, and
+#' \code{\link{MG_2019_raw}}, a table of raw data.
+"MG_2019_demographics"
 
-#' Table of choice trial data from the YouGov experiment
+#' Table of choice trial data from McCausland and Gerringer (2019)
 #'
 #' @format A data frame with 17 variables:
 #' \describe{
@@ -84,7 +84,7 @@
 #' }
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{YG_trials}}, a table of choice trial data,
-#' \code{\link{YG_counts}}, a matrix of choice count data, and
-#' \code{\link{YG_demographics}}, a table of demographic information
-"YG_raw"
+#' \code{\link{MG_2019_trials}}, a table of choice trial data,
+#' \code{\link{MG_2019_counts}}, a matrix of choice count data, and
+#' \code{\link{MG_2019_demographics}}, a table of demographic information
+"MG_2019_raw"

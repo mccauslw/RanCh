@@ -9,17 +9,17 @@
 #' \item{\code{choice}}{factor, choice made by subject: 'a', 'b', 'c', 'd' or 'e'}
 #' \item{\code{set_perm}}{factor, order of presentation of objects on screen, left to right}
 #' \item{\code{set_card}}{integer, cardinality of choice set (i.e. number of available options)}
-#' \item{\code{set_bin}}{binary representation of choice set (binary digits indicate object membership in choice set)}
+#' \item{\code{set_index}}{binary representation of choice set (binary digits indicate object membership in choice set)}
 #' \item{\code{choice_int}}{integer, code for chosen object: a=1, b=2, ..., e=5}
 #' \item{\code{ab}, \code{ac}, \ldots, \code{de}}{revealed preference indicator:
 #' taking column ab as an example, the value is 1 if a is revealed preferred to b,
 #' -1 if b is revealed preferred to a, 0 otherwise.}}
 #' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{MC_counts}}, an array of choice count data, and
-# \code{\link{MC_demographics}}, a table of demographic information and
-#' \code{\link{MC_raw}}, a table of raw data.
-"MC_trials"
+#' \code{\link{MSMPB_2019_counts}}, an array of choice count data, and
+# \code{\link{MSMPB_2019_demographics}}, a table of demographic information and
+#' \code{\link{MSMPB_2019_raw}}, a table of raw data.
+"MSMPB_2019_trials"
 
 #' Choice counts in multiple choice experiment
 #'
@@ -31,11 +31,11 @@
 #' Whenever \eqn{k} is not an element of \eqn{j}, the value is \code{NA}.
 #' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{MC_trials}}, a table of choice trial data, and
-# \code{\link{MC_demographics}}, a table of demographic information and
-#' \code{\link{MC_raw}}, a table of raw data.
+#' \code{\link{MSMPB_2019_trials}}, a table of choice trial data, and
+# \code{\link{MSMPB_2019_demographics}}, a table of demographic information and
+#' \code{\link{MSMPB_2019_raw}}, a table of raw data.
 #' \code{\link{set_index}} describes how the choice set index encodes the choice set.
-"MC_counts"
+"MSMPB_2019_counts"
 
 #' Multiple Choice experiment data
 #'
@@ -45,7 +45,6 @@
 #' We do not provide documentation, although the variable names are suggestive.
 #' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{MC_trials}}, a table of choice trial data, and
-#' \code{\link{MC_counts}}, an array of choice count data.
-# \code{\link{MC_demographics}}, a table of demographic information and
-"MC_raw"
+#' \code{\link{MSMPB_2019_trials}}, a table of choice trial data, and
+#' \code{\link{MSMPB_2019_counts}}, an array of choice count data.
+"MSMPB_2019_raw"

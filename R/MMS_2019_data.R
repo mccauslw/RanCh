@@ -1,4 +1,4 @@
-#' Table of choice trial data from the Population Choice experiment
+#' Table of choice trial data from McCausland, Marley and Davis-Stober (2019)
 #'
 #' @format A tibble with 20 variables
 #' \describe{
@@ -11,19 +11,19 @@
 #' \item{\code{choice}}{factor, choice made by subject: 'a', 'b', 'c', 'd' or 'e'}
 #' \item{\code{set_perm}}{factor, order of presentation of objects on screen, left to right}
 #' \item{\code{set_card}}{Integer, cardinality of choice set (i.e. number of available options)}
-#' \item{\code{set_bin}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
+#' \item{\code{set_index}}{Binary representation of choice set (binary digits indicate object membership in choice set)}
 #' \item{\code{choice_int}}{Integer code for chosen object: a=1, b=2, ..., e=5}
 #' \item{\code{ab}, \code{ac}, \ldots, \code{de}}{revealed preference indicator: taking column ab as an example,
 #' value is 1 if a is revealed preferred to b, -1 if b is revealed preferred to a, 0 otherwise.}
 #' }
 #' @seealso \code{\link{RanCh}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{PC_counts}}, an array of choice count data,
-#' \code{\link{PC_demographics}}, a table of demographic information, and
-#' \code{\link{PC_raw}}, a table of raw data.
-"PC_trials"
+#' \code{\link{MMS_2019_counts}}, an array of choice count data,
+#' \code{\link{MMS_2019_demographics}}, a table of demographic information, and
+#' \code{\link{MMS_2019_raw}}, a table of raw data.
+"MMS_2019_trials"
 
-#' Array of choice count data from the Population Choice experiment
+#' Array of choice count data from McCausland, Marley and Davis-Stober (2019)
 #'
 #' A 32 by 31 by 5 array of count data.
 #' Element \eqn{i,j,k} gives the number of subjects that chose object \eqn{k} when
@@ -34,13 +34,13 @@
 #'
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{PC_trials}}, a table of choice trial data,
-#' \code{\link{PC_demographics}}, a table of demographic information, and
-#' \code{\link{PC_raw}}, a table of raw data.
+#' \code{\link{MMS_2019_trials}}, a table of choice trial data,
+#' \code{\link{MMS_2019_demographics}}, a table of demographic information, and
+#' \code{\link{MMS_2019_raw}}, a table of raw data.
 #' \code{\link{set_index}} describes how the choice set index encodes the choice set.
-"PC_counts"
+"MMS_2019_counts"
 
-#' Table of demographic information from the Population Choice experiment
+#' Table of demographic information from McCausland, Marley and Davis-Stober (2019)
 #'
 #' @format A data frame with demographic information on subjects
 #' \describe{
@@ -52,12 +52,12 @@
 #' }
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{PC_trials}}, a table of choice trial data,
-#' \code{\link{PC_counts}}, a matrix of choice count data, and
-#' \code{\link{PC_raw}}, a table of raw data.
-"PC_demographics"
+#' \code{\link{MMS_2019_trials}}, a table of choice trial data,
+#' \code{\link{MMS_2019_counts}}, a matrix of choice count data, and
+#' \code{\link{MMS_2019_raw}}, a table of raw data.
+"MMS_2019_demographics"
 
-#' Table of raw data from Population Choice experiment
+#' Table of raw data from McCausland, Marley and Davis-Stober (2019)
 #'
 #' @format A data frame with 23 variables
 #' \describe{
@@ -89,8 +89,8 @@
 #' }
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
-#' \code{\link{PC_trials}}, a table of choice trial data,
-#' \code{\link{PC_counts}}, a matrix of choice count data, and
-#' \code{\link{PC_demographics}}, a table of demographic information
-"PC_raw"
+#' \code{\link{MMS_2019_trials}}, a table of choice trial data,
+#' \code{\link{MMS_2019_counts}}, a matrix of choice count data, and
+#' \code{\link{MMS_2019_demographics}}, a table of demographic information
+"MMS_2019_raw"
 

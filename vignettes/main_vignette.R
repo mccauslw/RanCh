@@ -17,20 +17,20 @@ print(RDS_2011_counts['Cash 1', 5, c(3, 5, 6, 9, 10, 12, 17, 18, 20, 24), ], na.
 #print(RDS_2011_counts['Cash 1', n_objects, doubletons[1:choose(n_objects, 2)], ], na.print='-')
 
 ## ----trials--------------------------------------------------------------
-head(PC_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set_bin', 'choice_int')], 5)
+head(MMS_2019_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set_index', 'choice_int')], 5)
 
 ## ----RP------------------------------------------------------------------
-PC_trials %>% select(set, choice, matches("^[a-e]{2}$")) %>% head(5)
+MMS_2019_trials %>% select(set, choice, matches("^[a-e]{2}$")) %>% head(5)
 
 ## ----RP_plus-------------------------------------------------------------
-PC_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSums
+MMS_2019_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSums
 
 ## ----counts--------------------------------------------------------------
-N_bce <- marginalize(PC_counts['Beer', , ], c(2, 3, 5))
+N_bce <- marginalize(MMS_2019_counts['Beer', , ], c(2, 3, 5))
 print(N_bce, na.print='-')
 
 ## ----demographic---------------------------------------------------------
-head(PC_demographics, 5)
+head(MMS_2019_demographics, 5)
 
 ## ----compare.waves-------------------------------------------------------
 my.chisq.test <- function(A)
@@ -41,7 +41,7 @@ my.chisq.test <- function(A)
     chi2$p.value
   } else NA
 }
-M <- apply(YG_counts, c(1, 3), my.chisq.test)
+M <- apply(MG_2019_counts, c(1, 3), my.chisq.test)
 hist(M, 20)
 
 ## ----write_RCS-----------------------------------------------------------
@@ -110,7 +110,7 @@ plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3)) # Plot regions
 plot_P3(P_bce)                           # Plot proportions from data
 
 ## ----logML---------------------------------------------------------------
-N = PC_counts['Colours',,]
+N = MMS_2019_counts['Colours',,]
 n_objects = ncol(N)
 
 # Zero parameter models

@@ -82,26 +82,26 @@ We provide data from three experiments in which individuals, or a sample from a 
 
 For each of the three experiments, we provide four data objects.
 Here, we will take the population choice experiment described in @McCaMarlStob19 as an example.
-`PC_trials` shows all responses of all subjects in a discrete choice experiment.
+`MMS_2019_trials` shows all responses of all subjects in a discrete choice experiment.
 The first few variables are the name of the choice domain (a universe of five related choice objects), the subject identifier and the trial index giving the order in which a subject responded to the various choice sets presented to her.
 The next variable, `set`, is a string showing which choice objects were presented at a given trial, the objects in alphabetical order.
 This is followed by `choice`, a letter indicating which object the subject chose from the given choice set.
 The variable `set_perm` shows the configuration of the objects as seen on screen by the subject.
-The subset and choice information is repeated in the values of the variables `set_bin` and `choice_int`.
-The variable `sub_bin` is the set index, a binary representation of the choice set, as described above.
+The subset and choice information is repeated in the values of the variables `set_index` and `choice_int`.
+The variable `set_index` is the set index, a binary representation of the choice set, as described above.
 Take for example the first row of the tqble below.
 The decimal value 30 is binary 11110, which indicates that the 2nd, 3rd, 4th and 5th elements of the set $\{a,b,c,d,e\}$ are in the choice set.
 This corresponds to the string `bcde` that is the value of the `set` variable.
 
 ```{r trials}
-head(PC_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set_bin', 'choice_int')], 5)
+head(MMS_2019_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set_index', 'choice_int')], 5)
 ```
 
 The remaining variables are revealed preference indicators for given pairs of objects.
 The value of variable `ab` is 1 if object $a$ is revealed preferred to object $b$, -1 if object $b$ is revealed preferred to object $a$ and zero otherwise.
 So for example, the choice of $e$ from $\{b,c,d,e\}$ reveals $e$ preferred to $c$, $d$, and $b$; see the first row of the following table, which repeats the first five observations of the variables `set` and `choice`, and includes the first five observations of the revealed preference indicators.
 ```{r RP}
-PC_trials %>% select(set, choice, matches("^[a-e]{2}$")) %>% head(5)
+MMS_2019_trials %>% select(set, choice, matches("^[a-e]{2}$")) %>% head(5)
 ```
 
 One possible application is aggregation of preferences.
@@ -109,30 +109,31 @@ Aggregating revealed preference indicators for the `Beer` domain gives the follo
 The regular expression `^[a-e]{2}$` matches variable names that are strings of length two
 formed from the letters a through e.
 ```{r RP_plus}
-PC_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSums
+MMS_2019_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSums
 ```
 In terms of net revealed preference, all values are consistent with the preference ranking $e \succ d \succ b \succ a \succ c$.
 That is, the number of times a higher ranked object is revealed preferred to a lower ranked object is always greater than the number of times the lower ranked object is revealed preferred to the higher ranked object.
 
-Choice counts for the experiment are in the $32 \times 31 \times 5$ array `PC_counts`.
+Choice counts for the experiment are in the $32 \times 31 \times 5$ array `MMS_2019_counts`.
 The first dimension is indexed by choice domain, the second by choice subset and the third by realized choice.
-For example, the number of times any of the subjects choose object $a$ from choice set $\{a,b\}$ of domain `Beer` is `PC_counts['Beer', 'ab', 'a']` or `PC_counts['Beer', 3, 1]`.
+For example, the number of times any of the subjects choose object $a$ from choice set $\{a,b\}$ of domain `Beer` is `MMS_2019_counts['Beer', 'ab', 'a']`
+or `MMS_2019_counts['Beer', 3, 1]`.
 Again, counts of impossible events have the value `NA`.
 
 We can take cross sections of count data using the function `marginalize`.
 Here is a cross section of counts for the 2nd, 3rd and 5th objects of the `Beer` domain.
-For example, the number of times any subject choose beer $b$ when presented with a choice between beers $b$ and $c$ is `r PC_counts['Beer', 6, 2]`.
+For example, the number of times any subject choose beer $b$ when presented with a choice between beers $b$ and $c$ is `r MMS_2019_counts['Beer', 6, 2]`.
 ```{r counts}
-N_bce <- marginalize(PC_counts['Beer', , ], c(2, 3, 5))
+N_bce <- marginalize(MMS_2019_counts['Beer', , ], c(2, 3, 5))
 print(N_bce, na.print='-')
 ```
 Note that the original object names are preserved.
 We will be using this very small count matrix as an example several times below.
 
-Demographic information for the subjects in the same experiment is found in the data frame `PC_demographics`.
+Demographic information for the subjects in the same experiment is found in the data frame `MMS_2019_demographics`.
 Here is the demographic information for the first five subjects.
 ```{r demographic}
-head(PC_demographics, 5)
+head(MMS_2019_demographics, 5)
 ```
 
 In the YG experiment, each subject is presented with two waves of 16 trials.
@@ -149,7 +150,7 @@ my.chisq.test <- function(A)
     chi2$p.value
   } else NA
 }
-M <- apply(YG_counts, c(1, 3), my.chisq.test)
+M <- apply(MG_2019_counts, c(1, 3), my.chisq.test)
 hist(M, 20)
 ```
 
@@ -378,7 +379,7 @@ plot_P3(P_bce)                           # Plot proportions from data
 
 We can also compute the log marginal likelihood for various simple models, as follows.
 ```{r logML}
-N = PC_counts['Colours',,]
+N = MMS_2019_counts['Colours',,]
 n_objects = ncol(N)
 
 # Zero parameter models

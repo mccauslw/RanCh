@@ -17,5 +17,5 @@ A random choice structure.
 proportions as a random choice structure.
 }
 \examples{
-PC_P <- proportions(PC_counts[1,,])
+P <- proportions(MMS_2019_counts[1,,])
 }

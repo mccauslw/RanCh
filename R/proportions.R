@@ -7,7 +7,7 @@
 #' @return A random choice structure.
 #' @export
 #' @examples
-#' PC_P <- proportions(PC_counts[1,,])
+#' P <- proportions(MMS_2019_counts[1,,])
 proportions <- function(N) {
   n_objects <- ncol(N)
   P <- N/rowSums(N, na.rm = TRUE)

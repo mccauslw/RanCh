@@ -20,7 +20,7 @@ probability vectors of a random RCS
 }
 \examples{
 library(klaR)
-N_bce <- marginalize(PC_counts['Beer', , ], c(2, 3, 5)) # Counts for objects 2, 3, 5
+N_bce <- marginalize(MMS_2019_counts['Beer', , ], c(2, 3, 5)) # Counts for objects 2, 3, 5
 prior_Alpha <- RCS_scalar_alpha_prior(2.0, 3) # Parameters of simple conjugate prior
 post_Alpha <- prior_Alpha + N_bce             # Posterior parameters
 triplot(label=c('b', 'c', 'e'))               # Set up ternary plot

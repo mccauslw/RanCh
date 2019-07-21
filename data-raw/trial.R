@@ -9,9 +9,9 @@ compute_set_choice_vars <- function(tb)
 	# Permutation of objects in choice set presented to subject
     set_perm = map_chr(set_vector, function(l) paste(na.omit(object_names[l]), collapse='')),
 	# Choice set as a subset of the universe of objects (binary representation)
-    set_bin = map_int(set_vector, function(l) sum(as.integer(bitShiftL(1, l-1)), na.rm=TRUE)),
+    set_index = map_int(set_vector, function(l) sum(as.integer(bitwShiftL(1, l-1)), na.rm=TRUE)),
 	# Choice set as a factor, with levels a, b, ab, c, ac, ...
-    set = as.factor(subset_names[set_bin]),
+    set = as.factor(subset_names[set_index]),
 	# Cardinality of the choice set
     set_card = map_int(set_vector, function(l) length(na.omit(l))),
 
@@ -28,5 +28,5 @@ arrange_set_choice_vars <- function(tb)
 	  # Standard variables to identify the trial,
 	  matches('domain'), matches('subject'), matches('block'), trial, matches('duration'),
 	  # Variables for choice set and choice object that are always present
-	  set, choice, set_perm, set_card, set_bin, choice_int)
+	  set, choice, set_perm, set_card, set_index, choice_int)
 }

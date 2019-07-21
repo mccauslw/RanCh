@@ -53,21 +53,21 @@ names(numeric_objects) <- all_names
 
 # Read in and vertically stack all subjects' responses.
 for (i in 1:81) {
-  filename <- sprintf('data-raw/MC_data_files/%i%s.txt', i, letterCodes[i])
+  filename <- sprintf('data-raw/MSMPB_2019_data_files/%i%s.txt', i, letterCodes[i])
   t_i <- read.csv2(filename, skip=1, header=TRUE, fileEncoding='UTF-16', sep='\t', skipNul=TRUE)
   t_i$Subject <- i
   t_i[sprintf('WaitClick%i.RT', 2:5)] <- NA
-  MC_raw <- if (i==1) t_i else rbind(MC_raw, t_i)
+  MSMPB_2019_raw <- if (i==1) t_i else rbind(MSMPB_2019_raw, t_i)
 }
 for (i in 82:length(letterCodes)) {
-  filename <- sprintf('data-raw/MC_data_files/%i%s.txt', i, letterCodes[i])
+  filename <- sprintf('data-raw/MSMPB_2019_data_files/%i%s.txt', i, letterCodes[i])
   t_i2 <- read.csv2(filename, header=TRUE, fileEncoding='UTF-16', sep='\t', skipNul=TRUE)
   t_i$Subject <- i
-  MC_raw <- rbind(MC_raw, t_i2)
+  MSMPB_2019_raw <- rbind(MSMPB_2019_raw, t_i2)
 }
 
-# Create MC_trials tibble, a database of all trials
-MC_trials <- MC_raw %>% as_tibble() %>%
+# Create MSMPB_2019_trials tibble, a database of all trials
+MSMPB_2019_trials <- MSMPB_2019_raw %>% as_tibble() %>%
 
   select(num_range("g", 1:5), subject=Subject, index=ClickedGamble) %>%
 
@@ -89,22 +89,25 @@ MC_trials <- MC_raw %>% as_tibble() %>%
   # Put standard variables in order for easy reading
   arrange_set_choice_vars()
 
-# Add revealed preference information to MC_trials
-MC_trials[doubleton_names[1:choose(n_objects, 2)]] =
-  t(apply(MC_trials[c('set_bin', 'choice_int')], 1,
-          function(v) as.integer(RP_table[v['set_bin'], v['choice_int'], 1:choose(n_objects, 2)])))
+# Add revealed preference information to MSMPB_2019_trials
+MSMPB_2019_trials[doubleton_names[1:choose(n_objects, 2)]] =
+  t(apply(MSMPB_2019_trials[c('set_index', 'choice_int')], 1,
+          function(v) as.integer(RP_table[v['set_index'], v['choice_int'],
+                                          1:choose(n_objects, 2)])))
 
 # Compute choice counts by subject, subset and choice object
-MC_table <- table(MC_trials[c('subject', 'set_bin', 'choice_int')])
-# Dimension naming for MC_counts
-MC_count_dimnames <- dimnames(MC_table)
-names(MC_count_dimnames) <- c('Subject', 'Subset', 'Object')
-MC_count_dimnames$Subset <- subset_names[1:n_subsets]
-MC_count_dimnames$Object <- object_names[1:n_objects]
+MSMPB_2019_table <- table(MSMPB_2019_trials[c('subject', 'set_index', 'choice_int')])
+# Dimension naming for MSMPB_2019_counts
+MSMPB_2019_count_dimnames <- dimnames(MSMPB_2019_table)
+names(MSMPB_2019_count_dimnames) <- c('Subject', 'Subset', 'Object')
+MSMPB_2019_count_dimnames$Subset <- subset_names[1:n_subsets]
+MSMPB_2019_count_dimnames$Object <- object_names[1:n_objects]
 # Create matrix with correct names, fill in counts for all subsets, even singletons
-MC_counts <- array(0, dim=c(n_subjects, n_subsets, n_objects), dimnames = MC_count_dimnames)
-MC_counts[, (1:n_subsets)[subset_card[1:n_subsets]>1], ] <- MC_table
+MSMPB_2019_counts <- array(0, dim=c(n_subjects, n_subsets, n_objects),
+                          dimnames = MSMPB_2019_count_dimnames)
+MSMPB_2019_counts[, (1:n_subsets)[subset_card[1:n_subsets]>1], ] <- MSMPB_2019_table
 # Set counts that don't make sense (e.g. number of times a chosen from {b,c}) to NA
-MC_counts <- MC_counts * outer(rep(1, n_subjects), member_table[1:n_subsets, 1:n_objects])
+MSMPB_2019_counts <- MSMPB_2019_counts * outer(rep(1, n_subjects),
+                                             member_table[1:n_subsets, 1:n_objects])
 
-usethis::use_data(MC_raw, MC_trials, MC_counts, overwrite=TRUE)
+usethis::use_data(MSMPB_2019_raw, MSMPB_2019_trials, MSMPB_2019_counts, overwrite=TRUE)
