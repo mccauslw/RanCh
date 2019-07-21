@@ -35,8 +35,8 @@ sim_DCE_multinomial <- function(n, P, N_total) {
 
 #' Log likelihood for DCE, multiple multinomial model
 #'
-#' \code{log_L_DCE_multinomial} computes the log likelihood function for a count matrix
-#' as a function of a RCS.
+#' \code{log_L_DCE_multinomial} computes the log likelihood function for a
+#' count matrix as a function of a RCS.
 #' @param P matrix containing a random choice structure (RCS)
 #' @param N matrix containing counts from a discrete choice experiment (DCE)
 #' @param log logical; if \code{TRUE}, return the log likelihood;
@@ -106,7 +106,7 @@ log_L_Dir_mult <- function(alpha, n, log=TRUE) {
   # Compute prior and posterior normalization constants
   ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
   ln_post_nc <- lgamma(sum(alpha + n)) - sum(lgamma(alpha + n))
-  ln_L <- ln_prior_nc - ln_post_nc
+  ln_L <- ln_prior_nc - ln_post_nc + lfactorial(sum(n)) - sum(lfactorial(n))
   if (log) ln_L else exp(ln_L)
 }
 
