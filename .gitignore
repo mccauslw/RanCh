@@ -1,5 +1,6 @@
 .Rproj.user
 .Rd2pdf*
+.Rhistory
 man/*
 vignettes/main_vignette.html
 vignettes/main_vignette.R
