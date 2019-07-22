@@ -2,8 +2,8 @@
 #'
 #' A four dimensional array, 3 by 8 by 7 by 3, of count data.
 #' Element \code{T_1972_counts[h,i,j,k]} gives the number of times
-#' subject \code{i} chose object
-#' \code{k} when presented with choice set \code{j} of domain \code{h}.
+#' subject \code{i} chose object \code{k} when presented with choice set
+#' \code{j} of domain \code{h}.
 #' Domain names are "Dots", "Gambles" and "Applicants", explained in the paper.
 #' The choice set index \code{j=1,...,7} encodes a non-empty subset of the
 #' universe of the three choice objects \code{x}, \code{y}, and \code{z}, numbered 1, 2, 3.
