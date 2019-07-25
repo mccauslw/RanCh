@@ -383,14 +383,16 @@ N = MMS_2019_counts['Colours',,]
 n_objects = ncol(N)
 
 # Zero parameter models
-print(log_L_DCE_multinomial(P_uniform(n_objects), N))
-print(log_L_DCE_Dir_mult(RCS_uniform_prior(n_objects), N))
+print(log_L_DCE_multinomial(P_uniform(n_objects), N, categorical=TRUE))
+print(log_L_DCE_Dir_mult(RCS_uniform_prior(n_objects), N, categorical=TRUE))
 
 # One parameter models
-print(log_L_DCE_Dir_mult(RCS_scalar_alpha_prior(2.0, n_objects), N))
+print(log_L_DCE_Dir_mult(RCS_scalar_alpha_prior(2.0, n_objects), N,
+                         categorical=TRUE))
 
 # n-parameter models
-print(log_L_DCE_Dir_mult(RCS_vector_alpha_prior(4.0, c(1.0, 2.0, 1.0, 2.0, 1.0)), N))
+print(log_L_DCE_Dir_mult(RCS_vector_alpha_prior(4.0, c(1.0, 2.0, 1.0, 2.0, 1.0)),
+                         N, categorical=TRUE))
 ```
 These marginal likelihoods serve as useful benchmarks.
 
