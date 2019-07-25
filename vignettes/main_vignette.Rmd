@@ -368,10 +368,15 @@ Regions for the three binary choice probabilities are the thick-line intervals o
 The region for the ternary choice probability vector is the green shape in the interior of the triangle.
 
 ```{r HPD}
+library(klaR)
 prior_Alpha <- RCS_scalar_alpha_prior(2.0, ncol(N_bce))
 post_Alpha <- prior_Alpha + N_bce
-triplot(label=c('b', 'c', 'e'))
-plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3)) # Plot regions
+HD3 <- Dir2_3_HD_region(post_Alpha, 0.9, c(1,2,3))
+triplot(label=c('b', 'c', 'e'))               # Set up ternary plot
+lines(tritrafo(HD3$HD12), lwd=4)              # Plot three binaries
+lines(tritrafo(HD3$HD23), lwd=4)
+lines(tritrafo(HD3$HD13), lwd=4)
+polygon(tritrafo(HD3$HD123), border='lightgreen') # Plot ternary
 plot_P3(P_bce)                           # Plot proportions from data
 ```
 
