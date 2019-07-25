@@ -4,24 +4,69 @@ source('./data-raw/trial.R')
 MG_2019_raw <- read.csv('data-raw/MG_2019.csv')
 n_lines <- nrow(MG_2019_raw)
 
-# Names of the 16 domains in the experiment
-domain_names <- c('Art',         # 1
-                  'Author',
-                  'City',
-                  'Beer',
-                  'Destination', # 5
-                  'Actor',
-                  'Hobby',
-                  'President',
-                  'Group',
-                  'Genre',       # 10
-                  'Instrument',
+# Domain names
+domain_names <- c('Smartphone',    # 1
                   'Credit',
+                  'City',
+                  'Car',
+                  'Beer',          # 5
+                  'President',
+                  'Author',
+                  'Group',
+                  'Actor',
+                  'Art',           # 10
+                  'Genre',
                   'League',
-                  'Outcome',
-                  'Smartphone',  # 15
-                  'Car')
+                  'Destination',
+                  'Instrument',
+                  'Hobby',         # 15
+                  'Outcome')
 n_domains <- length(domain_names)
+
+MG_2019_domains <- read_xlsx('./data-raw/MG_2019_domains.xlsx',
+                            col_names=c('Q', 'response_a', 'response_b',
+                                        'response_c', 'response_d'))
+MG_2019_domains$domain_name <- domain_names
+
+long_object_labels = matrix(data = c(
+  'Apple', 'Samsung', 'Google', 'LG',
+  '$200 now', '$255 in 1 yr', '$315 in 2 yrs', '$350 in 3 yrs',
+  'Seattle', 'Portland', 'Detroit', 'Toronto',
+  'Honda', 'Toyota', 'Ford', 'Hyundai',
+  'Guinness', 'Sam Adams', 'Heineken', 'Budweiser',
+  'Reagan', 'Obama', 'Trump', 'Clinton',
+  'Rowling', 'King', 'Grisham', 'Twain',
+  'U2', 'Kiss', 'Iron Maiden', 'Rush',
+  'Ford', 'Washington', 'Berry', 'Roberts',
+  'Escher', 'Van Gogh', 'Dali', 'Kahlo',
+  'Action', 'Sci-Fi', 'Rom-Com', 'Documentary',
+  'Hockey', 'Baseball', 'Basketball', 'Football',
+  'Vancouver', 'Hawaii', 'Paris', 'Iceland',
+  'Guitar', 'Drums', 'Saxophone', 'Piano',
+  'Hiking', 'Video Games', 'Gardening', 'Photography',
+  'R Pres, Cong', 'D Pres, Cong', 'D Pres, mixed', 'R Pres, mixed'),
+  nrow=16, ncol=4, byrow=TRUE,
+  dimnames=list(domain_names, object_names[1:4]))
+
+MG_2019_domains <- bind_cols(MG_2019_domains, as_tibble(long_object_labels))
+
+# Names of the 16 domains in the experiment
+#domain_names <- c('Art',         # 1
+#                  'Author',
+#                  'City',
+#                  'Beer',
+#                  'Destination', # 5
+#                  'Actor',
+#                  'Hobby',
+#                  'President',
+#                  'Group',
+#                  'Genre',       # 10
+#                  'Instrument',
+#                  'Credit',
+#                  'League',
+#                  'Outcome',
+#                  'Smartphone',  # 15
+#                  'Car')
 
 # Other experiment parameters
 n_objects <- 4
@@ -29,7 +74,6 @@ n_subsets <- 2^n_objects-1
 n_blocks <- 2 # Number of times a subject sees each domain
 n_subjects_per_set <- 10
 n_subjects <- (n_subsets - n_objects) * n_domains * n_subjects_per_set
-n_waves <- 2
 
 # Demographic categories
 sex_names <- c('Male', 'Female')
@@ -84,13 +128,14 @@ MG_2019_count_dimnames$Subset <- subset_names[1:n_subsets]
 MG_2019_count_dimnames$Object <- object_names[1:n_objects]
 
 # Create matrix with correct names, fill in counts for all subsets, even singletons
-MG_2019_counts <- array(0, dim=c(n_domains, n_waves, n_subsets, n_objects),
+MG_2019_counts <- array(0, dim=c(n_domains, n_blocks, n_subsets, n_objects),
                         dimnames = MG_2019_count_dimnames)
 MG_2019_counts[, , (1:n_subsets)[subset_card[1:n_subsets]>1], ] = MG_2019_table
 
 # Set counts that don't make sense (e.g. number of times a chosen from {b,c}) to NA
-MG_2019_counts <- MG_2019_counts * outer(rep(1, n_domains) %o% rep(1, n_waves),
+MG_2019_counts <- MG_2019_counts * outer(rep(1, n_domains) %o% rep(1, n_blocks),
                               member_table[1:n_subsets, 1:n_objects])
 
-usethis::use_data(MG_2019_raw, MG_2019_counts, MG_2019_trials, MG_2019_demographics,
+usethis::use_data(MG_2019_raw, MG_2019_counts, MG_2019_trials,
+                  MG_2019_domains, MG_2019_demographics,
                   overwrite=TRUE)
