@@ -13,19 +13,19 @@ that \eqn{x} is chosen when choice set \eqn{A} is presented.}
 \value{
 A matrix of Block-Marschak terms.
 If \code{Q} is the result, then for all random rankings of the elements of the
-universe of objects than induce the random choice structure \eqn{P},
+universe of objects that induce the random choice structure \eqn{P},
 element \code{Q[A,x]} is the probability that \eqn{x} is ranked higher than
 any other element of choice set \eqn{A} and lower than any element in the
 complement of \eqn{A} in the universe of objects.
-If \eqn{x \notin A}, then \code{Q[A,x]} has value \code{NA}.
-The RCS \eqn{P} satisfies random utility if and only if for all
-\eqn{x \in A \subseteq T}, \eqn{Q_A(x) \geq 0}
+If \code{x} is not an element of \code{A}, then \code{Q[A,x]} has value \code{NA}.
+The \code{P} satisfies random utility if and only if for all subsets \code{A}
+of the universe of choice objects and all \code{x} in \code{A}, \code{Q_A(x)}
+is greater than or equal to zero.
 }
 \description{
-\code{BM_terms} returns a matrix of the same dimensions as the input matrix, a
-random choice structure \code{P}.
-The non-NA terms are all non-negative if and only if the random choice structure
-\code{P} satisfies random utility.
+\code{BM_terms} takes as input a random choice structure \code{P} and returns
+a matrix of the same dimensions as the input matrix, whose non-NA terms are all
+non-negative if and only if \code{P} satisfies random utility.
 }
 \examples{
 P <- create_P3(0.7, 0.6, 0.8, 0.6, 0.3, names = c('x', 'y', 'z'))

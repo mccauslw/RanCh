@@ -24,6 +24,22 @@
 #' \code{\link{MG_2019_raw}}, a table of raw data.
 "MG_2019_trials"
 
+#' Table of choice domains from McCausland and Gerringer (2019)
+#'
+#' @format A tibble with 7 variables
+#' \describe{
+#' \item{\code{Q}}{character string, question posed to respondents to elicit
+#' their response for this domain}
+#' \item{\code{response_a}}{character string, response for object 'a'}
+#' \item{\code{response_b}}{character string, response for object 'b'}
+#' \item{\code{response_c}}{character string, response for object 'c'}
+#' \item{\code{response_d}}{character string, response for object 'd'}
+#' \item{\code{domain_name}}{name of domain, agreeing with names in
+#' \code{\link{MG_2019_trials}} and \code{\link{MG_2019_counts}}.
+#' \item{\code{object_labels}}{character vector of length four, short
+#' versions of object descriptions suitable for labels in graphs.}
+"MG_2019_domains"
+
 #' Array of choice count data from McCausland and Gerringer (2019)
 #'
 #' A four dimensional array, 16 by 2 by 15 by 4, of count data.

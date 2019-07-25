@@ -28,27 +28,23 @@ MG_2019_domains <- read_xlsx('./data-raw/MG_2019_domains.xlsx',
                                         'response_c', 'response_d'))
 MG_2019_domains$domain_name <- domain_names
 
-long_object_labels = matrix(data = c(
-  'Apple', 'Samsung', 'Google', 'LG',
-  '$200 now', '$255 in 1 yr', '$315 in 2 yrs', '$350 in 3 yrs',
-  'Seattle', 'Portland', 'Detroit', 'Toronto',
-  'Honda', 'Toyota', 'Ford', 'Hyundai',
-  'Guinness', 'Sam Adams', 'Heineken', 'Budweiser',
-  'Reagan', 'Obama', 'Trump', 'Clinton',
-  'Rowling', 'King', 'Grisham', 'Twain',
-  'U2', 'Kiss', 'Iron Maiden', 'Rush',
-  'Ford', 'Washington', 'Berry', 'Roberts',
-  'Escher', 'Van Gogh', 'Dali', 'Kahlo',
-  'Action', 'Sci-Fi', 'Rom-Com', 'Documentary',
-  'Hockey', 'Baseball', 'Basketball', 'Football',
-  'Vancouver', 'Hawaii', 'Paris', 'Iceland',
-  'Guitar', 'Drums', 'Saxophone', 'Piano',
-  'Hiking', 'Video Games', 'Gardening', 'Photography',
-  'R Pres, Cong', 'D Pres, Cong', 'D Pres, mixed', 'R Pres, mixed'),
-  nrow=16, ncol=4, byrow=TRUE,
-  dimnames=list(domain_names, object_names[1:4]))
-
-MG_2019_domains <- bind_cols(MG_2019_domains, as_tibble(long_object_labels))
+MG_2019_domains$object_labels = list(
+  c('Apple', 'Samsung', 'Google', 'LG'),
+  c('$200;now', '$255;1y', '$315;2y', '$350;3y'),
+  c('Seattle', 'Portland', 'Detroit', 'Toronto'),
+  c('Honda', 'Toyota', 'Ford', 'Hyundai'),
+  c('Guinness', 'Sam Adams', 'Heineken', 'Budweiser'),
+  c('Reagan', 'Obama', 'Trump', 'Clinton'),
+  c('Rowling', 'King', 'Grisham', 'Twain'),
+  c('U2', 'Kiss', 'Iron Maiden', 'Rush'),
+  c('Ford', 'Washington', 'Berry', 'Roberts'),
+  c('Escher', 'Van Gogh', 'Dali', 'Kahlo'),
+  c('Action', 'Sci-Fi', 'Rom-Com', 'Doc'),
+  c('Hockey', 'Baseball', 'Basketball', 'Football'),
+  c('Vancouver', 'Hawaii', 'Paris', 'Iceland'),
+  c('Guitar', 'Drums', 'Saxophone', 'Piano'),
+  c('Hiking', 'Video Games', 'Gardening', 'Photography'),
+  c('R;R', 'D;D', 'D;mixed', 'R;mixed'))
 
 # Names of the 16 domains in the experiment
 #domain_names <- c('Art',         # 1
@@ -119,18 +115,19 @@ MG_2019_demographics =
 
 # Compute choice counts by domain, subset and choice object
 MG_2019_table <- table(MG_2019_trials[c('domain', 'block', 'set_index', 'choice_int')])
+MG_2019_table <- MG_2019_table[domain_names,,,]
 
 # Dimension naming for MG_2019_counts
 MG_2019_count_dimnames <- dimnames(MG_2019_table)
 names(MG_2019_count_dimnames) <- c('Domain', 'Block', 'Subset', 'Object')
-MG_2019_count_dimnames$Block <- c('1st wave', '2nd wave')
+MG_2019_count_dimnames$Block <- c('Block 1', 'Block 2')
 MG_2019_count_dimnames$Subset <- subset_names[1:n_subsets]
 MG_2019_count_dimnames$Object <- object_names[1:n_objects]
 
 # Create matrix with correct names, fill in counts for all subsets, even singletons
 MG_2019_counts <- array(0, dim=c(n_domains, n_blocks, n_subsets, n_objects),
                         dimnames = MG_2019_count_dimnames)
-MG_2019_counts[, , (1:n_subsets)[subset_card[1:n_subsets]>1], ] = MG_2019_table
+MG_2019_counts[, , (1:n_subsets)[subset_card[1:n_subsets]>1], ] <- MG_2019_table
 
 # Set counts that don't make sense (e.g. number of times a chosen from {b,c}) to NA
 MG_2019_counts <- MG_2019_counts * outer(rep(1, n_domains) %o% rep(1, n_blocks),

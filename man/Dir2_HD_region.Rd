@@ -7,19 +7,20 @@
 Dir2_HD_region(alpha, HD_probability)
 }
 \arguments{
-\item{alpha}{vector of three (positive) Dirichlet parameters.}
+\item{alpha}{vector of two positive Dirichlet parameters.}
 
 \item{HD_probability}{scalar in \eqn{[0,1]} giving the probability of the HD region}
 }
 \value{
-matrix giving polygon approximation of HD region.
-Each row gives a polygon vertex.
-The three columns correspond to coordinates in a barycentric coordinate system.
+matrix giving line segment approximation of HD region.
+Each row gives an endpoint.
+The two columns correspond to coordinates in a one dimensional barycentric
+coordinate system.
 }
 \description{
 \code{Dir2_HD_region} constructs a line segment approximating the highest
-density region of a second order Dirichlet distribution.
-The line segment is in a second order barycentric coordinate system.
+density region of a second order Dirichlet (i.e. beta) distribution.
+The line segment is in a first order barycentric coordinate system.
 This can be used to compute highest prior density and highest posterior
 density (HPD) regions for a second order Dirichlet-multinomial model
 (i.e. a beta-binomial model).

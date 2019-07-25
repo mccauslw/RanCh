@@ -19,7 +19,7 @@ The three columns correspond to coordinates in a barycentric coordinate system.
 \description{
 \code{Dir3_HD_region} constructs a polygon approximating the highest density
 region of a third order Dirichlet distribution.
-The polygon is in a three-dimensional barycentric coordinate system.
+The polygon is in a two-dimensional barycentric coordinate system.
 This can be used to construct approximate highest prior density and
 highest posterior density (HPD) regions for a Dirichlet-multinomial model.
 }
