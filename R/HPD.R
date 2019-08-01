@@ -185,25 +185,30 @@ binary2ternary <- function(binary_points, ternary_cols)
   ternary_points
 }
 
-#' Plot highest density regions for RCS with 3 objects
+#' Compute all highest density regions for RCS with 3 objects
 #'
-#' This function plots the Dirichlet highest density (HD) regions in barycentric
-#' coordinates for the three binary choice probability and one ternary choice
-#' probability vectors of a random RCS
-#' @param Alpha matrix of Dirichlet parameters specifying the distribution of an RCD
-#' @param HD_probability scalar in \eqn{[0,1}] giving the probability of the HD region
-#' @param selection 3-vector specifying the three columns of \code{A} to use for plotting
-#' @importFrom graphics polygon lines
-#' @importFrom klaR tritrafo triplot
+#' This function computes the Dirichlet highest density (HD) regions in
+#' barycentric coordinates for the three binary choice probability vectors and
+#' one ternary choice probability vectors of a RCS with a multiple Dirichlet
+#' distribution.
+#' @param Alpha matrix of Dirichlet parameters specifying the distribution of
+#' an RCD
+#' @param HD_probability scalar giving the probability of the HD region
+#' @param selection vector of length three specifying the three columns of
+#' \code{Alpha} to use for plotting.
 #' @export
 #' @examples
 #' library(klaR)
 #' N_bce <- marginalize(MMS_2019_counts['Beer', , ], c(2, 3, 5)) # Counts for objects 2, 3, 5
 #' prior_Alpha <- RCS_scalar_alpha_prior(2.0, 3) # Parameters of simple conjugate prior
 #' post_Alpha <- prior_Alpha + N_bce             # Posterior parameters
+#' HD3 <- Dir2_3_HD_region(post_Alpha, 0.9, c(1,2,3))
 #' triplot(label=c('b', 'c', 'e'))               # Set up ternary plot
-#' plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3))      # Plot HPD regions
-plot_HD_Dir3 <- function(Alpha, HD_probability, selection)
+#' lines(tritrafo(HD3$HD12), lwd=4)              # Plot three binaries
+#' lines(tritrafo(HD3$HD23), lwd=4)
+#' lines(tritrafo(HD3$HD13), lwd=4)
+#' polygon(tritrafo(HD3$HD123), border='lightgreen') # Plot ternary
+Dir2_3_HD_region <- function(Alpha, HD_probability, selection=c(1, 2, 3))
 {
   obj1 <- selection[1]; obj2 <- selection[2]; obj3 <- selection[3]
   set_123 <- set_index(c(obj1, obj2, obj3))
@@ -212,21 +217,18 @@ plot_HD_Dir3 <- function(Alpha, HD_probability, selection)
   set_13 <- set_index(c(obj1, obj3))
 
   # Highest density region for ternary probability
-  HD_region <- Dir3_HD_region(Alpha[set_123, c(obj1, obj2, obj3)], HD_probability)
-  polygon(tritrafo(HD_region), col='lightgreen')
+  HD123 <- Dir3_HD_region(Alpha[set_123, c(obj1, obj2, obj3)], HD_probability)
 
   # Highest density region for (p1, p2)
-  HD12 <- binary2ternary(Dir2_HD_region(Alpha[set_12, c(obj1, obj2)], HD_probability),
-                        c(1, 2))
-  lines(tritrafo(HD12), lwd=4)
+  HD12 <- binary2ternary(Dir2_HD_region(Alpha[set_12, c(obj1, obj2)],
+                                        HD_probability), c(1, 2))
 
   # Highest density region for (p2, p3)
-  HD23 <- binary2ternary(Dir2_HD_region(Alpha[set_23, c(obj2, obj3)], HD_probability),
-                        c(2, 3))
-  lines(tritrafo(HD23), lwd=4)
+  HD23 <- binary2ternary(Dir2_HD_region(Alpha[set_23, c(obj2, obj3)],
+                                        HD_probability), c(2, 3))
 
   # Highest density region for (p1, p3)
-  HD13 <- binary2ternary(Dir2_HD_region(Alpha[set_13, c(obj1, obj3)], HD_probability),
-                        c(1, 3))
-  lines(tritrafo(HD13), lwd=4)
+  HD13 <- binary2ternary(Dir2_HD_region(Alpha[set_13, c(obj1, obj3)],
+                                        HD_probability), c(1, 3))
+  list(HD123=HD123, HD12=HD12, HD23=HD23, HD13=HD13)
 }

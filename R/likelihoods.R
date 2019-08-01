@@ -19,7 +19,7 @@
 #' N_total[tripletons[1]] = 10
 #' N = sim_DCE_multinomial(5, P, N_total)
 #' print(N[1,,], na.print='-') # Print first drawn count matrix
-#' log_L_DCE_multinomial(P, N[1,,], log=TRUE)
+#' log_L_DCE_multinomial(P, N[1,,], categorical=TRUE, log=TRUE)
 #' @seealso \code{\link{log_L_DCE_multinomial}}, which computes the log-likelihood
 #' for this model.
 #' @importFrom stats rmultinom
@@ -40,6 +40,9 @@ sim_DCE_multinomial <- function(n, P, N_total) {
 #' count matrix as a function of a RCS.
 #' @param P matrix containing a random choice structure (RCS)
 #' @param N matrix containing counts from a discrete choice experiment (DCE)
+#' @param categorical logical; if \code{TRUE}, the likelihood is the for
+#' the sequence of responses (categorical distribution) rather than for
+#' the counts (multinomial distribution).
 #' @param log logical; if \code{TRUE}, return the log likelihood;
 #' if \code{FALSE}, the likelihood.
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
@@ -53,19 +56,23 @@ sim_DCE_multinomial <- function(n, P, N_total) {
 #' N_total[tripletons[1]] = 10
 #' N = sim_DCE_multinomial(1, P, N_total) # Random count matrix
 #' print(N[1,,], na.print='-') # Print first drawn count matrix
-#' log_L_DCE_multinomial(P, N[1,,], log=TRUE) # Evaluate log liklihood
+#' log_L_DCE_multinomial(P, N[1,,], categorical=FALSE, log=TRUE)
+#' log_L_DCE_multinomial(P, N[1,,], categorical=TRUE, log=TRUE)
 #' @seealso \code{\link{sim_DCE_multinomial}} which simulates a count matrix under the
 #' model, given the total number of trials for each choice subset.
 #' @importFrom stats dmultinom
 #' @export
-log_L_DCE_multinomial <- function(P, N, log=TRUE) {
+log_L_DCE_multinomial <- function(P, N, categorical=FALSE, log=TRUE) {
   stopifnot(identical(dim(P), dim(N)))
   n_objects <- ncol(P)
   ln_L <- 0
   for (i in 1:nrow(P)) {
     if (subset_card[i] > 1) {
       v <- subset_vectors[[i]]
-      ln_L <- ln_L + dmultinom(N[i, v], prob=P[i, v], log=TRUE)
+      if (categorical)
+        ln_L <- ln_L + sum(N[i, v] * log(P[i, v]))
+      else
+        ln_L <- ln_L + dmultinom(N[i, v], prob=P[i, v], log=TRUE)
     }
   }
   if (log) ln_L else exp(ln_L)
@@ -97,6 +104,9 @@ sim_Dir_mult <- function(n, alpha, n_total) {
 #' data generating process and a Dirichlet prior over choice probabilities.
 #' @param alpha vector of Dirichlet parameters
 #' @param n vector of multinomial counts
+#' @param categorical logical; if \code{TRUE}, the likelihood is the for
+#' the sequence of responses (categorical distribution) rather than for
+#' the counts (multinomial distribution).
 #' @param log logical; if \code{TRUE}, return the log likelihood;
 #' if \code{FALSE}, the likelihood.
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
@@ -104,12 +114,14 @@ sim_Dir_mult <- function(n, alpha, n_total) {
 #' @examples
 #' log_L_Dir_mult(c(2.4, 1.5, 3.2), c(45, 20, 33))
 #' @export
-log_L_Dir_mult <- function(alpha, n, log=TRUE) {
+log_L_Dir_mult <- function(alpha, n, categorical=FALSE, log=TRUE) {
   stopifnot(length(alpha)==length(n))
   # Compute prior and posterior normalization constants
   ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
   ln_post_nc <- lgamma(sum(alpha + n)) - sum(lgamma(alpha + n))
-  ln_L <- ln_prior_nc - ln_post_nc + lfactorial(sum(n)) - sum(lfactorial(n))
+  ln_L <- ln_prior_nc - ln_post_nc
+  if (!categorical)
+    ln_L <- ln_L + lfactorial(sum(n)) - sum(lfactorial(n))
   if (log) ln_L else exp(ln_L)
 }
 
@@ -188,6 +200,9 @@ sim_DCE_Dir_mult <- function(n, Alpha, N_total) {
 #' distribution of the corresponding row of a random choice structure.
 #' @param N count matrix with the same dimensions as \code{Alpha}, pertaining to the same
 #' universe of objects.
+#' @param categorical logical; if \code{TRUE}, the likelihood is the for
+#' the sequence of responses (categorical distribution) rather than for
+#' the counts (multinomial distribution).
 #' @param log logical; if TRUE, return the log Bayes factor
 #' @return Likelihood or log likelihood value
 #' @examples
@@ -197,13 +212,13 @@ sim_DCE_Dir_mult <- function(n, Alpha, N_total) {
 #' @seealso \code{\link{sim_DCE_Dir_mult}}, which simulates a count matrix under
 #' this model, given the total number of trials for each choice subset.
 #' @export
-log_L_DCE_Dir_mult <- function(Alpha, N, log=TRUE) {
+log_L_DCE_Dir_mult <- function(Alpha, N, categorical=FALSE, log=TRUE) {
   stopifnot(identical(dim(Alpha), dim(N)))
   ln_L <- 0
   for (i in 1:nrow(Alpha)) {
     if (subset_card[i] > 1) {
       v <- subset_vectors[[i]]
-      ln_L <- ln_L + log_L_Dir_mult(Alpha[i, v], N[i, v], log=TRUE)
+      ln_L <- ln_L + log_L_Dir_mult(Alpha[i, v], N[i, v], categorical, log=TRUE)
     }
   }
   if (log) ln_L else exp(ln_L)

@@ -1,7 +1,6 @@
 .Rproj.user
-.Rd2pdf*
 .Rhistory
-man/*
+man/*.Rd
 vignettes/main_vignette.html
 vignettes/main_vignette.R
 .DS_Store

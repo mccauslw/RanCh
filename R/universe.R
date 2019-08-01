@@ -1,5 +1,5 @@
-n_objects = 6
-object_names = c('a', 'b', 'c', 'd', 'e', 'f')
+n_objects = 8
+object_names = c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
 n_subsets = 2^n_objects - 1
 
 # Compute names and cardinality of all subsets of {1,2,...,n_objects}
@@ -110,10 +110,12 @@ usethis::use_data(object_names,
                   tripletons,
                   doubleton_names,
                   tripleton_names,
+                  RP_table,
+                  member_table,
                   overwrite = TRUE)
 
-usethis::use_data(member_table,
-                  RP_table,
-                  internal = TRUE,
-                  overwrite = TRUE)
+#usethis::use_data(member_table,
+#                  RP_table,
+#                  internal = TRUE,
+#                  overwrite = TRUE)
 
