@@ -2,7 +2,7 @@
 title: "RanCh: A package for abstract discrete *Ran*dom *Ch*oice analysis"
 author: "William McCausland"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: pdf_document
 bibliography: bibliography.bib
 vignette: >
   %\VignetteIndexEntry{main_vignette}
@@ -44,7 +44,7 @@ Choice sets, subsets of the choice universe $\{x,y,z\}$, can be indexed using th
 Each digit (or bit) in the binary representation of a set index in an inclusion indicator: object $i \in \{1,\ldots,3\}$ is in the set if and only if the $i$'th digit from the right is 1.
 For example, the sets $\{x,z\}$, $\{y,z\}$ and $\{x,y,z\}$ have indices that are binary 101, 110 and 111, or decimal 5, 6 and 7.
 This convention for indexing sets has some important computational advantages.
-The singleton set with object $i$ is represented as $2^i−1$.
+The singleton set with object $i$ is represented as $2^i-1$.
 The bitwise “or” of the indices of two sets gives the index of their union; the bitwise “and”, the index of their intersection.
 
 Thus the number of times subject five chose object $x$ from choice set $\{x,y,z\}$ of domain `Dots` is `T_1972_counts["Dots", 5, "xyz", "x"]` or `T_1972_counts[1, 5, 7, 1]`; names and integer indices can be mixed.
@@ -81,7 +81,7 @@ We provide data from three experiments in which individuals, or a sample from a 
 (In the experiment described in @Tver72a, the set $\{x,y\}$ is never presented; in the experiment in @RegeDanaDavi11, only doubleton subsets of the universe are presented.)
 
 For each of the three experiments, we provide four data objects.
-Here, we will take the population choice experiment described in @McCaMarlStob19 as an example.
+Here, we will take the population choice experiment described in McCausland, Marley and Davis-Stober (no paper yet) as an example.
 `MMS_2019_trials` shows all responses of all subjects in a discrete choice experiment.
 The first few variables are the name of the choice domain (a universe of five related choice objects), the subject identifier and the trial index giving the order in which a subject responded to the various choice sets presented to her.
 The next variable, `set`, is a string showing which choice objects were presented at a given trial, the objects in alphabetical order.
@@ -259,7 +259,7 @@ print(regularity(P_xyz))
 Three context effects pertaining to stochastic discrete choice have attracted a lot of
 attention in Psychology, Economics, Marketing and other fields: the similarity effect,
 the compromise effect and the asymmetric dominance effect.
-See @McCaMarlStobTurn19 for details.
+See McCausland, Marley, Davis-Stober and Turner (no paper yet) for details.
 
 ### Displaying context effects
 
