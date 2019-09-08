@@ -4,7 +4,7 @@
 \alias{log_L_DCE_Dir_mult}
 \title{Log likelihood for DCE, multiple Dirichlet-multinomial model}
 \usage{
-log_L_DCE_Dir_mult(Alpha, N, log = TRUE)
+log_L_DCE_Dir_mult(Alpha, N, categorical = FALSE, log = TRUE)
 }
 \arguments{
 \item{Alpha}{matrix of Dirichlet parameters, each row giving the Dirichlet
@@ -12,6 +12,10 @@ distribution of the corresponding row of a random choice structure.}
 
 \item{N}{count matrix with the same dimensions as \code{Alpha}, pertaining to the same
 universe of objects.}
+
+\item{categorical}{logical; if \code{TRUE}, the likelihood is the for
+the sequence of responses (categorical distribution) rather than for
+the counts (multinomial distribution).}
 
 \item{log}{logical; if TRUE, return the log Bayes factor}
 }

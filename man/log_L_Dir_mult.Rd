@@ -4,12 +4,16 @@
 \alias{log_L_Dir_mult}
 \title{Log likelihood, Dirichlet-multinomial model}
 \usage{
-log_L_Dir_mult(alpha, n, log = TRUE)
+log_L_Dir_mult(alpha, n, categorical = FALSE, log = TRUE)
 }
 \arguments{
 \item{alpha}{vector of Dirichlet parameters}
 
 \item{n}{vector of multinomial counts}
+
+\item{categorical}{logical; if \code{TRUE}, the likelihood is the for
+the sequence of responses (categorical distribution) rather than for
+the counts (multinomial distribution).}
 
 \item{log}{logical; if \code{TRUE}, return the log likelihood;
 if \code{FALSE}, the likelihood.
