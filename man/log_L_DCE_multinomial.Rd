@@ -4,12 +4,16 @@
 \alias{log_L_DCE_multinomial}
 \title{Log likelihood for DCE, multiple multinomial model}
 \usage{
-log_L_DCE_multinomial(P, N, log = TRUE)
+log_L_DCE_multinomial(P, N, categorical = FALSE, log = TRUE)
 }
 \arguments{
 \item{P}{matrix containing a random choice structure (RCS)}
 
 \item{N}{matrix containing counts from a discrete choice experiment (DCE)}
+
+\item{categorical}{logical; if \code{TRUE}, the likelihood is the for
+the sequence of responses (categorical distribution) rather than for
+the counts (multinomial distribution).}
 
 \item{log}{logical; if \code{TRUE}, return the log likelihood;
 if \code{FALSE}, the likelihood.
@@ -31,7 +35,8 @@ N_total[doubletons[1:3]] = 10
 N_total[tripletons[1]] = 10
 N = sim_DCE_multinomial(1, P, N_total) # Random count matrix
 print(N[1,,], na.print='-') # Print first drawn count matrix
-log_L_DCE_multinomial(P, N[1,,], log=TRUE) # Evaluate log liklihood
+log_L_DCE_multinomial(P, N[1,,], categorical=FALSE, log=TRUE)
+log_L_DCE_multinomial(P, N[1,,], categorical=TRUE, log=TRUE)
 }
 \seealso{
 \code{\link{sim_DCE_multinomial}} which simulates a count matrix under the

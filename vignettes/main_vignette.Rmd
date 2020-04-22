@@ -401,6 +401,7 @@ print(log_L_DCE_Dir_mult(RCS_vector_alpha_prior(4.0, c(1.0, 2.0, 1.0, 2.0, 1.0))
 ```
 These marginal likelihoods serve as useful benchmarks.
 
+
 ## References
 
 [terW]: https://en.wikipedia.org/wiki/Ternary_plot

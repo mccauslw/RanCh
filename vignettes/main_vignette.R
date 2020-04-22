@@ -103,10 +103,15 @@ triplot(label=c('x', 'y', 'z'))
 points(tritrafo(p[filt2, ]), pch=20)
 
 ## ----HPD-----------------------------------------------------------------
+library(klaR)
 prior_Alpha <- RCS_scalar_alpha_prior(2.0, ncol(N_bce))
 post_Alpha <- prior_Alpha + N_bce
-triplot(label=c('b', 'c', 'e'))
-plot_HD_Dir3(post_Alpha, 0.90, c(1,2,3)) # Plot regions
+HD3 <- Dir2_3_HD_region(post_Alpha, 0.9, c(1,2,3))
+triplot(label=c('b', 'c', 'e'))               # Set up ternary plot
+lines(tritrafo(HD3$HD12), lwd=4)              # Plot three binaries
+lines(tritrafo(HD3$HD23), lwd=4)
+lines(tritrafo(HD3$HD13), lwd=4)
+polygon(tritrafo(HD3$HD123), border='lightgreen') # Plot ternary
 plot_P3(P_bce)                           # Plot proportions from data
 
 ## ----logML---------------------------------------------------------------
@@ -114,12 +119,14 @@ N = MMS_2019_counts['Colours',,]
 n_objects = ncol(N)
 
 # Zero parameter models
-print(log_L_DCE_multinomial(P_uniform(n_objects), N))
-print(log_L_DCE_Dir_mult(RCS_uniform_prior(n_objects), N))
+print(log_L_DCE_multinomial(P_uniform(n_objects), N, categorical=TRUE))
+print(log_L_DCE_Dir_mult(RCS_uniform_prior(n_objects), N, categorical=TRUE))
 
 # One parameter models
-print(log_L_DCE_Dir_mult(RCS_scalar_alpha_prior(2.0, n_objects), N))
+print(log_L_DCE_Dir_mult(RCS_scalar_alpha_prior(2.0, n_objects), N,
+                         categorical=TRUE))
 
 # n-parameter models
-print(log_L_DCE_Dir_mult(RCS_vector_alpha_prior(4.0, c(1.0, 2.0, 1.0, 2.0, 1.0)), N))
+print(log_L_DCE_Dir_mult(RCS_vector_alpha_prior(4.0, c(1.0, 2.0, 1.0, 2.0, 1.0)),
+                         N, categorical=TRUE))
 
