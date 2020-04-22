@@ -5,7 +5,7 @@ knitr::opts_chunk$set(
 )
 library(RanCh)
 library(klaR)
-library(Smisc)
+library(HDInterval)
 library(tidyverse)
 
 ## ----counts_T_1972-------------------------------------------------------

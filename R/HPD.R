@@ -145,14 +145,12 @@ Dir3_HD_region <- function(alpha, HD_probability) {
 #' Each row gives an endpoint.
 #' The two columns correspond to coordinates in a one dimensional barycentric
 #' coordinate system.
-#' @importFrom Smisc hpd
-#' @importFrom stats dbeta pbeta
+#' @importFrom HDInterval hdi
+#' @importFrom stats qbeta
 #' @export
 Dir2_HD_region <- function(alpha, HD_probability) {
-  interval <- hpd(function(x) dbeta(x, alpha[1], alpha[2]), c(0, 1),
-                  cdf = function(x) pbeta(x, alpha[1], alpha[2]),
-                  HD_probability)
-  matrix(c(interval$lower, 1-interval$lower, interval$upper, 1-interval$upper),
+  interval <- hdi(qbeta, HD_probability, shape1=alpha[1], shape2=alpha[2])
+  matrix(c(interval[['lower']], 1-interval[['lower']], interval[['upper']], 1-interval[['upper']]),
          byrow=TRUE, nrow=2, ncol=2)
 }
 

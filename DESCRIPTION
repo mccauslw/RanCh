@@ -16,7 +16,7 @@ Imports:
     tidyverse,
     klaR,
     MASS,
-    Smisc
+    HDInterval
 Depends: R (>= 3.6.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
