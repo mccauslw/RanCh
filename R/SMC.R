@@ -5,13 +5,13 @@
 #'
 #' @inheritParams compute_pi_ln_like
 #' @param J number of independent groups of particles
-#' @param M number of particles, must be multiple of J
+#' @param M number of particles per group
 #' @param alpha_prior list with information on the prior distribution of alpha,
 #'                    created using [create_alpha_prior()]
 #'
 #' @return A list with the following elements
 #' \describe{
-#'    \item{alpha}{A M/J x J matrix with a sample from the target distribution}
+#'    \item{alpha}{An M x J matrix with a sample from the target distribution}
 #'    \item{marl_stats}{Simulation statistics for the marginal likelihood}
 #'    \item{n_plus}{Number of non-zero counts in data}
 #'    \item{theta}{Parameter of Beta-Gamma importance distribution}
@@ -27,7 +27,7 @@
 #' u <- create_universe(n_objects, object_names=dimnames(N)[2])
 #' Nflat <- vectorize_counts(u, N)
 #' J <- 20
-#' M <- 1000
+#' M <- 50
 #' RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nflat)
 #'
 #' @inherit create_universe author references
@@ -38,7 +38,7 @@ run_RC_sim <- function(u, J, M, alpha_prior, N) {
   params <- compute_proposal_params(u, alpha_prior, N)
 
   # Draw alpha from gamma proposal distribution
-  alpha <- extraDistr::rbetapr(M, params[1], params[2], params[3])
+  alpha <- extraDistr::rbetapr(M*J, params[1], params[2], params[3])
   alpha_Ax <- compute_alpha_Ax(u, alpha)
   ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, N)
 
@@ -59,11 +59,11 @@ run_RC_sim <- function(u, J, M, alpha_prior, N) {
   C_stage_stats <- weights_to_C_stage_stats(W, ln_marl_offset, 0, gr_cum_ln_marl)
 
   # Initial selection step to get an unweighted sample
-  W = matrix(W, nrow=M/J, ncol=J)
+  W = matrix(W, nrow=M, ncol=J)
   for (j in 1:J) {
     probabilities = W[,j] / sum(W[,j])
-    selection = sample.int(M/J, M/J, replace = TRUE, prob = probabilities)
-    alpha[(1+(j-1)*M/J):(j*M/J)] <- alpha[(selection+(j-1)*(M/J))]
+    selection = sample.int(M, M, replace = TRUE, prob = probabilities)
+    alpha[(1+(j-1)*M):(j*M)] <- alpha[(selection+(j-1)*M)]
   }
 
   n_plus = sum(N$by_Ax > 0)
@@ -112,7 +112,7 @@ create_cycle_schedule <- function(lambda_values) {
 #'
 #' @return List with the following elements
 #' \describe{
-#'    \item{alpha}{A M/J x J matrix with a sample of alpha from the final target distribution}
+#'    \item{alpha}{An M x J matrix with a sample of alpha from the final target distribution}
 #'    \item{gamma}{?WJM? sample of gamma from the final target distribution}
 #'    \item{lambda_stats}{?WJM? simulation statistics}
 #'    \item{cycle_stats}{?WJM? simulation statistics}
@@ -133,7 +133,7 @@ create_cycle_schedule <- function(lambda_values) {
 #' u <- create_universe(n_objects, object_names=dimnames(N)[2])
 #' Nflat <- vectorize_counts(u, N)
 #' J <- 20
-#' M <- 1000
+#' M <- 50
 #' lambda_values <- seq(0.01, 1.00, by=0.01)
 #' cycle_schedule <- create_cycle_schedule(lambda_values)
 #' RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nflat, lambda_values, cycle_schedule)
@@ -165,9 +165,9 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
   for (blt in 1:length(n_bl)) {
     bl_data[[blt]]$n_bl = n_bl[blt]
     bl_data[[blt]]$bl_len = bl_len[blt]
-    bl_data[[blt]]$indices <- seq(n_bl[blt])
-    bl_data[[blt]]$start <- (seq(n_bl[blt]) - 1) * bl_len[blt] + 1
-    bl_data[[blt]]$end <- seq(n_bl[blt]) * bl_len[blt]
+    bl_data[[blt]]$indices <- seq_len(n_bl[blt])
+    bl_data[[blt]]$start <- (seq_len(n_bl[blt]) - 1) * bl_len[blt] + 1
+    bl_data[[blt]]$end <- seq_len(n_bl[blt]) * bl_len[blt]
     bl_data[[blt]]$aPr <- matrix(NA, nrow = n_cycles, ncol = n_bl[blt])
   }
 
@@ -193,8 +193,8 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
   # Columns are iid, the rows are independent.
   # An element i,j is distributed as Gamma(alpha_i, 1), where alpha_i
   # is the i'th element of alpha_p.
-  gamma_p <- matrix(stats::rgamma(u$n_orders * M, alpha_p),
-                    nrow=u$n_orders, ncol=M)
+  gamma_p <- matrix(stats::rgamma(u$n_orders * M*J, alpha_p),
+                    nrow=u$n_orders, ncol=M*J)
   rownames(gamma_p) <- u$order_strings
   gamma_Ax <- compute_gamma_Ax(u, gamma_p)
   ln_Pr_rp_by_A <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax, N)
@@ -242,7 +242,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
     ##############################
 
     # Resample alpha and gamma using final weights, group by group
-    W = matrix(exp(w[, n_lambda_index]), nrow=M/J, ncol=J)
+    W = matrix(exp(w[, n_lambda_index]), nrow=M, ncol=J)
     for (j in 1:J) {
       # Old multinomial sampling
       #probabilities = W[,j] / sum(W[,j])
@@ -251,20 +251,20 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
       #  print(summary(alpha))
       #  print(summary(colSums(gamma)))
       #}
-      #selection <- sample.int(M/J, M/J, replace=TRUE, prob=probabilities)
+      #selection <- sample.int(M, M, replace=TRUE, prob=probabilities)
 
       # New residual sampling
       En <- W[,j] / mean(W[,j])
-      indices = seq(M/J)
+      indices = seq_len(M)
       sure_n = floor(En)
       resid_n = En - sure_n
       sure_M = sum(sure_n)
-      resid_M = M/J - sure_M
-      selection <- c(rep(seq(M/J), sure_n),
-                     sample.int(M/J, resid_M, replace=TRUE, prob=resid_n))
+      resid_M = M - sure_M
+      selection <- c(rep(seq_len(M), sure_n),
+                     sample.int(M, resid_M, replace=TRUE, prob=resid_n))
 
-      gamma_p[,(1+(j-1)*M/J):(j*M/J)] <- gamma_p[,(selection+(j-1)*(M/J))]
-      alpha[(1+(j-1)*M/J):(j*M/J)] <- alpha[(selection+(j-1)*(M/J))]
+      gamma_p[,(1+(j-1)*M):(j*M)] <- gamma_p[,(selection+(j-1)*M)]
+      alpha[(1+(j-1)*M):(j*M)] <- alpha[(selection+(j-1)*M)]
     }
     alpha_p = outer(rep.int(1/u$n_orders, u$n_orders), alpha)
 
@@ -296,8 +296,8 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
           small_gamma_total <- colSums(small_gamma_p)
           AR_small_gamma_total <-
             AR_gamma(small_gamma_total, small_alpha_total, phi)
-          small_gamma_p_star <- matrix(rgamma(bld$bl_len * M, small_alpha_p),
-                                       nrow=bld$bl_len, ncol=M)
+          small_gamma_p_star <- matrix(rgamma(bld$bl_len * M * J, small_alpha_p),
+                                       nrow=bld$bl_len, ncol=M*J)
           small_gamma_total_star <-
             pmax(colSums(small_gamma_p_star), .Machine$double.xmin)
           scale_value <- small_gamma_total_star/AR_small_gamma_total
@@ -312,7 +312,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
           num <- compute_ln_like(u, last_lambda, ln_Pr_RC_by_A,
                                  ln_Pr_rp_by_A_star)
           H <- pmin(1, exp(num-den))
-          accept <- (runif(M) < H)
+          accept <- (runif(M * J) < H)
           gamma_p[small_gamma_indices, accept] <- small_gamma_p_star[, accept]
           gamma_Ax <- compute_gamma_Ax(u, gamma_p)
           den[accept] <- num[accept]
@@ -353,8 +353,8 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
 #' relative numerical efficiency for the mean, specified quantiles and their
 #' numerical standard errors.
 #'
-#' @param x vector of length M, with J mutually independent subvectors of length
-#'  M/J, each subvector arising from a SMC simulation
+#' @param x vector of length M * J, with J mutually independent subvectors of length
+#'  M, each subvector arising from a SMC simulation
 #' @inheritParams run_RC_sim
 #' @param p vector of probabilities for which to compute quantiles
 #'
@@ -378,25 +378,25 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
 #' alpha_prior <- create_alpha_prior(n, 4, 0.1)
 #' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
 #' J <- 20
-#' M <- 1000
+#' M <- 50
 #' RC_sim <- run_RC_sim(u, J, M, alpha_prior, N)
 #' ind_groups_stats(RC_sim$alpha, J, c(0.1, 0.5, 0.9))
 #'
 #' @inherit create_universe author references
 #'
 ind_groups_stats <- function(x, J, p) {
-  M <- length(x)
+  M <- length(x) / J
   s2 <- stats::var(x); std = sqrt(s2)
-  # x_by_group is a (M/J) x J matrix, x organized as J independent columns, with
+  # x_by_group is a M x J matrix, x organized as J independent columns, with
   # each column generated by a group of particles.
-  x_by_group <- matrix(x, nrow=M/J, ncol=J)
+  x_by_group <- matrix(x, nrow=M, ncol=J)
   mu_by_group <- colMeans(x_by_group)    # J-vector of group means
   mu <- mean(mu_by_group)                # Global mean
   nse2 <- stats::var(mu_by_group)/J; nse <- sqrt(nse2)
   q_by_group <- apply(x_by_group, 2, stats::quantile, probs = p)
   q <- rowMeans(q_by_group)
   q_nse2 = apply(q_by_group, 1, stats::var)/J; q_nse <- sqrt(q_nse2)
-  list(mu = mu, std = std, nse = nse, rne = (s2/M)/nse2,
+  list(mu = mu, std = std, nse = nse, rne = (s2/(M*J))/nse2,
        p = p, q = q, q_nse = q_nse)
 }
 
@@ -425,9 +425,9 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
   if (length(x_grid) == 1) {
     x_grid = seq(min(x), max(x), len=x_grid)
   }
-  M <- length(x)
+  M <- length(x) / J
   Kp1 <- length(x_grid); K = Kp1 - 1
-  x_by_group <- matrix(x, nrow=M/J, ncol=J)
+  x_by_group <- matrix(x, nrow=M, ncol=J)
   pdf_by_group <- matrix(nrow=K, ncol=J)
   cdf_by_group <- matrix(nrow=Kp1, ncol=J)
   for (j in 1:J) {
@@ -453,7 +453,7 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
 #'
 #' @inheritParams ind_groups_stats
 #' @inheritParams compute_pi_ln_like
-#' @param gamma_p matrix, \eqn{M \times n!}, where each column is a vector of
+#' @param gamma_p matrix, \eqn{MJ \times n!}, where each column is a vector of
 #' unnormalized preference probabilities
 #' @param p_grid vector of choice probability values
 #'
@@ -468,15 +468,15 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
 #' @inherit create_universe author references
 #'
 compute_RP_binp_funcs <- function(u, gamma_p, J, N, p_grid) {
-  M <- ncol(gamma_p)
+  M <- ncol(gamma_p) / J
   n_grid_pts = length(p_grid)
   Ax_binaries <- u$A_table[u$A_table[,'nA']==2, 'Ax']
   n_binary <- length(Ax_binaries)
   binp_funcs <- vector("list", n_binary)
 
-  # bin_probs is a n_binary x M matrix of binary choice probabilities
+  # bin_probs is a n_binary x MJ matrix of binary choice probabilities
   bin_probs <- t(t(u$pi_to_P[Ax_binaries,] %*% gamma_p)/colSums(gamma_p))
-  for (i_bin in seq(n_binary)) {
+  for (i_bin in seq_len(n_binary)) {
     binp_funcs[[i_bin]] <- compute_pdf_cdf_on_grid(bin_probs[i_bin,], J, p_grid)
   }
   binp_funcs
@@ -491,7 +491,7 @@ compute_RP_binp_funcs <- function(u, gamma_p, J, N, p_grid) {
 #' of alpha in the Dirichlet RC model
 #'
 #' @inheritParams compute_RP_binp_funcs
-#' @param alpha vector of length M, sample of values of alpha
+#' @param alpha vector of length M*J, sample of values of alpha
 #'
 #' @inherit compute_RP_binp_funcs return
 #' @export
@@ -504,7 +504,7 @@ compute_RP_binp_funcs <- function(u, gamma_p, J, N, p_grid) {
 #'
 compute_RC_binp_funcs <- function(u, alpha, J, N, p_grid) {
   n_grid <- length(p_grid)
-  M <- length(alpha)
+  M <- length(alpha) / J
   Ax_binaries <- u$A_table[u$A_table[,'nA']==2, 'Ax']
   n_binary <- length(Ax_binaries)
   n1 <- N$by_Ax[Ax_binaries]      # first object count for n_binary choice sets
@@ -512,20 +512,20 @@ compute_RC_binp_funcs <- function(u, alpha, J, N, p_grid) {
 
   binp_funcs <- vector("list", n_binary)
 
-  for (i_bin in seq(n_binary)) {
-    a1v <- n1[i_bin] + 0.5 * alpha  # Vector of M Dirichlet weights, 1st object
-    a2v <- n0[i_bin] + 0.5 * alpha  # Vector of M Dirichlet weights, 2nd object
-    a1 <- matrix(a1v, nrow = M/J, ncol = J)
-    a2 <- matrix(a2v, nrow = M/J, ncol = J)
+  for (i_bin in seq_len(n_binary)) {
+    a1v <- n1[i_bin] + 0.5 * alpha  # Vector of M*J Dirichlet weights, 1st object
+    a2v <- n0[i_bin] + 0.5 * alpha  # Vector of M*J Dirichlet weights, 2nd object
+    a1 <- matrix(a1v, nrow = M, ncol = J)
+    a2 <- matrix(a2v, nrow = M, ncol = J)
 
     cdf <- matrix(0, nrow = n_grid, ncol = J)
     pdf <- matrix(0, nrow = n_grid, ncol = J)
-    for (j in seq(J)) {
-      for (m in seq(M/J)) {
+    for (j in seq_len(J)) {
+      for (m in seq_len(M)) {
         pdf <- pdf + stats::dbeta(p_grid, a1[m, j], a2[m, j])
         cdf <- cdf + stats::pbeta(p_grid, a1[m, j], a2[m, j])
       }
-      pdf = pdf/(M/J); cdf <- cdf/(M/J)
+      pdf = pdf/M; cdf <- cdf/M
     }
     pdf_mean = rowMeans(pdf); cdf_mean = rowMeans(cdf)
     binp_funcs[[i_bin]] <- list(
@@ -540,14 +540,15 @@ compute_RC_binp_funcs <- function(u, alpha, J, N, p_grid) {
 # from a single value of lambda
 weights_to_C_stage_stats <- function(W, cum_ln_marl, cum_ln_marl_nse2,
                                      gr_cum_ln_marl) {
-  M <- length(W); J <- length(gr_cum_ln_marl)
+  J <- length(gr_cum_ln_marl)
+  M <- length(W) / J
 
   # To compute globally, not by group
   W_var <- stats::var(W)      # Global variance of weights
   ESS <- sum(W)^2 / sum(W^2)  # Effective sample size of weights
 
   # Organize weights by group, compute group means
-  W <- matrix(W, nrow=M/J, ncol=J)      # Weights organized by groups
+  W <- matrix(W, nrow=M, ncol=J)      # Weights organized by groups
 
   # To compute by group, j=1,...,J
   gr_ESS <- colSums(W)^2 / colSums(W^2) # ESS
@@ -559,7 +560,7 @@ weights_to_C_stage_stats <- function(W, cum_ln_marl, cum_ln_marl_nse2,
   marl <- mean(gr_marl)              # Marginal likelihood increment
   marl_nse2 <- stats::var(gr_marl)/J # Numerical variance of mlike increment
   marl_nse <- sqrt(marl_nse2)        # Numerical standard error of mlike increment
-  marl_rne <- (W_var/M) / marl_nse2  # Relative numerical efficiency of ml
+  marl_rne <- (W_var/(M*J)) / marl_nse2  # Relative numerical efficiency of ml
   ln_marl <- log(marl)               # Log marginal likelihood increment
   ln_marl_nse <- marl_nse / marl     # Numerical standard error of log mlike increment
   list(gr_ESS = gr_ESS, gr_marl = gr_marl, gr_cum_ln_marl = gr_cum_ln_marl,
@@ -576,7 +577,7 @@ lnf_seq_multinom <- function(p, N_x) {
 }
 
 # Compute expectation of maximum likelihood P at maximum likelihood probabilities
-compute_EP_ln_maxl <- function(u, N, alpha, M) {
+compute_EP_ln_maxl <- function(u, N, alpha, MJ) {
   P_mle <- rep(0, u$n_probs)
   Eln_maxl <- 0
   for (A in 1:u$n_subsets) {
@@ -586,7 +587,7 @@ compute_EP_ln_maxl <- function(u, N, alpha, M) {
       N_Ax <- N$by_Ax[Ax:(Ax+nA-1)]
       N_A <- N$by_A[A]
       al_post = N_Ax + rep(alpha/nA, nA)
-      P = bayesm::rdirichlet(M, N_Ax)
+      P = bayesm::rdirichlet(MJ, N_Ax)
       lnf = apply(P, MARGIN=1, lnf_seq_multinom, N_Ax)
       Eln_maxl <- Eln_maxl + mean(lnf)
     }
@@ -603,7 +604,7 @@ compute_gamma_Ax <- function(u, gamma) {
 
 # Compute choice alpha parameters from scalar alpha parameter
 compute_alpha_Ax <- function(u, alpha) {
-  M <- ncol(alpha)
+  MJ <- ncol(alpha)
   card_Ax <- u$A_table[u$Ax_table[, 'A'], 'nA']
   alpha_Ax <- outer(card_Ax, alpha, FUN = function(x,y){y/x})
   rownames(alpha_Ax) <- rownames(u$Ax_table)
@@ -616,10 +617,10 @@ log_prior_gamma <- function(u, gamma_p, alpha_p) {
 
 # Compute one of the following log probabilities, by choice set
 #
-#   (1) ln_Pr_RC_by_A, n_subsets x M
+#   (1) ln_Pr_RC_by_A, n_subsets x M*J
 #     - gives, for set A (row) and particle m (col), the probability of choice
 #       count vector N_A given alpha_m and lambda = 0
-#   (2) ln_Pr_RP_by_A, n_subsets x M
+#   (2) ln_Pr_RP_by_A, n_subsets x M*J
 #     - gives, for set A (row) and particle m (col), the probability of choice
 #       count vector N_A given gamma_p (col m) and lambda = 1
 #
@@ -669,18 +670,33 @@ compute_ln_like <- function(u, lambda, ln_Pr_RC_by_A, ln_Pr_RP_by_A) {
 }
 
 AR_gamma <- function(gamma, alpha, phi) {
-  # gamma is length M,
-  # alpha is length M,
+  # gamma is length M*J,
+  # alpha is length M*J,
   # phi is scalar
-  M <- length(alpha)
-  be <- stats::rbeta(M, phi*alpha, (1-phi)*alpha)
-  gamma <- be * gamma + stats::rgamma(M, (1-phi)*alpha)
+  MJ <- length(alpha)
+  be <- stats::rbeta(MJ, phi*alpha, (1-phi)*alpha)
+  gamma <- be * gamma + stats::rgamma(MJ, (1-phi)*alpha)
   gamma
 }
 
+#' Sample alpha from its conditional distribution given gamma and data
+#'
+#' @param u
+#' @param N
+#' @param alpha_prior
+#' @param alpha
+#' @param gamma_p
+#' @param lambda
+#' @param ln_Pr_RP_by_A
+#' @param n_reps
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 update_alpha <- function(u, N, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by_A,
                          n_reps = 2) {
-  M <- length(alpha)
+  MJ <- length(alpha)
   # Metropolis-Hastings proposal distribution for target distribution
   # alpha|pi is based on the close approximation gamma(x) = 1/x for
   # small values of x. The proposal distribution is Ga(a_post, b_post)
@@ -706,9 +722,9 @@ update_alpha <- function(u, N, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by_
     a_delta * log(alpha) + b_delta * alpha
 
   aPr <- 0
-  for (i_rep in seq(n_reps)) {
+  for (i_rep in seq_len(n_reps)) {
     # Next compute ln Pr[N|alpha_star, lambda = 0], ln Pr[N|alpha, lambda = 0]
-    alpha_star <- stats::rgamma(M, a_bar, b_bar)
+    alpha_star <- stats::rgamma(MJ, a_bar, b_bar)
     alpha_Ax_star <- compute_alpha_Ax(u, alpha_star)
     ln_Pr_RC_by_A_star <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax_star, N)
     ln_ll_star <- compute_ln_like(u, lambda, ln_Pr_RC_by_A_star, ln_Pr_RP_by_A)
@@ -722,13 +738,13 @@ update_alpha <- function(u, N, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by_
     # min(1, H) and return updated alpha.
     ln_H <- ln_ll_star - ln_ll + ln_f_over_g_star - ln_f_over_g
     H = pmin(1, exp(ln_H))
-    accept <- stats::runif(M) <= H
+    accept <- stats::runif(MJ) <= H
     aPr <- aPr + mean(H)
     alpha[accept] <- alpha_star[accept]
     ln_f_over_g[accept] <- ln_f_over_g_star[accept]
     ln_ll[accept] <- ln_ll_star[accept]
   }
-  G <- stats::rgamma(M, alpha)
+  G <- stats::rgamma(MJ, alpha)
   gamma_p <- scale(gamma_p, center=F, scale=G0/G)
   aPr <- aPr / n_reps
   list(alpha = alpha, gamma_p = gamma_p, aPr = aPr, mu = mean(alpha))

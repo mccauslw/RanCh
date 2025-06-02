@@ -5,7 +5,7 @@ test_that("RC and RP simulation works", {
   u <- create_universe(n_objects, object_names=dimnames(N)[2])
   Nflat <- vectorize_counts(u, N)
   J <- 20
-  M <- 1000
+  M <- 50
   RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nflat)
   lambda_values <- seq(0.01, 1.00, by=0.01)
   cycle_schedule <- create_cycle_schedule(lambda_values)
