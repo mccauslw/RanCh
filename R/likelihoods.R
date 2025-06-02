@@ -1,15 +1,18 @@
-## Basic likelihoods, as functions of RCS P or multiple Dirichlet Alpha,
-## as well as correponding simulation routines
+## Density and random generation for distributions of the RC model P and
+## for distributions of RC count data N
 
-#' Simulation for DCE, multiple multinomial model
+#' Random generation of RC count data from a multiple multinomial model
 #'
-#' \code{sim_DCE_multinomial} draws random counts given probabilities in a RCS \code{P}.
-#' Total counts for each choice subset are specified in the vector \code{N_total}.
-#' @param n number of draws
-#' @param P matrix containing a random choice structure (RCS)
-#' @param N_total vector containing count totals (i.e. number of trials) for each
-#' subset of the universe of choice objects.
-#' @return a random count matrix
+#' code{rmultinomDC} draws random counts given probabilities in a RCS \code{P}
+#' and numbers of trials for each menu in the vector \code{N_total}.
+#' Counts are independent across menus. Counts for each menu A are multinomial,
+#' with number of trials N_total[A] and probability vector P[A,].
+#'
+#' @param n_draws number of draws
+#' @param P matrix containing a random choice (RC) model
+#' @param N_total vector containing numbers of trials, by menu.
+#' @return a random count matrix (if \code{n_draws} = 1) or array (if \code{n_draws} > 1).
+#' The first two dimensions are indexed by choice set A and object x.
 #' @examples
 #' u = c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
 #' P = P_Luce(u)
@@ -17,29 +20,29 @@
 #' N_total[singletons[1:3]] = 0
 #' N_total[doubletons[1:3]] = 10
 #' N_total[tripletons[1]] = 10
-#' N = sim_DCE_multinomial(5, P, N_total)
-#' print(N[1,,], na.print='-') # Print first drawn count matrix
-#' log_L_DCE_multinomial(P, N[1,,], categorical=TRUE, log=TRUE)
-#' @seealso \code{\link{log_L_DCE_multinomial}}, which computes the log-likelihood
-#' for this model.
+#' N = rmultinomDC(5, P, N_total)
+#' print(N[, , 1], na.print='-') # Print first count matrix
+#' dmultinomDC(P, N[, , 1], categorical=TRUE, log=TRUE)
+#' @seealso \code{\link{dmultinomDC}}, which computes the density for this distribution.
 #' @importFrom stats rmultinom
 #' @export
-sim_DCE_multinomial <- function(n, P, N_total) {
+rmultinomDC <- function(n_draws, P, N_total) {
   stopifnot(nrow(P)==length(N_total))
-  N <- array(dim=c(n, dim(P)), dimnames=c(list(NULL), dimnames(P)))
-  for (i in 1:nrow(P)) {
-    v <- subset_vectors[[i]]
-    N[, i, v] <- t(rmultinom(n, N_total[i], P[i, v]))
+  N <- array(dim=c(dim(P), n_draws), dimnames=c(dimnames(P), list(NULL)))
+  for (A in seq_len(nrow(P))) {
+    v <- subset_vectors[[A]]
+    N[A, v, ] <- rmultinom(n_draws, N_total[A], P[A, v])
   }
   N
 }
 
-#' Log likelihood for DCE, multiple multinomial model
+#' Density of RC count data from a multiple multinomial model
 #'
-#' \code{log_L_DCE_multinomial} computes the log likelihood function for a
-#' count matrix as a function of a RCS.
-#' @param P matrix containing a random choice structure (RCS)
-#' @param N matrix containing counts from a discrete choice experiment (DCE)
+#' \code{dmultinomDC} evaluates the density of a count matrix given probabilities
+#' in a RC model \code{P}.
+#' @param P matrix containing a random choice (RC) model
+#' @param N A count matrix or 3D array (multiple observations).
+#' The first two dimensions are indexed by menu A and object x.
 #' @param categorical logical; if \code{TRUE}, the likelihood is the for
 #' the sequence of responses (categorical distribution) rather than for
 #' the counts (multinomial distribution).
@@ -54,54 +57,57 @@ sim_DCE_multinomial <- function(n, P, N_total) {
 #' N_total[singletons[1:3]] = 0
 #' N_total[doubletons[1:3]] = 10
 #' N_total[tripletons[1]] = 10
-#' N = sim_DCE_multinomial(1, P, N_total) # Random count matrix
-#' print(N[1,,], na.print='-') # Print first drawn count matrix
-#' log_L_DCE_multinomial(P, N[1,,], categorical=FALSE, log=TRUE)
-#' log_L_DCE_multinomial(P, N[1,,], categorical=TRUE, log=TRUE)
-#' @seealso \code{\link{sim_DCE_multinomial}} which simulates a count matrix under the
-#' model, given the total number of trials for each choice subset.
+#' N = rmultinomDC(1, P, N_total) # Random count matrix
+#' print(N[, , 1], na.print='-') # Print first count matrix
+#' dmultinomDC(P, N[, , 1], categorical=FALSE, log=TRUE)
+#' dmultinomDC(P, N[, , 1], categorical=TRUE, log=TRUE)
+#' @seealso \code{\link{rmultinomDC}} which generates a random count matrix
+#' under the multiple multinomial distribution.
 #' @importFrom stats dmultinom
 #' @export
-log_L_DCE_multinomial <- function(P, N, categorical=FALSE, log=TRUE) {
-  stopifnot(identical(dim(P), dim(N)))
+dmultinomDC <- function(P, N, categorical=FALSE, log=TRUE) {
+  stopifnot(identical(dim(P), dim(N)[1:2]))
+  if (is.matrix(N)) dim(N) <- c(dim(N), 1)
   n_objects <- ncol(P)
   ln_L <- 0
-  for (i in 1:nrow(P)) {
-    if (subset_card[i] > 1) {
-      v <- subset_vectors[[i]]
-      if (categorical)
-        ln_L <- ln_L + sum(N[i, v] * log(P[i, v]))
-      else
-        ln_L <- ln_L + dmultinom(N[i, v], prob=P[i, v], log=TRUE)
+  for (i in seq_len(dim(N)[3])) {
+    for (A in 1:nrow(P)) {
+      if (subset_card[A] > 1) {
+        v <- subset_vectors[[A]]
+        if (categorical)
+          ln_L <- ln_L + sum(N[A, v, i] * log(P[A, v]))
+        else
+          ln_L <- ln_L + dmultinom(N[A, v, i], prob=P[A, v], log=TRUE)
+      }
     }
   }
   if (log) ln_L else exp(ln_L)
 }
 
-#' Simulation for Dirichlet-multinomial model
+#' Random generation for the Dirichlet-multinomial distribution
 #'
-#' \code{sim_Dir_mult} draws from a Dirichlet-multinomial distribution
-#' @param n number of random vectors to draw
+#' \code{rDirMultinom} draws from a Dirichlet-multinomial distribution
+#' @param n_draws number of random vectors to draw
 #' @param alpha vector of Dirichlet parameters
-#' @param n_total total count over all categories
+#' @param n_trials number of trials
 #' @return a \code{n} by \code{length(alpha)} matrix of counts.
 #' @examples
-#' n = sim_Dir_mult(10, c(2.4, 1.5, 3.2), 100)
+#' n = rDirMultinom(10, c(2.4, 1.5, 3.2), 100)
 #' @importFrom stats rmultinom
 #' @export
-sim_Dir_mult <- function(n, alpha, n_total) {
-  N = matrix(nrow=n, ncol=length(alpha))
-  for (d in 1:n) { # WJM: avoid loop?
+rDirMultinom <- function(n_draws, alpha, n_trials) {
+  N = matrix(nrow=length(alpha), ncol=n_draws)
+  for (d in 1:n_draws) { # WJM: avoid loop?
     p <- rDirichlet(1, alpha)
-    N[d, ] = rmultinom(1, n_total, p)
+    N[, d] = rmultinom(1, n_trials, p)
   }
   N
 }
 
-#' Log likelihood, Dirichlet-multinomial model
+#' Density for the Dirichlet-multinomial distribution
 #'
-#' \code{log_L_Dir_mult} computes the log marginal likelihood for a multinomial
-#' data generating process and a Dirichlet prior over choice probabilities.
+#' \code{dDirMultinom} evaluates the density for the Dirichlet-multinomial
+#' distribution.
 #' @param alpha vector of Dirichlet parameters
 #' @param n vector of multinomial counts
 #' @param categorical logical; if \code{TRUE}, the likelihood is the for
@@ -112,47 +118,52 @@ sim_Dir_mult <- function(n, alpha, n_total) {
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
 #' @return Likelihood or log likelihood
 #' @examples
-#' log_L_Dir_mult(c(2.4, 1.5, 3.2), c(45, 20, 33))
+#' dDirMultinom(c(2.4, 1.5, 3.2), c(45, 20, 33))
 #' @export
-log_L_Dir_mult <- function(alpha, n, categorical=FALSE, log=TRUE) {
-  stopifnot(length(alpha)==length(n))
-  # Compute prior and posterior normalization constants
-  ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
-  ln_post_nc <- lgamma(sum(alpha + n)) - sum(lgamma(alpha + n))
-  ln_L <- ln_prior_nc - ln_post_nc
-  if (!categorical)
-    ln_L <- ln_L + lfactorial(sum(n)) - sum(lfactorial(n))
+dDirMultinom <- function(alpha, N, categorical=FALSE, log=TRUE) {
+  if (is.vector(N)) N = matrix(N, ncol=1)
+  stopifnot(length(alpha) == nrow(N))
+  ln_L <- 0
+  for (i in seq_len(ncol(N))) {
+    # Compute prior and posterior normalization constants
+    ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
+    ln_post_nc <- lgamma(sum(alpha + N)) - sum(lgamma(alpha + N))
+    ln_L <- ln_L + ln_prior_nc - ln_post_nc
+    if (!categorical)
+      ln_L <- ln_L + lfactorial(sum(N)) - sum(lfactorial(N))
+  }
   if (log) ln_L else exp(ln_L)
 }
 
-#' Simulation of RCSs under a multiple Dirichlet distribution
+#' Simulation of RC models under a multiple Dirichlet distribution
 #'
-#' \code{sim_RCS_Dirichlet} draws RCSs from a multiple Dirichlet distribution.
-#' @param n number of random choice structures (RCSs) to draw.
+#' \code{dDirichletRC} draws RC models from a multiple Dirichlet distribution.
+#' @param n_draws number of draws to generate
 #' @param Alpha matrix of Dirichlet parameters, each row giving the Dirichlet
 #' distribution of the corresponding row of an RCS.
-#' @return a \code{n} by \code{nrow(Alpha)} by \code{ncol{Alpha}} array.
-#' If the returned matrix is \code{P}, \code{P[i,,]} is the \eqn{i}'th draw
+#' @return a \code{nrow(Alpha)} by \code{ncol{Alpha}} by \code{n} array.
+#' If the returned matrix is \code{P}, \code{P[, , i]} is the \eqn{i}'th draw
 #' of a RCS.
 #' @examples
-#' P <- sim_RCS_Dirichlet(10, RCS_uniform_prior(3)) # 10 draws, 3 objects in universe
+#' Alpha = RCS_uniform_prior(3)
+#' P <- dDirichlet(10, Alpha) # 10 draws, 3 objects in universe
 #' @export
-sim_RCS_Dirichlet <- function(n, Alpha) {
-  P <- array(dim=c(n, dim(Alpha)), dimnames=c(list(NULL), dimnames(Alpha)))
-  for (i in 1:nrow(Alpha)) {
-    v <- subset_vectors[[i]]
-    if (subset_card[i] > 1) {
-      P[, i, v] <- rDirichlet(n, Alpha[i, v])
+dDirichletRC <- function(n_draws, Alpha) {
+  P <- array(dim=c(dim(Alpha), n), dimnames=c(dimnames(Alpha), list(NULL)))
+  for (A in 1:nrow(Alpha)) {
+    x <- subset_vectors[[A]]
+    if (subset_card[A] > 1) {
+      P[A, x, ] <- t(rDirichlet(n, Alpha[A, x]))
     } else {
-      P[, i, v] <- 1.0
+      P[A, x, ] <- 1.0
     }
   }
   P
 }
 
-#' Simulation of DCE, multiple Dirichlet-multinomial model
+#' Simulation of RC experimental data, multiple Dirichlet-multinomial model
 #'
-#' \code{sim_DCE_Dir_mult} draws random counts given a multiple Dirichlet
+#' \code{rDirMultinomRC} draws random counts given a multiple Dirichlet
 #' prior distribution over the probabilities in an RCS.
 #' Total counts for each choice subset are specified in the vector
 #' \code{N_total}.
@@ -169,12 +180,12 @@ sim_RCS_Dirichlet <- function(n, Alpha) {
 #' N_total[singletons[1:3]] = 0
 #' N_total[doubletons[1:3]] = 10
 #' N_total[tripletons[1]] = 10
-#' N = sim_DCE_Dir_mult(10, Alpha, N_total)
-#' @seealso \code{\link{log_L_DCE_Dir_mult}} for the likelihood function for
+#' N = rDirMultinomRC(10, Alpha, N_total)
+#' @seealso \code{\link{dDirMultinomRC}} for the likelihood function for
 #' this model.
 #' @importFrom stats rmultinom
 #' @export
-sim_DCE_Dir_mult <- function(n, Alpha, N_total) {
+rDirMultinomRC <- function(n, Alpha, N_total) {
   stopifnot(nrow(Alpha)==length(N_total))
   N <- array(dim=c(n, dim(Alpha)), dimnames=c(list(NULL), dimnames(Alpha)))
   for (i in 1:nrow(Alpha)) {
@@ -193,7 +204,7 @@ sim_DCE_Dir_mult <- function(n, Alpha, N_total) {
 
 #' Log likelihood for DCE, multiple Dirichlet-multinomial model
 #'
-#' \code{log_L_DCE_Dir_mult} computes the marginal likelihood for a model
+#' \code{dDirMultinomRC} computes the marginal likelihood for a model
 #' where choice count vectors are independent multinomial across choice sets
 #' and choice probability vectors are independent Dirichlet across choice sets.
 #' @param Alpha matrix of Dirichlet parameters, each row giving the Dirichlet
@@ -208,17 +219,17 @@ sim_DCE_Dir_mult <- function(n, Alpha, N_total) {
 #' @examples
 #' Alpha = RCS_scalar_alpha_prior(2.0, 3)
 #' N = T_1972_counts['Dots', 6,,]
-#' log_L_DCE_Dir_mult(Alpha, N)
-#' @seealso \code{\link{sim_DCE_Dir_mult}}, which simulates a count matrix under
+#' dDirMultinomRC(Alpha, N)
+#' @seealso \code{\link{rDirMultinomRC}}, which simulates a count matrix under
 #' this model, given the total number of trials for each choice subset.
 #' @export
-log_L_DCE_Dir_mult <- function(Alpha, N, categorical=FALSE, log=TRUE) {
+dDirMultinomRC <- function(Alpha, N, categorical=FALSE, log=TRUE) {
   stopifnot(identical(dim(Alpha), dim(N)))
   ln_L <- 0
   for (i in 1:nrow(Alpha)) {
     if (subset_card[i] > 1) {
       v <- subset_vectors[[i]]
-      ln_L <- ln_L + log_L_Dir_mult(Alpha[i, v], N[i, v], categorical, log=TRUE)
+      ln_L <- ln_L + dDirMultinom(Alpha[i, v], N[i, v], categorical, log=TRUE)
     }
   }
   if (log) ln_L else exp(ln_L)
@@ -242,7 +253,7 @@ P_uniform <- function(n_objects) {
     P[i, ] = P[i, ]/subset_card[i]
   }
   P
-}
+}Dir
 
 #' P_Luce
 #'
@@ -263,62 +274,72 @@ P_Luce <- function(v) {
   P
 }
 
-## Basic Dirichlet Alpha construction
-
-#' Uniform prior for a RCS
+#' Random Choice Structure from count proportions
 #'
-#' \code{RCS_uniform_prior} constructs a matrix of Dirichlet parameters for the
-#' uniform prior over a random choice structure.
-#' @param n_objects number of objects in the universe.
-#' @return a matrix of Dirichlet parameters all set to one, so that all choice
-#' probability vectors are uniformly distributed.
-#' @examples
-#' Alpha <- RCS_uniform_prior(3)
-#' P <- sim_RCS_Dirichlet(10, Alpha)
+#' \code{proportions} takes a count matrix as input, and returns choice
+#' proportions as a random choice structure.
+#'
+#' @param N A count matrix.
+#' @return A random choice structure.
 #' @export
-RCS_uniform_prior <- function(n_objects) {
-  n_subsets <- 2^n_objects-1
-  member_table[1:n_subsets, 1:n_objects]
+#' @examples
+#' P <- proportions(MMS_2019_counts[1,,])
+proportions <- function(N) {
+  n_objects <- ncol(N)
+  P <- N/rowSums(N, na.rm = TRUE)
+  for (i in 1:n_objects)
+    P[singletons[i], i] <- 1.0
+  P
 }
 
-#' Scalar alpha prior for a RCS
+## Basic construction of Dirichlet shape parameters for all menus of a universe
+
+#' Dirichlet shape parameters for all menus of a universe, with constant values
 #'
-#' \code{RCS_scalar_alpha_prior} constructs a matrix of Dirichlet parameters
-#' for a one-parameter Dirichlet prior for a random choice structure.
-#' @param alpha univariate parameter for the one-parameter Dirichlet prior.
+#' \code{DirRC_constant_shape} returns a matrix of Dirichlet shape
+#' parameters where all individual shape parameters have the same value
+#' \code{alpha}, within and across menus.
 #' @param n_objects number of objects in the universe.
-#' @return a matrix of Dirichlet parameters for the scalar alpha prior
+#' @return a matrix of Dirichlet shape parameters with all values set to
+#' \code{alpha}. If \code{alpha} is one, the Dirichlet distribution on each
+#' choice probability vector coincides with the uniform distribution.
 #' @examples
-#' Alpha <- RCS_scalar_alpha_prior(2.5, 3)
-#' P <- sim_RCS_Dirichlet(10, Alpha)
+#' Alpha <- DirDC_constant_shape(3)
+#' P <- rDirichlet_DC(10, Alpha)
 #' @export
-RCS_scalar_alpha_prior <- function(alpha, n_objects) {
+DirDC_shape_constant_value <- function(n_objects, alpha, name_source = NULL) {
   n_subsets <- 2^n_objects-1
-  Alpha = matrix(0, nrow=n_subsets, ncol=n_objects)
-  for (i in 1:n_subsets) {
-    Alpha[i, ] = alpha/subset_card[i]
-  }
-  Alpha * member_table[1:n_subsets, 1:n_objects]
+  Alpha <- alpha * member_table[1:n_subsets, 1:n_objects]
+  dimnames(Alpha) <- copy_A_x_names(name_source, n_subsets, n_objects)
+  Alpha
 }
 
-#' Vector alpha prior for a RCS
+#' Dirichlet shape parameters for all menus of a universe, with constant menu sums
 #'
-#' \code{RCS_vector_alpha_prior} computes a matrix of Dirichlet parameters
+#' \code{DirRC_constant_sum} returns a matrix of Dirichlet shape parameters
 #' for a vector Dirichlet prior for a random choice structure.
-#' @param alpha scalar, prior precision parameter
-#' @param v vector, object weights for the vector Dirichlet prior.
-#' @return a matrix of Dirichlet parameters for the vector Dirichlet prior.
+#' @param alpha_sum scalar, sum of shape parameters, constant over all menus
+#' @param v weights_spec, either a vector of object weights or the number of
+#' equal weights. Gives the
+#' @return a matrix of Dirichlet shape parameters where each row A gives
+#' the parameter vector for menu A.
 #' @examples
-#' Alpha <- RCS_vector_alpha_prior(5.2, c(2.5, 1.2, 3.3))
-#' P <- sim_RCS_Dirichlet(10, Alpha)
+#' Alpha <- DirDC_constant_sum(5.2, c(2.5, 1.2, 3.3))
+#' P <- rDirichlet_DC(10, Alpha)
 #' @export
-RCS_vector_alpha_prior <- function(alpha, v) {
-  n_objects <- length(v)
+DirDC_constant_sum <- function(weights_spec, alpha_sum, name_source = NULL) {
+
+  stopifnot(is.numeric(weights_spec))
+  if (length(weights_spec)==1) weights_spec <- rep(1.0, weights_spec)
+
+  n_objects <- length(weights_spec)
   n_subsets <- 2^n_objects-1
   Alpha = matrix(0, nrow=n_subsets, ncol=n_objects)
-  for (i in 1:n_subsets) {
-    den <- sum(v[subset_vectors[[i]]])
-    Alpha[i, subset_vectors[[i]]] = alpha * v[subset_vectors[[i]]]/den
+  for (A in 1:n_subsets) {
+    den <- sum(weights_spec[subset_vectors[[A]]])
+    Alpha[A, subset_vectors[[A]]] = alpha_sum * weights_spec[subset_vectors[[A]]]/den
   }
-  Alpha * member_table[1:n_subsets, 1:n_objects]
+  Alpha <- Alpha * member_table[1:n_subsets, 1:n_objects]
+  dimnames(Alpha) <- copy_A_x_names(name_source, n_subsets, n_objects)
+  Alpha
 }

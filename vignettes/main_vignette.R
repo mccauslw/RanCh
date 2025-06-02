@@ -1,4 +1,4 @@
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = " "
@@ -8,31 +8,31 @@ library(klaR)
 library(HDInterval)
 library(tidyverse)
 
-## ----counts_T_1972-------------------------------------------------------
+## ----counts_T_1972------------------------------------------------------------
 print(T_1972_counts['Gambles', 1, c('xz', 'yz', 'xyz'), ], na.print='-')
 
-## ----counts_RDS_2011-----------------------------------------------------
+## ----counts_RDS_2011----------------------------------------------------------
 print(RDS_2011_counts['Cash 1', 5, c(3, 5, 6, 9, 10, 12, 17, 18, 20, 24), ], na.print='-')
-#n_objects = 5
-#print(RDS_2011_counts['Cash 1', n_objects, doubletons[1:choose(n_objects, 2)], ], na.print='-')
+n_objects = 5
+print(RDS_2011_counts['Cash 1', n_objects, doubletons[1:choose(n_objects, 2)], ], na.print='-')
 
-## ----trials--------------------------------------------------------------
+## ----trials-------------------------------------------------------------------
 head(MMS_2019_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set_index', 'choice_int')], 5)
 
-## ----RP------------------------------------------------------------------
+## ----RP-----------------------------------------------------------------------
 MMS_2019_trials %>% select(set, choice, matches("^[a-e]{2}$")) %>% head(5)
 
-## ----RP_plus-------------------------------------------------------------
+## ----RP_plus------------------------------------------------------------------
 MMS_2019_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSums
 
-## ----counts--------------------------------------------------------------
+## ----counts-------------------------------------------------------------------
 N_bce <- marginalize(MMS_2019_counts['Beer', , ], c(2, 3, 5))
 print(N_bce, na.print='-')
 
-## ----demographic---------------------------------------------------------
+## ----demographic--------------------------------------------------------------
 head(MMS_2019_demographics, 5)
 
-## ----compare.waves-------------------------------------------------------
+## ----compare.waves------------------------------------------------------------
 my.chisq.test <- function(A)
 {
   x <- na.omit(t(A))
@@ -44,29 +44,29 @@ my.chisq.test <- function(A)
 M <- apply(MG_2019_counts, c(1, 3), my.chisq.test)
 hist(M, 20)
 
-## ----write_RCS-----------------------------------------------------------
+## ----write_RCS----------------------------------------------------------------
 P_bce <- proportions(N_bce)  # Compute proportions from count data
 print(P_bce, na.print='-')   # and display.
 
-## ----plot_RCS------------------------------------------------------------
+## ----plot_RCS-----------------------------------------------------------------
 triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
 plot_P3(P_bce)                  # Plot points 
 
-## ----regularity----------------------------------------------------------
+## ----regularity---------------------------------------------------------------
 triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
 plot_P3(P_bce)                  # Plot points 
 polygon(tritrafo(regularity_X3(P_bce)), border='blue')
 polygon(tritrafo(multiplicative_X3(P_bce)), border='red')
 
-## ----check regularity bce------------------------------------------------
+## ----check regularity bce-----------------------------------------------------
 print(regularity(P_bce))
 
-## ----check regularity xyz------------------------------------------------
+## ----check regularity xyz-----------------------------------------------------
 P_xyz <- P_Luce(c(2, 3, 5))
 print(P_xyz, na.print='-')
 print(regularity(P_xyz))
 
-## ----similarity----------------------------------------------------------
+## ----similarity---------------------------------------------------------------
 S <- similarity_X3(pxz = 0.6, pyz = 0.4)
 triplot(label=c('x', 'y', 'z')) # Set up ternary plot, with labels and grid
 polygon(tritrafo(S$So), col=grey(0.95)); text(tritrafo(colMeans(S$So)), 'So')
@@ -74,13 +74,13 @@ polygon(tritrafo(S$Sx), col=grey(0.9)); text(tritrafo(colMeans(S$Sx)), 'Sx')
 polygon(tritrafo(S$Sy), col=grey(0.9)); text(tritrafo(colMeans(S$Sy)), 'Sy')
 polygon(tritrafo(S$Sxy), col=grey(0.8)); text(tritrafo(colMeans(S$Sxy)), 'Sxy')
 
-## ----similarity_rotate---------------------------------------------------
+## ----similarity_rotate--------------------------------------------------------
 triplot(label=c('a', 'b', 'c')) # Set up ternary plot, with labels and grid
 Sacb <- S$Sxyz[, c(1, 3, 2)]
 polygon(tritrafo(Sacb), col=grey(0.95))
 text(tritrafo(colMeans(Sacb)), 'Sacb')
 
-## ----compromise----------------------------------------------------------
+## ----compromise---------------------------------------------------------------
 C <- compromise_X3(pyx = 0.6, pyz = 0.4)
 triplot(label=c('x', 'y', 'z')) # Set up ternary plot
 polygon(tritrafo(C$Co), col=grey(0.95)); text(tritrafo(colMeans(C$Co)), 'Co')
@@ -88,7 +88,7 @@ polygon(tritrafo(C$Cx), col=grey(0.9)); text(tritrafo(colMeans(C$Cx)), 'Cx')
 polygon(tritrafo(C$Cz), col=grey(0.9)); text(tritrafo(colMeans(C$Cz)), 'Cz')
 polygon(tritrafo(C$Cxz), col=grey(0.8)); text(tritrafo(colMeans(C$Cxz)), 'Cxz')
 
-## ----check_sim_comp------------------------------------------------------
+## ----check_sim_comp-----------------------------------------------------------
 n <- 500
 filt1 <- vector('logical', n); filt2 <- vector('logical', n)
 p <- rDirichlet(n, c(1, 1, 1)) # Uniform distribution on 2-simplex
@@ -102,7 +102,7 @@ points(tritrafo(p[filt1, ]), pch=20)
 triplot(label=c('x', 'y', 'z'))
 points(tritrafo(p[filt2, ]), pch=20)
 
-## ----HPD-----------------------------------------------------------------
+## ----HPD----------------------------------------------------------------------
 library(klaR)
 prior_Alpha <- RCS_scalar_alpha_prior(2.0, ncol(N_bce))
 post_Alpha <- prior_Alpha + N_bce
@@ -114,7 +114,7 @@ lines(tritrafo(HD3$HD13), lwd=4)
 polygon(tritrafo(HD3$HD123), border='lightgreen') # Plot ternary
 plot_P3(P_bce)                           # Plot proportions from data
 
-## ----logML---------------------------------------------------------------
+## ----logML--------------------------------------------------------------------
 N = MMS_2019_counts['Colours',,]
 n_objects = ncol(N)
 

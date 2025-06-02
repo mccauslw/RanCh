@@ -2,12 +2,16 @@
 title: "RanCh: A package for abstract discrete *Ran*dom *Ch*oice analysis"
 author: "William McCausland"
 date: "`r Sys.Date()`"
-output: pdf_document
+output:
+  pdf_document:
+    citation_package: natbib  # or biblatex, see below
+  html_document:
+    toc: true
 bibliography: bibliography.bib
 vignette: >
   %\VignetteIndexEntry{main_vignette}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r, include = FALSE}
@@ -33,7 +37,7 @@ The data sets are organized in similar ways, allowing for the use of a common se
 ### Data sets from the context effects literature
 
 One of the data sets in this package is the choice count data from the experiments described in @Tver72a, which introduces the similarity effect.
-The $3 \times 8 \times 7 \times 3$ array `T_1972_counts` contains the data for the three choice domains ("Dots", "Gambles" and "Applicants") and eight subjects of that experiment.
+The $3 \times 8 \times 7 \times 3$ array `T_1972_counts` contains the data for the three choice domains ("Dots", "Gambles" and "Applicants") and the eight subjects in that experiment.
 The first dimension of the array is indexed by choice domain, either as an integer from one to three, or as one of the strings "Dots", "Gambles" or "Applicants".
 The second dimension is indexed by subject identifier, an integer from one to eight.
 The third dimension is indexed by choice set and the fourth by choice object.
@@ -41,7 +45,7 @@ The third dimension is indexed by choice set and the fourth by choice object.
 Here and in many other contexts, choice sets and choice objects each have different kinds of indices.
 In this dataset, the object names are $x$, $y$ and $z$, as in the paper; they can be indexed using the strings `"x"`, `"y"` and `"z"` or the integers 1, 2, and 3, respectively.
 Choice sets, subsets of the choice universe $\{x,y,z\}$, can be indexed using the strings `"x"`, `"y"`, `"xy"`, ..., `"xyz"` or by integers we will call set indices.
-Each digit (or bit) in the binary representation of a set index in an inclusion indicator: object $i \in \{1,\ldots,3\}$ is in the set if and only if the $i$'th digit from the right is 1.
+Each digit (or bit) in the binary representation of a set index is an inclusion indicator: object $i \in \{1,\ldots,3\}$ is in the set if and only if the $i$'th digit from the right is 1.
 For example, the sets $\{x,z\}$, $\{y,z\}$ and $\{x,y,z\}$ have indices that are binary 101, 110 and 111, or decimal 5, 6 and 7.
 This convention for indexing sets has some important computational advantages.
 The singleton set with object $i$ is represented as $2^i-1$.
@@ -60,7 +64,7 @@ print(T_1972_counts['Gambles', 1, c('xz', 'yz', 'xyz'), ], na.print='-')
 ### Data sets from the stochastic intransitivity literature
 
 Another data set in the package is the count data from the experiment described in @RegeDanaDavi11.
-The $3 \times 18 \times 31 \times 5$ `RDS_2011_counts` contains the data for the three choice domains ("Cash 1", "Cash 2" and "Noncash") and 18 subjects of that experiment.
+The $3 \times 18 \times 31 \times 5$ array `RDS_2011_counts` contains the data for the three choice domains ("Cash 1", "Cash 2" and "Noncash") and the 18 subjects in that experiment.
 The data is organized in a similar way to that of `T_1972_counts`, although the universe of choice objects has five objects instead of three, and their names are $a$, $b$, $c$, $d$ and $e$.
 The four dimensions are indexed by domain, subject number, subset and choice object.
 Thus the number of times subject 5 chose object $a$ from choice set $\{a,b\}$ of domain `Cash 1` is `RDS_2011_counts['Cash 1', 5, 'ab', 'a']` or `RDS_2011_counts[1, 5, 3, 1]`.
@@ -70,10 +74,10 @@ Here is a cross section of counts for the "Cash 1" domain and the fifth subject,
 For example, the number of times this subject chose gamble $c$ when presented with a choice between $b$ and $c$ is `r RDS_2011_counts['Cash 1', 5, 6, 3]`.
 ```{r counts_RDS_2011}
 print(RDS_2011_counts['Cash 1', 5, c(3, 5, 6, 9, 10, 12, 17, 18, 20, 24), ], na.print='-')
-#n_objects = 5
-#print(RDS_2011_counts['Cash 1', n_objects, doubletons[1:choose(n_objects, 2)], ], na.print='-')
+n_objects = 5
+print(RDS_2011_counts['Cash 1', n_objects, doubletons[1:choose(n_objects, 2)], ], na.print='-')
 ```
-For this partcular domain and subject, all choice proportions are consistent with weak stochastic transitivity: relative to alphabetical order, the subject always chose the lower ranked object much more often than the higher ranked object.
+For this particular domain and subject, all choice proportions are consistent with weak stochastic transitivity: from each binary choice set, the subject chose the lower alphabetically ranked object much more often than the higher.
 
 ### Data sets where all subsets of the choice universe are presented 
 
@@ -89,7 +93,7 @@ This is followed by `choice`, a letter indicating which object the subject chose
 The variable `set_perm` shows the configuration of the objects as seen on screen by the subject.
 The subset and choice information is repeated in the values of the variables `set_index` and `choice_int`.
 The variable `set_index` is the set index, a binary representation of the choice set, as described above.
-Take for example the first row of the tqble below.
+Take for example the first row of the table below.
 The decimal value 30 is binary 11110, which indicates that the 2nd, 3rd, 4th and 5th elements of the set $\{a,b,c,d,e\}$ are in the choice set.
 This corresponds to the string `bcde` that is the value of the `set` variable.
 

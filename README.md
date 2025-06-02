@@ -1,5 +1,8 @@
 # RanCh
 
+<!-- badges: start -->
+<!-- badges: end -->
+
 An R project providing tools and data for abstract discrete Random Choice analysis.
 
 #### To install and load, update R to at least version 3.6.0, then at the R prompt:

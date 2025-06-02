@@ -3,11 +3,11 @@
 #' The RanCh package provides data, graphical tools and inferential tools for
 #' abstract discrete random choice analysis.
 #'
-#' A central data structure is the Random Choice Structure (RCD), which organizes all
+#' A central data structure is the Random Choice Structure (RCS), which organizes all
 #' choice probabities on some universe of choice objects.
-#' If \eqn{n} is the number of choice objects in the universe, the RCD is a
+#' If \eqn{n} is the number of choice objects in the universe, the RCS is a
 #' \eqn{2^n-1} by \eqn{n} matrix of probabilities.
-#' Rows are indexed by non-empty subset (the help for the \code{set_index}
+#' Rows are indexed by non-empty subset (the help for the \code{\link{set_index}}
 #' describes how vectors of elements map to set indices) and columns are indexed
 #' by choice object.
 #' Element \eqn{i,j} of an RCS gives the probability that object \eqn{j} is chosen
@@ -25,7 +25,7 @@
 #'
 #' Another important data structure is the count matrix, which organizes choice counts
 #' from an experiment. A count matrix for a given universe of objects has the same
-#' dimensions as an RCD for the same universe of objects.
+#' dimensions as an RCS for the same universe of objects.
 #' Here, element \eqn{i,j} is the number of times object \eqn{j} was chosen in the
 #' experiment when choice subset \eqn{i} was presented; again, impossible counts have
 #' the value NA.
@@ -103,6 +103,6 @@
 #' can be computed using \code{\link{Dir2_HD_region}} and \code{\link{Dir3_HD_region}},
 #' respectively.
 #'
-#' @docType package
 #' @name RanCh
-NULL
+#' @keywords package
+"_PACKAGE"

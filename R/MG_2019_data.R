@@ -35,9 +35,10 @@
 #' \item{\code{response_c}}{character string, response for object 'c'}
 #' \item{\code{response_d}}{character string, response for object 'd'}
 #' \item{\code{domain_name}}{name of domain, agreeing with names in
-#' \code{\link{MG_2019_trials}} and \code{\link{MG_2019_counts}}.
+#' \code{\link{MG_2019_trials}} and \code{\link{MG_2019_counts}}.}
 #' \item{\code{object_labels}}{character vector of length four, short
 #' versions of object descriptions suitable for labels in graphs.}
+#' }
 "MG_2019_domains"
 
 #' Array of choice count data from McCausland and Gerringer (2019)

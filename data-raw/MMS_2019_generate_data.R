@@ -2,6 +2,7 @@ library(tidyverse)
 source('./data-raw/trial.R')
 
 MMS_2019_raw = read.csv("data-raw/MMS_2019.csv")
+MMS_2019_raw <- subset(MMS_2019_raw, select = -feedback)
 n_lines = nrow(MMS_2019_raw)
 
 # Names of the 32 choice domains in the experiment

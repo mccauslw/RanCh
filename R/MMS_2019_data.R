@@ -85,7 +85,6 @@
 #' \item{\code{choice}}{Position of object chosen}
 #' \item{\code{expdur}}{Trial duration in ms}
 #' \item{\code{intdur}}{Survey duration in minutes}
-#' \item{\code{feedback}}{Subject's response to "Please provide any additional feedback about the survey you have just completed."}
 #' }
 #' @seealso{\code{\link{RanCh}}}, under \code{Datasets} for a description of the experiment.
 #' Other data objects for the experiment include
