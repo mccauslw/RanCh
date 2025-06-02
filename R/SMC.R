@@ -1,104 +1,3 @@
-#' Compute max-min log likelihood value
-#'
-#' Compute the max-min log likelihood value, which is both the Random Choice
-#' (RC) log likelihood evaluated at the RC model where all choice distributions
-#' are discrete uniform, and the Random Preference (RP) log likelihood evaluated
-#' at the RP model where all preferences are equally likely. See Section 4.1
-#' of the reference below.
-#'
-#' @inheritParams compute_pi_ln_like
-#'
-#' @return Max-min log likelihood value
-#'
-#' @export
-#'
-#' @examples
-#' library(RanCh)
-#' n <- 5
-#' u <- create_universe(n)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
-#' compute_max_min_ln_marl(u, N)
-#'
-#' @inherit create_universe author references
-#'
-compute_max_min_ln_marl <- function(u, N) {
-  ln_marl <- 0
-  for (A in 1:u$n_subsets) {
-    if (u$A_table[A, 'nA'] > 1) {
-      ln_marl <- ln_marl - N$by_A[A] * log(u$A_table[A, 'nA'])
-    }
-  }
-  ln_marl
-}
-
-#' Compute Random Choice (RC) model P maximising the RC likelihood and the
-#' maximum value of the RC log likelihood.
-#'
-#' @inheritParams compute_pi_ln_like
-#'
-#' @return A list with the following elements
-#' \describe{
-#'  \item{ln_maxl}{Maximum value of RC log likelihood}
-#'  \item{P_mle}{RC model P maximizing the RC log likelihood}
-#' }
-#'
-#' @export
-#'
-#' @examples
-#' library(RanCh)
-#' n <- 5
-#' u <- create_universe(n)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
-#' compute_max_min_ln_marl(u, N)
-#'
-#' @inherit create_universe author references
-#'
-compute_P_ln_maxl <- function(u, N) {
-  P_mle <- rep(0, u$n_probs)
-  ln_maxl <- 0
-  for (A in 1:u$n_subsets) {
-    if (u$A_table[A, 'nA'] > 1) {
-      Ax <- u$A_table[A, 'Ax']
-      nA <- u$A_table[A, 'nA']
-      N_Ax <- N$by_Ax[Ax:(Ax+nA-1)]
-      N_A <- N$by_A[A]
-      P_Ax <- N_Ax / N_A
-      P_mle[Ax:(Ax+nA-1)] <- P_Ax
-      ln_maxl <- ln_maxl + sum(N_Ax[N_Ax!=0]*log(P_Ax[N_Ax!=0]))
-    }
-  }
-  names(P_mle) <- rownames(u$Ax_table)
-  list(ln_maxl = ln_maxl, P_mle = P_mle)
-}
-
-#' Compute the log marginal likelihood for the uniform-P model
-#'
-#' Compute the log marginal likelihood for the Bayesian Random Choice model
-#' where choice probability vectors are mutually independent and each is
-#' uniformly distributed on its corresponding probability simplex.
-#'
-#' @inheritParams compute_pi_ln_like
-#'
-#' @return The value of the log marginal likelihood
-#'
-#' @export
-#'
-#' @examples
-#' library(RanCh)
-#' n <- 5
-#' u <- create_universe(n)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
-#' compute_uniform_P_ln_marl(u, N)
-#'
-#' @inherit create_universe author references
-#'
-compute_uniform_P_ln_marl <- function(u, N) {
-  alpha_Ax <- matrix(1, nrow=nrow(u$Ax_table), ncol=1)
-  rownames(alpha_Ax) <- rownames(u$Ax_table)
-  ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, N)
-  ln_marl <- sum(ln_Pr_RC_by_A)
-}
-
 #' Use SMC to simulate the posterior distribution alpha|N of the Dirichlet RC model
 #'
 #' Use SMC to simulate the target distribution alpha|N, the posterior distribution
@@ -106,7 +5,7 @@ compute_uniform_P_ln_marl <- function(u, N) {
 #'
 #' @inheritParams compute_pi_ln_like
 #' @param J number of independent groups of particles
-#' @param M umber of particles, must be multiple of J
+#' @param M number of particles, must be multiple of J
 #' @param alpha_prior list with information on the prior distribution of alpha,
 #'                    created using [create_alpha_prior()]
 #'
@@ -122,14 +21,14 @@ compute_uniform_P_ln_marl <- function(u, N) {
 #' @importFrom extraDistr rbetapr dbetapr
 #'
 #' @examples
-#' library(RanCh)
-#' n <- 5
-#' u <- create_universe(n)
-#' alpha_prior <- create_alpha_prior(n, 4, 0.1)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
+#' n_objects <- 5
+#' alpha_prior <- create_alpha_prior(n_objects, 4, 0.1)
+#' N <- RanCh::MMS_2019_counts[1, , ]
+#' u <- create_universe(n_objects, object_names=dimnames(N)[2])
+#' Nflat <- vectorize_counts(u, N)
 #' J <- 20
 #' M <- 1000
-#' RC_sim <- run_RC_sim(u, J, M, alpha_prior, N)
+#' RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nflat)
 #'
 #' @inherit create_universe author references
 #'
@@ -171,9 +70,17 @@ run_RC_sim <- function(u, J, M, alpha_prior, N) {
   list(alpha=alpha, marl_stats = C_stage_stats, n_plus = n_plus, theta = params)
 }
 
-create_cycle_schedule <- function() {
-  # Grid of lambda values at which to approximate marginal likelihod
-  lambda_values <- seq(0.01, 1.00, by=0.01)
+#' Create a schedule of simulation parameter values for random preference simulation
+#'
+#' @param lambda_values grid of lambda values for simulation
+#'
+#' @returns tibble with simulation parameter values for each SCM cycle
+#' @export
+#'
+#' @examples
+#' lambda_values <- seq(0.01, 1.00, by=0.01)
+#' cycle_schedule <- create_cycle_schedule(lambda_values)
+create_cycle_schedule <- function(lambda_values) {
 
   # Indices of lambda values at which to transition from C stage to S-M stages
   lambda_break_indices <-
@@ -183,24 +90,25 @@ create_cycle_schedule <- function() {
 
   # Number of repetitions of M step to perform, by cycle index
   n_big_sweeps <- c(rep(3, 10), rep(1, n_cycles-10))
-  phi_big_sweeps <- 1 - exp(-3*seq(n_cycles)/n_cycles)
+  phi_big_sweeps <- 1 - exp(-3*seq_len(n_cycles)/n_cycles)
   n_sm_sweeps <- c(rep(1, 10), rep(4, 10), rep(6, n_cycles-20))
-  phi_sm_sweeps <- 1 - exp(-1*seq(n_cycles)/n_cycles)
+  phi_sm_sweeps <- 1 - exp(-1*seq_len(n_cycles)/n_cycles)
 
   # Table of parameter values for each cycle
   cycle_schedule <-
-    tibble(lambda_break_indices = lambda_break_indices, # Last index of each cycle
-           lambda_breaks = lambda_values[lambda_break_indices],
-           lambda_values = lambda_values,
-           n_big_sweeps = n_big_sweeps, phi_big_sweeps,
-           n_sm_sweeps = n_sm_sweeps, phi_sm_sweeps)
+    tibble::tibble(lambda_break_indices = lambda_break_indices,
+                   lambda_breaks = lambda_values[lambda_break_indices],
+                   n_big_sweeps = n_big_sweeps,
+                   phi_big_sweeps = phi_big_sweeps,
+                   n_sm_sweeps = n_sm_sweeps,
+                   phi_sm_sweeps = phi_sm_sweeps)
 }
 
 #' Use SMC to simulate posterior distributions of Dirichlet RC and hybrid models
 #'
-#'
 #' @inheritParams run_RC_sim
-#' @param lambda_values Vector of indices of the hybrid models
+#' @param lambda_values Grid of lambda values at which to approximate marginal likelihod
+#' @param cycle_schedule Information organising simulation by cycles
 #'
 #' @return List with the following elements
 #' \describe{
@@ -219,25 +127,25 @@ create_cycle_schedule <- function() {
 #' @importFrom stats rgamma runif
 #'
 #' @examples
-#' library(RanCh)
-#' n <- 5
-#' u <- create_universe(n)
-#' alpha_prior <- create_alpha_prior(n, 4, 0.1)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
+#' n_objects <- 5
+#' alpha_prior <- create_alpha_prior(n_objects, 4, 0.1)
+#' N <- RanCh::MMS_2019_counts[1, , ]
+#' u <- create_universe(n_objects, object_names=dimnames(N)[2])
+#' Nflat <- vectorize_counts(u, N)
 #' J <- 20
 #' M <- 1000
-#' cycle_schedule <- create_cycle_schedule()
-#' RP_sim <- run_RP_sim(u, J, M, alpha_prior, N, lambda_values, cycle_schedule)
+#' lambda_values <- seq(0.01, 1.00, by=0.01)
+#' cycle_schedule <- create_cycle_schedule(lambda_values)
+#' RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nflat, lambda_values, cycle_schedule)
 #'
 #' @inherit create_universe author references
 #'
-run_RP_sim <- function(u, J, M, alpha_prior, N) {
+run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
 
   lambda_aggregate_names =
     c('ESS', 'W_var', 'marl', 'marl_nse', 'marl_rne',
       'ln_marl', 'ln_marl_nse', 'cum_ln_marl', 'cum_ln_marl_nse2')
-  cycle_schedule <- create_cycle_schedule()
-  n_lambda_values = length(cycle_schedule$lambda_values)
+  n_lambda_values = length(lambda_values)
   n_cycles = nrow(cycle_schedule)
 
   # Table to hold marginal likelihood statistics
@@ -249,7 +157,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, N) {
       matrix(nrow = n_lambda_values, ncol = 1 + length(lambda_aggregate_names),
              dimnames = list(NULL, c('lambda', lambda_aggregate_names)))
   )
-  lambda_stats$aggregates[, 'lambda'] <- cycle_schedule$lambda_values
+  lambda_stats$aggregates[, 'lambda'] <- lambda_values
 
   # Table for cycle parameters pertaining to gamma update
   n_bl <- c(u$n, u$n*(u$n-1)); bl_len <- c(factorial(u$n-1), factorial(u$n-2))
@@ -304,7 +212,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, N) {
                     cycle_schedule[[cycle_index, 'phi_sm_sweeps']])
     last_lambda_index <- cycle_schedule[[cycle_index, 'lambda_break_indices']]
     lambda_index_range <- seq(first_lambda_index, last_lambda_index)
-    cycle_lambda_values <- cycle_schedule$lambda_values[lambda_index_range]
+    cycle_lambda_values <- lambda_values[lambda_index_range]
     n_lambda_index <- length(lambda_index_range)
     last_lambda <- cycle_lambda_values[n_lambda_index]
 

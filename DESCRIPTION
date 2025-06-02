@@ -13,9 +13,8 @@ Description: This package provides tools for a research project whose purpose is
     posterior density contours, as well as regions, in the space of choice probabilities,
     defined by various stochastic choice axioms, context effects and other conditions.
 Imports:
-    tidyverse,
+    tibble,
     klaR,
-    MASS,
     HDInterval,
     Matrix,
     combinat,

@@ -13,7 +13,7 @@
 #' @examples
 #' # Get names from an array with counts
 #' N = RanCh::MMS_2019_counts[1, , ]
-#' names_from_N <- copy_A_x_names(u, 31, 5)
+#' names_from_N <- copy_A_x_names(N, 31, 5)
 #'
 #' # Get names from a universe
 #' u <- create_universe(5, letters[1:5])

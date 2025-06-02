@@ -21,7 +21,7 @@
 #' RCSs repesenting frequencies can be constructed from choice data using
 #' \code{\link{proportions}}.
 #' Random RCSs can be constructed using multiple Dirichlet priors (including
-#' the uniform distribution) using \code{\link{sim_RCS_Dirichlet}}.
+#' the uniform distribution) using \code{\link{dDirichletRC}}.
 #'
 #' Another important data structure is the count matrix, which organizes choice counts
 #' from an experiment. A count matrix for a given universe of objects has the same
@@ -76,28 +76,28 @@
 #'
 #' @section Inference:
 #'
-#' The function \code{\link{log_L_DCE_multinomial}} computes the probability of
+#' The function \code{\link{dmultinomRC}} computes the probability of
 #' the realized data in a count matrix, as a function of a RCS.
 #' Likelihood functions for many different kinds of models can be evaluated by
 #' first mapping parameter values into a RCS then evaluating
-#' \code{\link{log_L_DCE_multinomial}}.
-#' For example, \code{log_L_DCE_multinomial(P_Luce(c(3, 1.4, 4.0)), N)}
+#' \code{\link{dmultinomRC}}.
+#' For example, \code{dmultinomRC(P_Luce(c(3, 1.4, 4.0)), N)}
 #' evaluates the likelihood function of Luce's choice model for data \code{N}.
 #'
-#' The function \code{\link{log_L_DCE_Dir_mult}} adds a level of indirection using
+#' The function \code{\link{dDirMultinom}} adds a level of indirection using
 #' a multiple Dirichlet prior distribution for the RCS.
 #' It computes the probability of the realized data in a count matrix, as a function
 #' of a multiple Dirichlet parameter matrix.
 #' Likelihood functions for many different kinds of models can be evaluated
 #' by first mapping parameter values into a Dirichlet parameter matrix then
-#' evaluating \code{\link{log_L_DCE_Dir_mult}}.
-#' For example, \code{log_L_DCE_Dir_mult(RCS_vector_alpha_prior(10.0, c(3, 1.4, 4.0)), N)}
+#' evaluating \code{\link{dDirMultinom}}.
+#' For example, \code{dDirMultinom(RCS_vector_alpha_prior(10.0, c(3, 1.4, 4.0)), N)}
 #' evaluates the likelihood function for a Luce-like model.
-#' The \code{alpha} parameter of \code{\link{RCS_vector_alpha_prior}} controls the
+#' The \code{alpha} parameter of \code{\link{DirRC_constant_sum}} controls the
 #' prior precision of the implicit mixing RCS; in the limit as \code{alpha} goes
 #' to infinity, we get the Luce model.
 #'
-#' The function \code{\link{sim_RCS_Dirichlet}} can be used for prior and posterior
+#' The function \code{\link{dDirichletRC}} can be used for prior and posterior
 #' simulation, for a model where the RCS has a multiple Dirichlet prior.
 #' High posterior density (HPD) regions for binary and ternary choice probabilities
 #' can be computed using \code{\link{Dir2_HD_region}} and \code{\link{Dir3_HD_region}},
