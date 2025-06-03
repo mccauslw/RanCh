@@ -19,15 +19,15 @@
 #' n_fact = factorial(n)
 #' pi <- rep(1/n_fact, n_fact) # Uniform distribution over preference orders
 #' u <- create_universe(n)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
+#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
 #' pi_ln_like <- compute_pi_ln_like(pi, u, N)
 #'
 #' @inherit create_universe author references
 #'
-compute_pi_ln_like <- function(pi, u, N) {
+compute_pi_ln_like <- function(pi, u, Nv) {
   P_Ax <- u$pi_to_P %*% pi
-  P_Ax[N$by_Ax == 0] <- 1
-  ln_like <- sum(N$by_Ax * log(P_Ax))
+  P_Ax[Nv == 0] <- 1
+  ln_like <- sum(Nv * log(P_Ax))
 }
 
 #' Evaluate gradient of random preference (RP) log likelihood
@@ -46,15 +46,15 @@ compute_pi_ln_like <- function(pi, u, N) {
 #' n_fact = factorial(n)
 #' pi <- rep(1/n_fact, n_fact) # Uniform distribution over preference orders
 #' u <- create_universe(n)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
+#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
 #' pi_score <- compute_pi_score(pi, u, N)
 #'
 #' @inherit create_universe author references
 #'
-compute_pi_score <- function(pi, u, N) {
+compute_pi_score <- function(pi, u, Nv) {
   P_Ax <- as.vector(u$pi_to_P %*% pi)
-  P_Ax[N$by_Ax == 0] <- 1
-  score <- colSums((N$by_Ax/P_Ax) * u$pi_to_P)
+  P_Ax[Nv == 0] <- 1
+  score <- colSums((Nv/P_Ax) * u$pi_to_P)
 }
 
 #' Maximize the RP log likelihood for given data N
@@ -101,14 +101,14 @@ compute_pi_score <- function(pi, u, N) {
 #' library(RanCh)
 #' n <- 5
 #' u <- create_universe(n)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
+#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
 #' pi_ln_maxl <- compute_pi_ln_maxl(u, N)
 #'
 #' @inherit create_universe author references
 #' @references
 #' Chok, J. and G. M. Vasil (2023). Convex Optimization over a Probability Simplex, arXiv:2305.09046
 #'
-compute_pi_ln_maxl <- function(u, N, init_pi = rep(1/u$n_orders, u$n_orders),
+compute_pi_ln_maxl <- function(u, Nv, init_pi = rep(1/u$n_orders, u$n_orders),
                                delta = 0.0001, epsilon = 1e-8, n_max_iter = 15000,
                                beta = 0.95,
                                debug = FALSE, doplot = FALSE) {
@@ -118,8 +118,8 @@ compute_pi_ln_maxl <- function(u, N, init_pi = rep(1/u$n_orders, u$n_orders),
   prev_val <- -Inf
   n_iter <- 0
   curr_pi <- init_pi
-  curr_val <- compute_pi_ln_like(curr_pi, u, N)
-  curr_score <- compute_pi_score(curr_pi, u, N)
+  curr_val <- compute_pi_ln_like(curr_pi, u, Nv)
+  curr_score <- compute_pi_score(curr_pi, u, Nv)
   curr_z <- curr_score
   S <- rep(TRUE, u$n_orders); Q <- !S
   while ((max(curr_score[S]) - min(curr_score[S]) > delta) &&
@@ -139,10 +139,10 @@ compute_pi_ln_maxl <- function(u, N, init_pi = rep(1/u$n_orders, u$n_orders),
     eta[3] <- (1 - phi_inv) * eta_max
     eta[4] <- phi_inv * eta_max
     v[1] <- curr_val
-    for (i in 3:4) v[i] <- compute_pi_ln_like(curr_pi + eta[i] * d, u, N)
+    for (i in 3:4) v[i] <- compute_pi_ln_like(curr_pi + eta[i] * d, u, Nv)
     pi_eta_max <- curr_pi + eta_max * d
     pi_eta_max[pi_eta_max < 0] = 0
-    v_eta_max <- compute_pi_ln_like(pi_eta_max, u, N)
+    v_eta_max <- compute_pi_ln_like(pi_eta_max, u, Nv)
     v[2] <- v_eta_max
 
     # Line search
@@ -152,13 +152,13 @@ compute_pi_ln_maxl <- function(u, N, init_pi = rep(1/u$n_orders, u$n_orders),
         eta[1] <- eta[3]; v[1] <- v[3]
         eta[3] <- eta[4]; v[3] <- v[4]
         eta[4] <- (1 - phi_inv) * eta[1] + phi_inv * eta[2]
-        v[4] <- compute_pi_ln_like(curr_pi + eta[4] * d, u, N)
+        v[4] <- compute_pi_ln_like(curr_pi + eta[4] * d, u, Nv)
       }
       else {
         eta[2] <- eta[4]; v[2] <- v[4]
         eta[4] <- eta[3]; v[4] <- v[3]
         eta[3] <- (1 - phi_inv) * eta[2] + phi_inv * eta[1]
-        v[3] <- compute_pi_ln_like(curr_pi + eta[3] * d, u, N)
+        v[3] <- compute_pi_ln_like(curr_pi + eta[3] * d, u, Nv)
       }
       i <- i+1
     }
@@ -176,8 +176,8 @@ compute_pi_ln_maxl <- function(u, N, init_pi = rep(1/u$n_orders, u$n_orders),
 
     curr_pi[Q] <- 0
     curr_pi[S] = curr_pi[S]/sum(curr_pi[S])
-    curr_val <- compute_pi_ln_like(curr_pi, u, N)
-    curr_score <- compute_pi_score(curr_pi, u, N)
+    curr_val <- compute_pi_ln_like(curr_pi, u, Nv)
+    curr_score <- compute_pi_score(curr_pi, u, Nv)
     curr_z <- beta * curr_z + curr_score
     n_iter <- n_iter + 1
   }
@@ -185,64 +185,4 @@ compute_pi_ln_maxl <- function(u, N, init_pi = rep(1/u$n_orders, u$n_orders),
        score = curr_score, z = curr_z, S = S, n_iter = n_iter,
        score_range = max(curr_score[S]) - min(curr_score[S]),
        ln_maxl_diff = curr_val - prev_val)
-}
-
-# This is obsolete code using MCMC simulation to get a value of pi with high
-# posterior probability, for use as a starting value.
-# WJM: consider deleting.
-sim_MCMC <- function(u, M, N, alpha, gamma_p = NULL) {
-  if (is.null(gamma_p))
-    gamma_p = stats::rgamma(u$n_orders, alpha/u$n_orders)
-  big_bl_n = factorial(u$n-1)
-  small_bl_n = factorial(u$n-2)
-
-  sum_gamma_p = rep.int(NA, M)
-  sum_ln_gamma_p = rep.int(NA, M)
-  ln_like = rep.int(NA, M)
-
-  sum_gamma_p = sum(gamma_p)
-  pi = gamma_p / sum_gamma_p
-  ln_like_den = compute_pi_ln_like(pi, u, N)
-
-  sum_gamma_p[1] = sum_gamma_p; print(sum_gamma_p[1])
-  sum_ln_gamma_p[1] = sum(log(gamma_p)); print(sum_ln_gamma_p[1])
-  ln_like[1] = ln_like_den; print(ln_like[1])
-
-  for (m in seq(2:M)) {
-    for (i in seq(1)) {
-      for (big_bl in seq(0, u$n-1)) {
-        gamma_p_star = gamma_p
-        gamma_p_star[(big_bl * big_bl_n + 1):
-                       ((big_bl + 1) * big_bl_n)] =
-          stats::rgamma(big_bl_n, alpha/u$n_orders)
-        sum_gamma_p_star = sum(gamma_p_star)
-        pi_star = gamma_p_star / sum_gamma_p_star
-        ln_like_num = compute_pi_ln_like(pi_star, u, N)
-        if (stats::runif(1) < exp(ln_like_num - ln_like_den)) {
-          pi = pi_star
-          ln_like_den = ln_like_num
-          gamma_p = gamma_p_star
-        }
-      }
-      for (small_bl in seq(0, u$n * (u$n-1) - 1)) {
-        gamma_p_star = gamma_p
-        gamma_p_star[(small_bl * small_bl_n + 1):
-                       ((small_bl + 1) * small_bl_n)] =
-          stats::rgamma(small_bl_n, alpha/u$n_orders)
-        sum_gamma_p_star = sum(gamma_p_star)
-        pi_star = gamma_p_star / sum_gamma_p_star
-        ln_like_num = compute_pi_ln_like(pi_star, u, N)
-        if (stats::runif(1) < exp(ln_like_num - ln_like_den)) {
-          pi = pi_star
-          ln_like_den = ln_like_num
-          gamma_p = gamma_p_star
-        }
-      }
-    }
-    ln_like[m] = ln_like_den
-    sum_gamma_p[m] = sum(gamma_p)
-    sum_ln_gamma_p[m] = -sum(log(gamma_p))
-  }
-  list(sum_gamma_p = sum_gamma_p, sum_ln_gamma_p = sum_ln_gamma_p,
-       ln_like = ln_like, final_pi = pi)
 }

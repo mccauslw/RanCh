@@ -78,12 +78,12 @@ create_alpha_prior <- function(n, a, b, h = 0.05, eps = 1e-7) {
 #' n <- 5
 #' u <- create_universe(n)
 #' alpha_prior <- create_alpha_prior(n, 4, 0.1)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
-#' theta <- compute_proposal_params(u, alpha_prior, N)
+#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
+#' theta <- compute_proposal_params(u, alpha_prior, Nv)
 #'
 #' @inherit create_universe author references
 #'
-compute_proposal_params <- function(u, alpha_prior, N) {
+compute_proposal_params <- function(u, alpha_prior, Nv) {
 
   # Construct grid of alpha values
   max_alpha <- qgamma(0.01, alpha_prior$a, alpha_prior$b, lower.tail = FALSE)
@@ -92,7 +92,7 @@ compute_proposal_params <- function(u, alpha_prior, N) {
 
   # Evaluate f(alpha) Pr(N|alpha,lambda=0) on a grid
   alpha_Ax <- compute_alpha_Ax(u, alpha_grid)
-  ln_Pr_ind_by_A <- compute_ln_Pr_by_A(u, 'ind', alpha_Ax, N)
+  ln_Pr_ind_by_A <- compute_ln_Pr_by_A(u, 'ind', alpha_Ax, Nv)
   ln_Pr_N__al <- compute_ln_like(u, 0.0, ln_Pr_ind_by_A, ln_Pr_ind_by_A) # Last arg ignored
   ln_f_al <- dgamma(alpha_grid, alpha_prior$a, alpha_prior$b, log = TRUE)
   ln_f_al_N <- ln_Pr_N__al + ln_f_al

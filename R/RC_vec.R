@@ -1,39 +1,3 @@
-#' Vectorize a choice count matrix
-#'
-#' Create a list with two vectors of choice counts
-#'
-#' @inheritParams compute_pi_ln_like
-#' @param choice_counts matrix of choice counts indexed by choice set (row) and
-#'        choice object (column)
-#'
-#' @return List with the elements
-#' \describe{
-#'   \item{by_Ax}{Vector of choice counts, indexed by Ax, a flat index coding
-#'   both choice set and choice object}
-#'   \item{by_A}{Vector of total choice counts, indexed by choice set A
-#'   (aggregates by_Ax)}
-#' }
-#' @export
-#'
-#' @examples
-#' n <- 5
-#' u <- create_universe(n)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
-#'
-vectorize_counts <- function(u, choice_counts) {
-  N <- list(by_Ax = rep.int(0, u$n_probs),
-            by_A = rep.int(0, u$n_subsets))
-  for (Ax in 1:u$n_probs) {
-    A <- u$Ax_table[Ax,'A']
-    x <- u$Ax_table[Ax,'x']
-    N$by_Ax[Ax] <- choice_counts[A, x]
-    N$by_A[A] <- N$by_A[A] + choice_counts[A, x]
-  }
-  names(N$by_Ax) <- u$Ax_strings
-  names(N$by_A) <- u$A_strings
-  N
-}
-
 #' Vectorize a matrix indexed by set A and object x from universe u
 #'
 #' Create a flat vector without NA values and values for singleton choice sets.
@@ -60,8 +24,12 @@ vectorize <- function(u, Ax_array) {
   result <- vapply(seq_len(n_slices),
                    function(i) Ax_matrix[u$Ax_table[,3], i],
                    numeric(u$n_probs))
-  dim(result) <- c(u$n_probs, slice_dims)
-  result
+  d <- c(u$n_probs, slice_dims)
+  if (length(d) == 1)
+    return(as.vector(result))
+  if (length(d) == 1)
+    return(as.matrix(result, nrow=d[1], ncol=d[2]))
+  dim(result) <- d
 }
 
 #' Vectorize a matrix indexed by set A and object x from universe u

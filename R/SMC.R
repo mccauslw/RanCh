@@ -1,7 +1,7 @@
-#' Use SMC to simulate the posterior distribution alpha|N of the Dirichlet RC model
+#' Use SMC to simulate the posterior distribution alpha|Nv of the Dirichlet RC model
 #'
-#' Use SMC to simulate the target distribution alpha|N, the posterior distribution
-#' alpha|N of the scalar parameter alpha of the Dirichlet RC model.
+#' Use SMC to simulate the target distribution alpha|Nv, the posterior distribution
+#' alpha|Nv of the scalar parameter alpha of the Dirichlet RC model.
 #'
 #' @inheritParams compute_pi_ln_like
 #' @param J number of independent groups of particles
@@ -25,22 +25,22 @@
 #' alpha_prior <- create_alpha_prior(n_objects, 4, 0.1)
 #' N <- RanCh::MMS_2019_counts[1, , ]
 #' u <- create_universe(n_objects, object_names=dimnames(N)[2])
-#' Nflat <- vectorize_counts(u, N)
+#' Nv <- vectorize(u, N)
 #' J <- 20
 #' M <- 50
-#' RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nflat)
+#' RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
 #'
 #' @inherit create_universe author references
 #'
-run_RC_sim <- function(u, J, M, alpha_prior, N) {
+run_RC_sim <- function(u, J, M, alpha_prior, Nv) {
 
-  # Compute alpha proposal distribution based on f(alpha) * Pr[N|alpha,lambda=0]
-  params <- compute_proposal_params(u, alpha_prior, N)
+  # Compute alpha proposal distribution based on f(alpha) * Pr[Nv|alpha,lambda=0]
+  params <- compute_proposal_params(u, alpha_prior, Nv)
 
   # Draw alpha from gamma proposal distribution
   alpha <- extraDistr::rbetapr(M*J, params[1], params[2], params[3])
   alpha_Ax <- compute_alpha_Ax(u, alpha)
-  ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, N)
+  ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, Nv)
 
   # Compute IS (importance sampling) log weights w
   ln_num <- stats::dgamma(alpha, alpha_prior$a, alpha_prior$b, log = TRUE)
@@ -66,7 +66,7 @@ run_RC_sim <- function(u, J, M, alpha_prior, N) {
     alpha[(1+(j-1)*M):(j*M)] <- alpha[(selection+(j-1)*M)]
   }
 
-  n_plus = sum(N$by_Ax > 0)
+  n_plus = sum(Nv > 0)
   list(alpha=alpha, marl_stats = C_stage_stats, n_plus = n_plus, theta = params)
 }
 
@@ -131,16 +131,16 @@ create_cycle_schedule <- function(lambda_values) {
 #' alpha_prior <- create_alpha_prior(n_objects, 4, 0.1)
 #' N <- RanCh::MMS_2019_counts[1, , ]
 #' u <- create_universe(n_objects, object_names=dimnames(N)[2])
-#' Nflat <- vectorize_counts(u, N)
+#' Nv <- vectorize(u, N)
 #' J <- 20
 #' M <- 50
 #' lambda_values <- seq(0.01, 1.00, by=0.01)
 #' cycle_schedule <- create_cycle_schedule(lambda_values)
-#' RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nflat, lambda_values, cycle_schedule)
+#' RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule)
 #'
 #' @inherit create_universe author references
 #'
-run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
+run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) {
 
   lambda_aggregate_names =
     c('ESS', 'W_var', 'marl', 'marl_nse', 'marl_rne',
@@ -176,7 +176,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
   alpha_aPr <- rep(NA, n_cycles)
 
   # Start with simulation based on lambda = 0
-  RC_sim <- run_RC_sim(u, J, M, alpha_prior, N)
+  RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
   alpha <- RC_sim$alpha
   gr_cum_ln_marl <- RC_sim$marl_stats$gr_cum_ln_marl
   cum_ln_marl <- RC_sim$marl_stats$cum_ln_marl
@@ -187,9 +187,9 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
   rownames(alpha_p) <- u$order_strings
   alpha_Ax <- compute_alpha_Ax(u, alpha)
   rownames(alpha_Ax) <- u$Ax_strings
-  ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, N)
+  ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, Nv)
 
-  # Draw gamma_p from gamma_p|alpha, same as gamma_p|alpha, N, lambda = 0
+  # Draw gamma_p from gamma_p|alpha, same as gamma_p|alpha, Nv, lambda = 0
   # Columns are iid, the rows are independent.
   # An element i,j is distributed as Gamma(alpha_i, 1), where alpha_i
   # is the i'th element of alpha_p.
@@ -197,7 +197,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
                     nrow=u$n_orders, ncol=M*J)
   rownames(gamma_p) <- u$order_strings
   gamma_Ax <- compute_gamma_Ax(u, gamma_p)
-  ln_Pr_rp_by_A <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax, N)
+  ln_Pr_rp_by_A <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax, Nv)
 
   # Initialize loop over cycles
   old_ll <- compute_ln_like(u, 0.0, ln_Pr_RC_by_A, NULL)
@@ -275,8 +275,8 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
     # construct at resampling step
     gamma_Ax <- compute_gamma_Ax(u, gamma_p)
     alpha_Ax <- compute_alpha_Ax(u, alpha)
-    ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, N)
-    ln_Pr_rp_by_A <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax, N)
+    ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, Nv)
+    ln_Pr_rp_by_A <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax, Nv)
     den <- compute_ln_like(u, last_lambda, ln_Pr_RC_by_A, ln_Pr_rp_by_A)
 
     for (blt in 1:length(bl_data)) {
@@ -308,7 +308,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
           # Recompute likelihood values for proposal, accept or reject
           gamma_Ax_diff <- small_pi_to_P %*% (small_gamma_p_star-small_gamma_p)
           gamma_Ax_star <- pmax(gamma_Ax + gamma_Ax_diff, .Machine$double.xmin)
-          ln_Pr_rp_by_A_star <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax_star, N)
+          ln_Pr_rp_by_A_star <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax_star, Nv)
           num <- compute_ln_like(u, last_lambda, ln_Pr_RC_by_A,
                                  ln_Pr_rp_by_A_star)
           H <- pmin(1, exp(num-den))
@@ -323,17 +323,17 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
       bl_data[[blt]]$aPr[cycle_index, ] <-
         bl_data[[blt]]$aPr[cycle_index, ] / n_sweeps[blt]
     }
-    ln_Pr_rp_by_A <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax, N)
+    ln_Pr_rp_by_A <- compute_ln_Pr_by_A(u, 'RP', gamma_Ax, Nv)
 
     # Update alpha, update likelihood for next cycle
-    res <- update_alpha(u, N, alpha_prior, alpha, gamma_p, last_lambda, ln_Pr_rp_by_A)
+    res <- update_alpha(u, Nv, alpha_prior, alpha, gamma_p, last_lambda, ln_Pr_rp_by_A)
     alpha <- res$alpha
     gamma_p <- res$gamma_p
     alpha_aPr[cycle_index] = res$aPr
     alpha_mu[cycle_index] = res$mu
     alpha_Ax <- compute_alpha_Ax(u, alpha)
     alpha_p <- outer(rep.int(1/u$n_orders, u$n_orders), alpha)
-    ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, N)
+    ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, Nv)
     old_ll <- compute_ln_like(u, last_lambda, ln_Pr_RC_by_A, ln_Pr_rp_by_A)
 
     first_lambda_index = last_lambda_index + 1
@@ -376,10 +376,10 @@ run_RP_sim <- function(u, J, M, alpha_prior, N, lambda_values, cycle_schedule) {
 #' n <- 5
 #' u <- create_universe(n)
 #' alpha_prior <- create_alpha_prior(n, 4, 0.1)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
+#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
 #' J <- 20
 #' M <- 50
-#' RC_sim <- run_RC_sim(u, J, M, alpha_prior, N)
+#' RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
 #' ind_groups_stats(RC_sim$alpha, J, c(0.1, 0.5, 0.9))
 #'
 #' @inherit create_universe author references
@@ -465,7 +465,7 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
 #'
 #' @inherit create_universe author references
 #'
-compute_RP_binp_funcs <- function(u, gamma_p, J, N, p_grid) {
+compute_RP_binp_funcs <- function(u, gamma_p, J, Nv, p_grid) {
   M <- ncol(gamma_p) / J
   n_grid_pts = length(p_grid)
   Ax_binaries <- u$A_table[u$A_table[,'nA']==2, 'Ax']
@@ -500,13 +500,13 @@ compute_RP_binp_funcs <- function(u, gamma_p, J, N, p_grid) {
 #'
 #' @inherit create_universe author references
 #'
-compute_RC_binp_funcs <- function(u, alpha, J, N, p_grid) {
+compute_RC_binp_funcs <- function(u, alpha, J, Nv, p_grid) {
   n_grid <- length(p_grid)
   M <- length(alpha) / J
   Ax_binaries <- u$A_table[u$A_table[,'nA']==2, 'Ax']
   n_binary <- length(Ax_binaries)
-  n1 <- N$by_Ax[Ax_binaries]      # first object count for n_binary choice sets
-  n0 <- N$by_Ax[Ax_binaries + 1]  # second object count for n_binary choice sets
+  n1 <- Nv[Ax_binaries]      # first object count for n_binary choice sets
+  n0 <- Nv[Ax_binaries + 1]  # second object count for n_binary choice sets
 
   binp_funcs <- vector("list", n_binary)
 
@@ -574,14 +574,14 @@ lnf_seq_multinom <- function(p, N_x) {
 }
 
 # Compute expectation of maximum likelihood P at maximum likelihood probabilities
-compute_EP_ln_maxl <- function(u, N, alpha, MJ) {
+compute_EP_ln_maxl <- function(u, Nv, alpha, MJ) {
   P_mle <- rep(0, u$n_probs)
   Eln_maxl <- 0
   for (A in 1:u$n_subsets) {
     if (u$A_table[A, 'nA'] > 1) {
       Ax <- u$A_table[A, 'Ax']
       nA <- u$A_table[A, 'nA']
-      N_Ax <- N$by_Ax[Ax:(Ax+nA-1)]
+      N_Ax <- Nv[Ax:(Ax+nA-1)]
       al_post = N_Ax + rep(alpha/nA, nA)
       P = bayesm::rdirichlet(MJ, N_Ax)
       lnf = apply(P, MARGIN=1, lnf_seq_multinom, N_Ax)
@@ -647,11 +647,11 @@ log_prior_gamma <- function(u, gamma_p, alpha_p) {
 #' @examples
 #' n <- 5
 #' u <- create_universe(n)
-#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
+#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
 #' M <- 10
 #' weight_Ax <- matrix(rgamma(u$n_probs * M, 4.0), nrow=u$n_probs, ncol=M)
-#' ln_Pr_by_A <- compute_ln_Pr_by_A(u, "RC", weight_Ax, N)
-compute_ln_Pr_by_A <- function(u, type, weight_Ax, N) {
+#' ln_Pr_by_A <- compute_ln_Pr_by_A(u, "RC", weight_Ax, Nv)
+compute_ln_Pr_by_A <- function(u, type, weight_Ax, Nv) {
   ln_Pr_by_A <- matrix(0, nrow=u$n_subsets, ncol=ncol(weight_Ax))
   rownames(ln_Pr_by_A) <- u$A_strings
 
@@ -662,7 +662,7 @@ compute_ln_Pr_by_A <- function(u, type, weight_Ax, N) {
     if (u$A_table[A, 'nA'] > 1) {
       Ax <- u$A_table[A, 'Ax']
       nA <- u$A_table[A, 'nA']
-      N_Ax <- N$by_Ax[Ax:(Ax+nA-1)]
+      N_Ax <- Nv[Ax:(Ax+nA-1)]
       N_A <- sum(N_Ax)
       if (type == 'RP') { # weight_Ax is gamma_Ax
         ga_Ax <- weight_Ax[Ax:(Ax+nA-1), ]
@@ -732,7 +732,7 @@ AR_gamma <- function(gamma, alpha, phi) {
 #' Sample alpha from its conditional distribution given gamma and data
 #'
 #' @param u
-#' @param N
+#' @param Nv
 #' @param alpha_prior
 #' @param alpha current state of alpha particles
 #' @param gamma_p
@@ -744,7 +744,7 @@ AR_gamma <- function(gamma, alpha, phi) {
 #' @export
 #'
 #' @examples
-update_alpha <- function(u, N, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by_A,
+update_alpha <- function(u, Nv, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by_A,
                          n_reps = 2) {
   MJ <- length(alpha)
   # Metropolis-Hastings proposal distribution for target distribution
@@ -765,7 +765,7 @@ update_alpha <- function(u, N, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by_
   b_bar <- alpha_prior$b - p_bar + b_delta
 
   alpha_Ax <- compute_alpha_Ax(u, alpha)
-  ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, N)
+  ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, Nv)
   ln_ll <- compute_ln_like(u, lambda, ln_Pr_RC_by_A, ln_Pr_RP_by_A)
   ln_f_over_g <- lgamma(alpha + 1) -
     n_fact * lgamma(alpha/n_fact + 1) -
@@ -773,10 +773,10 @@ update_alpha <- function(u, N, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by_
 
   aPr <- 0
   for (i_rep in seq_len(n_reps)) {
-    # Next compute ln Pr[N|alpha_star, lambda = 0], ln Pr[N|alpha, lambda = 0]
+    # Next compute ln Pr[Nv|alpha_star, lambda = 0], ln Pr[Nv|alpha, lambda = 0]
     alpha_star <- stats::rgamma(MJ, a_bar, b_bar)
     alpha_Ax_star <- compute_alpha_Ax(u, alpha_star)
-    ln_Pr_RC_by_A_star <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax_star, N)
+    ln_Pr_RC_by_A_star <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax_star, Nv)
     ln_ll_star <- compute_ln_like(u, lambda, ln_Pr_RC_by_A_star, ln_Pr_RP_by_A)
 
     # Next evaluate proposal density g and target density f at alpha and alpha_star
