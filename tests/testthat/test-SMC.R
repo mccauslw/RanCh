@@ -12,3 +12,15 @@ test_that("RC and RP simulation works", {
   RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nflat,
                        lambda_values, cycle_schedule)
 })
+
+test_that("AR_gamma works (autoregressive gamma process)", {
+  M <- 10
+  n_rep <- 100
+  alpha <- 3.0
+  phi <- 0.9
+  gamma <- matrix(nrow = n_rep, ncol = M)
+  gamma[1,] = rgamma(M, alpha)
+  for (i in seq(2, n_rep)) {
+    gamma[i,] = AR_gamma(gamma[i-1,], alpha, phi)
+  }
+})

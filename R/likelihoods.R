@@ -40,7 +40,7 @@ rmultinomRC <- function(n_draws, P, N_total) {
 #'
 #' \code{dmultinomRC} evaluates the density of a count matrix given probabilities
 #' in a RC model \code{P}.
-#' @param P matrix containing a random choice (RC) model
+#' @inheritParams rmultinomRC
 #' @param N A count matrix or 3D array (multiple observations).
 #' The first two dimensions are indexed by menu A and object x.
 #' @param categorical logical; if \code{TRUE}, the likelihood is the for
@@ -49,7 +49,7 @@ rmultinomRC <- function(n_draws, P, N_total) {
 #' @param log logical; if \code{TRUE}, return the log likelihood;
 #' if \code{FALSE}, the likelihood.
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
-#' @return log likelihood or likelihood
+#' @return value of log density or density
 #' @examples
 #' u = c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
 #' P = P_Luce(u)
@@ -138,9 +138,10 @@ dDirMultinom <- function(alpha, counts, categorical=FALSE, log=TRUE) {
 #' Simulation of RC models under a multiple Dirichlet distribution
 #'
 #' \code{rDirichletRC} draws RC models from a multiple Dirichlet distribution.
-#' @param n_draws number of draws to generate
+#' @inheritParams rmultinomRC
 #' @param Alpha matrix of Dirichlet parameters, each row giving the Dirichlet
-#' @return a \code{nrow(Alpha)} by \code{ncol{Alpha}} by \code{n} array.
+#' shape parameter vector for a given menu
+#' @return a \code{nrow(Alpha)} by \code{ncol{Alpha}} by \code{n_draws} array.
 #' If the returned matrix is \code{P}, \code{P[, , i]} is the \eqn{i}'th draw
 #' of a RCS.
 #' @examples
@@ -166,7 +167,7 @@ rDirichletRC <- function(n_draws, Alpha) {
 #' distribution of the corresponding row of an RCS.
 #' @inheritParams rDirichletRC
 #' @inheritParams dmultinomRC
-#' @return Likelihood or log likelihood
+#' @inherit dmultinomRC return
 #' @examples
 #' Alpha = DirRC_constant_shape(3, 1.0)
 #' P <- rDirichlet(10, Alpha) # 10 draws, 3 objects in universe

@@ -582,7 +582,6 @@ compute_EP_ln_maxl <- function(u, N, alpha, MJ) {
       Ax <- u$A_table[A, 'Ax']
       nA <- u$A_table[A, 'nA']
       N_Ax <- N$by_Ax[Ax:(Ax+nA-1)]
-      N_A <- N$by_A[A]
       al_post = N_Ax + rep(alpha/nA, nA)
       P = bayesm::rdirichlet(MJ, N_Ax)
       lnf = apply(P, MARGIN=1, lnf_seq_multinom, N_Ax)
@@ -592,14 +591,30 @@ compute_EP_ln_maxl <- function(u, N, alpha, MJ) {
   Eln_maxl
 }
 
-# Aggregated preference gamma weights to choice gamma weights
+#' Aggregate preference gamma weights to obtain choice object gamma weights
+#'
+#' @param u
+#' @param gamma
+#'
+#' @returns A matrix of gamma weights indexed by Ax and particle
+#' @export
+#'
+#' @examples
 compute_gamma_Ax <- function(u, gamma) {
   gamma_Ax <- u$pi_to_P %*% gamma
   rownames(gamma_Ax) <- u$Ax_strings
   gamma_Ax
 }
 
-# Compute choice alpha parameters from scalar alpha parameter
+#' Compute Dirichlet alpha parameters by Ax given a
+#'
+#' @param u
+#' @param alpha vector of alpha values by particle
+#'
+#' @returns matrix, n_probs by MJ, of Dirichlet alpha parameters
+#' @export
+#'
+#' @examples
 compute_alpha_Ax <- function(u, alpha) {
   card_Ax <- u$A_table[u$Ax_table[, 'A'], 'nA']
   alpha_Ax <- outer(card_Ax, alpha, FUN = function(x,y){y/x})
@@ -611,15 +626,31 @@ log_prior_gamma <- function(u, gamma_p, alpha_p) {
   colSums(stats::dgamma(gamma_p, alpha_p, log = TRUE))
 }
 
-# Compute one of the following log probabilities, by choice set
-#
-#   (1) ln_Pr_RC_by_A, n_subsets x M*J
-#     - gives, for set A (row) and particle m (col), the probability of choice
-#       count vector N_A given alpha_m and lambda = 0
-#   (2) ln_Pr_RP_by_A, n_subsets x M*J
-#     - gives, for set A (row) and particle m (col), the probability of choice
-#       count vector N_A given gamma_p (col m) and lambda = 1
-#
+#' Compute RC or RP log likelihood terms, by menu and particle
+#'
+#' Compute one of the following log probabilities, by choice set
+#'
+#'   (1) ln_Pr_RC_by_A, n_subsets x M*J
+#'     - gives, for set A (row) and particle m (col), the probability of choice
+#'       count vector N_A given alpha_m and lambda = 0
+#'   (2) ln_Pr_RP_by_A, n_subsets x M*J
+#'     - gives, for set A (row) and particle m (col), the probability of choice
+#'       count vector N_A given gamma_p (col m) and lambda = 1
+#'
+#' @inheritParams compute_pi_ln_like
+#' @param type the string "RP" or "RC", to indicate which terms to compute
+#' @param weight_Ax
+#'
+#' @returns A matrix of RC or RP log likelihood terms, by menu and particle
+#' @export
+#'
+#' @examples
+#' n <- 5
+#' u <- create_universe(n)
+#' N <- vectorize_counts(u, RanCh::MMS_2019_counts[1, , ])
+#' M <- 10
+#' weight_Ax <- matrix(rgamma(u$n_probs * M, 4.0), nrow=u$n_probs, ncol=M)
+#' ln_Pr_by_A <- compute_ln_Pr_by_A(u, "RC", weight_Ax, N)
 compute_ln_Pr_by_A <- function(u, type, weight_Ax, N) {
   ln_Pr_by_A <- matrix(0, nrow=u$n_subsets, ncol=ncol(weight_Ax))
   rownames(ln_Pr_by_A) <- u$A_strings
@@ -632,7 +663,7 @@ compute_ln_Pr_by_A <- function(u, type, weight_Ax, N) {
       Ax <- u$A_table[A, 'Ax']
       nA <- u$A_table[A, 'nA']
       N_Ax <- N$by_Ax[Ax:(Ax+nA-1)]
-      N_A <- N$by_A[A]
+      N_A <- sum(N_Ax)
       if (type == 'RP') { # weight_Ax is gamma_Ax
         ga_Ax <- weight_Ax[Ax:(Ax+nA-1), ]
         ln_Pr_by_A[A, ] <- colSums(N_Ax*log(ga_Ax)) - N_A*log(gamma_total)
@@ -648,8 +679,22 @@ compute_ln_Pr_by_A <- function(u, type, weight_Ax, N) {
   ln_Pr_by_A
 }
 
-# If lambda is the scalar zero, ln_Pr_RP_by_A is not referenced
+#' Compute log likelihood values for a hybrid model indexed by \code{lambda}
+#'
+#' Takes log likelihood terms, by subset A, for the RC and RP models and
+#' computes a weighted log likelihood for the hybrid model indexed by the
+#' scalar value @eqn{\lambda \in [0,1]}.
+#' @param u
+#' @param lambda index of hybrid model
+#' @param ln_Pr_RC_by_A matrix of RC log likelihood terms, by menu A and particle
+#' @param ln_Pr_RP_by_A matrix of RP log likelihood terms, by menu A and particle
+#'
+#' @returns A vector of hybrid model log likelihood values, by particle
+#' @export
+#'
+#' @examples
 compute_ln_like <- function(u, lambda, ln_Pr_RC_by_A, ln_Pr_RP_by_A) {
+  # If lambda is (scalar) zero, ln_Pr_RP_by_A is not referenced
   if (identical(lambda, 0.00)) {
     ln_like <- colSums(ln_Pr_RC_by_A)
   } else {
@@ -665,13 +710,22 @@ compute_ln_like <- function(u, lambda, ln_Pr_RC_by_A, ln_Pr_RP_by_A) {
   ln_like
 }
 
+#' Apply a Markov transition to each element of gamma. The stationary
+#' distribution of each element gamma[i] is Gamma(alpha[i], 1)
+#'
+#' @param gamma A vector of random variables
+#' @param alpha A vector of shape parameters for the Gamma distribution or a
+#' common scalar value
+#' @param phi A common autocorrelation parameter, -1 < phi < 1
+#'
+#' @returns A vector of random variables, the result of the Markov transitions
+#' @export
+#'
+#' @examples
 AR_gamma <- function(gamma, alpha, phi) {
-  # gamma is length M*J,
-  # alpha is length M*J,
-  # phi is scalar
-  MJ <- length(alpha)
-  be <- stats::rbeta(MJ, phi*alpha, (1-phi)*alpha)
-  gamma <- be * gamma + stats::rgamma(MJ, (1-phi)*alpha)
+  M <- length(gamma)
+  be <- stats::rbeta(M, phi*alpha, (1-phi)*alpha)
+  gamma <- be * gamma + stats::rgamma(M, (1-phi)*alpha)
   gamma
 }
 
@@ -680,11 +734,11 @@ AR_gamma <- function(gamma, alpha, phi) {
 #' @param u
 #' @param N
 #' @param alpha_prior
-#' @param alpha
+#' @param alpha current state of alpha particles
 #' @param gamma_p
-#' @param lambda
+#' @param lambda parameter of hybrid model
 #' @param ln_Pr_RP_by_A
-#' @param n_reps
+#' @param n_reps number of times to apply Metropolis-Hastings update of alpha
 #'
 #' @returns
 #' @export
