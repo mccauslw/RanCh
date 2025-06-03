@@ -11,20 +11,21 @@
 #'
 #' @return A list with the following elements
 #' \describe{
-#'    \item{alpha}{An M x J matrix with a sample from the target distribution}
+#'    \item{alpha}{An M x J matrix, a sample from the target distribution with
+#'    independent columns}
 #'    \item{marl_stats}{Simulation statistics for the marginal likelihood}
 #'    \item{n_plus}{Number of non-zero counts in data}
-#'    \item{theta}{Parameter of Beta-Gamma importance distribution}
+#'    \item{theta}{Parameter vector of the Beta-Gamma importance distribution}
 #' }
 #' @export
 #'
 #' @importFrom extraDistr rbetapr dbetapr
 #'
 #' @examples
-#' n_objects <- 5
-#' alpha_prior <- create_alpha_prior(n_objects, 4, 0.1)
+#' n <- 5 # Number of objects in choice universe
+#' alpha_prior <- create_alpha_prior(n, 4, 0.1)
 #' N <- RanCh::MMS_2019_counts[1, , ]
-#' u <- create_universe(n_objects, object_names=dimnames(N)[2])
+#' u <- create_universe(n, object_names=dimnames(N)[[2]])
 #' Nv <- vectorize(u, N)
 #' J <- 20
 #' M <- 50
@@ -72,7 +73,7 @@ run_RC_sim <- function(u, J, M, alpha_prior, Nv) {
 
 #' Create a schedule of simulation parameter values for random preference simulation
 #'
-#' @param lambda_values grid of lambda values for simulation
+#' @param lambda_values Grid of lambda values at which to approximate marginal likelihood
 #'
 #' @returns tibble with simulation parameter values for each SCM cycle
 #' @export
@@ -107,19 +108,39 @@ create_cycle_schedule <- function(lambda_values) {
 #' Use SMC to simulate posterior distributions of Dirichlet RC and hybrid models
 #'
 #' @inheritParams run_RC_sim
-#' @param lambda_values Grid of lambda values at which to approximate marginal likelihod
+#' @inheritParams create_cycle_schedule
 #' @param cycle_schedule Information organising simulation by cycles
 #'
 #' @return List with the following elements
 #' \describe{
 #'    \item{alpha}{An M x J matrix with a sample of alpha from the final target distribution}
-#'    \item{gamma}{?WJM? sample of gamma from the final target distribution}
-#'    \item{lambda_stats}{?WJM? simulation statistics}
-#'    \item{cycle_stats}{?WJM? simulation statistics}
-#'    \item{big_aPr}{Acceptance probabilities for big blocks}
-#'    \item{sm_aPr}{Acceptance probabilities for small blocks}
-#'    \item{alpha_aPr}{Acceptance probabilities for alpha proposals}
-#'    \item{alpha_mu}{?WJM?}
+#'    \item{gamma}{An \eqn{n! \times MJ} matrix of unnormalized preference weights.}
+#'    \item{lambda_stats}{A list with the following components:
+#'      \itemize{
+#'        \item \code{gr_ESS}
+#'        \item \code{gr_marl}
+#'        \item \code{gr_cum_ln_marl}
+#'        \item \code{aggregates}
+#'      }
+#'    }
+#'    \item{cycle_stats}{A data frame giving simulation results for each SMC
+#'    C-S-M cycle. The named columns are:
+#'      \itemize{
+#'        \item \code{lambda} value of lambda at the end of the cycle
+#'        \item \code{ESS} Effective Sample Size
+#'        \item \code{W_var}
+#'        \item \code{marl} Multiplicative contribution to marginal likelihood
+#'        \item \code{marl_nse} Numerical standard error of \code{marl}
+#'        \item \code{ln_marl} Additive contribution to log marginal likelihood
+#'        \item \code{ln_marl_nse} Numerical standard error of \code{ln_marl}
+#'        \item \code{cum_lin_marl} Cumulative log marginal likelihood at end of cycle
+#'        \item \code{cum_lin_marl_nse2} Numerical standard error of \code{cum_lin_marl}
+#'      }
+#'    }
+#'    \item{big_aPr}{A matrix of acceptance probabilities for big blocks, by cycle and block}
+#'    \item{sm_aPr}{A matrix of acceptance probabilities for small blocks, by cycle and block}
+#'    \item{alpha_aPr}{A vector of acceptance probabilities for alpha proposals, by cycle}
+#'    \item{alpha_mu}{Posterior mean of alpha parameter, by cycle}
 #' }
 #'
 #' @export
@@ -127,10 +148,10 @@ create_cycle_schedule <- function(lambda_values) {
 #' @importFrom stats rgamma runif
 #'
 #' @examples
-#' n_objects <- 5
-#' alpha_prior <- create_alpha_prior(n_objects, 4, 0.1)
+#' n <- 5 # Number of objects in the relevant choice universe
+#' alpha_prior <- create_alpha_prior(n, 4, 0.1)
 #' N <- RanCh::MMS_2019_counts[1, , ]
-#' u <- create_universe(n_objects, object_names=dimnames(N)[2])
+#' u <- create_universe(n, object_names=dimnames(N)[[2]])
 #' Nv <- vectorize(u, N)
 #' J <- 20
 #' M <- 50
@@ -244,15 +265,6 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
     # Resample alpha and gamma using final weights, group by group
     W = matrix(exp(w[, n_lambda_index]), nrow=M, ncol=J)
     for (j in 1:J) {
-      # Old multinomial sampling
-      #probabilities = W[,j] / sum(W[,j])
-      #if (any(is.nan(probabilities))) {
-      #  print(cycle_index)
-      #  print(summary(alpha))
-      #  print(summary(colSums(gamma)))
-      #}
-      #selection <- sample.int(M, M, replace=TRUE, prob=probabilities)
-
       # New residual sampling
       En <- W[,j] / mean(W[,j])
       indices = seq_len(M)
@@ -372,7 +384,6 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
 #' @export
 #'
 #' @examples
-#' library(RanCh)
 #' n <- 5
 #' u <- create_universe(n)
 #' alpha_prior <- create_alpha_prior(n, 4, 0.1)
@@ -451,7 +462,7 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
 #'
 #' @inheritParams ind_groups_stats
 #' @inheritParams compute_pi_ln_like
-#' @param gamma_p matrix, \eqn{MJ \times n!}, where each column is a vector of
+#' @param gamma_p matrix, \eqn{JM \times n!}, where each column is a vector of
 #' unnormalized preference probabilities
 #' @param p_grid vector of choice probability values
 #'
@@ -533,8 +544,42 @@ compute_RC_binp_funcs <- function(u, alpha, J, Nv, p_grid) {
   binp_funcs
 }
 
-# Compute marginal likelihood statistics for the vector of importance weights
-# from a single value of lambda
+#' Compute marginal likelihood statistics for a vector of importance weights
+#'
+#' Use importanace weights for the current SMC cycle and the cumulative
+#' marginal likelihood statistics from previous SMC cycles to compute
+#' marginal likelihood statistics for the current cycle and to update the
+#' cumulative marginal likelihood statistics.
+#'
+#' @param W vector of importance weights of length JM
+#' @param cum_ln_marl cumulative log marginal likelihood at the end of the
+#' previous SMC cycle
+#' @param cum_ln_marl_nse2 cumulative numerical variance of the log marginal
+#' likelihood at the end of the previous SMC cycle
+#' @param gr_cum_ln_marl cumulative log marginal likelihood at the end of the
+#' previous SJM cycle, by group
+#'
+#' @returns A list with components
+#' \describe{
+#'   \item{gr_ESS}{Effective Sample Size, by group}
+#'   \item{gr_marl}{marginal likelihood factor, by group}
+#'   \item{gr_cum_ln_marl}{cumulative log marginal likelihood, by group}
+#'   \item{ESS}{Effective Sample Size, aggregate}
+#'   \item{W_var}{}
+#'   \item{marl}{marginal likelihood incremental factor}
+#'   \item{marl_nse}{numerical standard error of \code{marl}}
+#'   \item{marl_rne}{relative numerical efficiency of \code{marl}}
+#'   \item{ln_marl}{log marginal likelihood increment}
+#'   \item{ln_marl_nse}{numerical standard error of \code{ln_marl}}
+#'   \item{cum_ln_marl}{cumulative log marginal likeilhood at the end of the
+#'   current SMC cycle}
+#'   \item{cum_ln_marl_nse2}{cumulative numerical variance of the log marginal
+#'   likelihood at the end of the current SMC cycle}
+#' }
+#'
+#' @export
+#'
+#' @examples
 weights_to_C_stage_stats <- function(W, cum_ln_marl, cum_ln_marl_nse2,
                                      gr_cum_ln_marl) {
   J <- length(gr_cum_ln_marl)
@@ -568,14 +613,31 @@ weights_to_C_stage_stats <- function(W, cum_ln_marl, cum_ln_marl_nse2,
        cum_ln_marl_nse2 = cum_ln_marl_nse2 + ln_marl_nse^2)
 }
 
-# Compute log multinomial density for sequence, rather than counts
-lnf_seq_multinom <- function(p, N_x) {
-  sum(N_x[N_x != 0] * log(p[N_x != 0]))
-}
+#' Compute posterior expected value of RC log likelihood function for the
+#' Bayesian Dirichlet RC model
+#'
+#' @inheritParams compute_pi_ln_like
+#' @param alpha common scalar sum of Dirichlet shape parameters
+#' @param M total number of draws from each Dirichlet distribution
+#'
+#' @returns The posterior expected value of the RC log likelihood
+#' @export
+#'
+#' @examples
+#' n <- 5
+#' u <- create_universe(n)
+#' alpha <- 1.0
+#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
+#'
+compute_EP_ln_maxl <- function(u, Nv, alpha, M) {
 
-# Compute expectation of maximum likelihood P at maximum likelihood probabilities
-compute_EP_ln_maxl <- function(u, Nv, alpha, MJ) {
-  P_mle <- rep(0, u$n_probs)
+  # Compute log multinomial density without the "n choose r" normalization
+  # constant, so that it measures the probability of the sequence, rather than
+  # the count.
+  lnf_seq_multinom <- function(p, N_x) {
+    sum(N_x[N_x != 0] * log(p[N_x != 0]))
+  }
+
   Eln_maxl <- 0
   for (A in 1:u$n_subsets) {
     if (u$A_table[A, 'nA'] > 1) {
@@ -583,7 +645,7 @@ compute_EP_ln_maxl <- function(u, Nv, alpha, MJ) {
       nA <- u$A_table[A, 'nA']
       N_Ax <- Nv[Ax:(Ax+nA-1)]
       al_post = N_Ax + rep(alpha/nA, nA)
-      P = bayesm::rdirichlet(MJ, N_Ax)
+      P = bayesm::rdirichlet(M, N_Ax)
       lnf = apply(P, MARGIN=1, lnf_seq_multinom, N_Ax)
       Eln_maxl <- Eln_maxl + mean(lnf)
     }
@@ -683,7 +745,7 @@ compute_ln_Pr_by_A <- function(u, type, weight_Ax, Nv) {
 #'
 #' Takes log likelihood terms, by subset A, for the RC and RP models and
 #' computes a weighted log likelihood for the hybrid model indexed by the
-#' scalar value @eqn{\lambda \in [0,1]}.
+#' scalar value \code{lambda} in the unit interval @eqn{[0,1]}.
 #' @param u
 #' @param lambda index of hybrid model
 #' @param ln_Pr_RC_by_A matrix of RC log likelihood terms, by menu A and particle
@@ -731,11 +793,10 @@ AR_gamma <- function(gamma, alpha, phi) {
 
 #' Sample alpha from its conditional distribution given gamma and data
 #'
-#' @param u
-#' @param Nv
-#' @param alpha_prior
+#' @inheritParams compute_pi_ln_like
+#' @inheritParams run_RC_sim
 #' @param alpha current state of alpha particles
-#' @param gamma_p
+#' @param gamma_p current state of gamma particles
 #' @param lambda parameter of hybrid model
 #' @param ln_Pr_RP_by_A
 #' @param n_reps number of times to apply Metropolis-Hastings update of alpha

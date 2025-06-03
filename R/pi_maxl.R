@@ -2,25 +2,26 @@
 #
 #' Evaluate random preference (RP) log likelihood
 #'
-#' Evaluate RP log likelihood as a function of pi,
-#' the vector of preference probabilities, for given data N.
+#' Evaluate RP log likelihood as a function of pi, the vector of preference
+#' probabilities, for data organized into a vector Nv.
 #'
-#' @param pi vector of preference probabilities of length n!
+#' @param pi vector of preference probabilities of length \eqn{n!}, where
+#' \eqn{n} is the number of objects in the relevant choice universe
 #' @param u list with precomputed information about choice universes
 #'      of size n, created using [create_universe()]
-#' @param N matrix containing observed choice counts in a choice experiment
+#' @param Nv vector containing observed choice counts in a choice experiment,
+#' created using [vectorize()]
 #'
 #' @return The value of the RP log likelihood at the given value of pi
 #' @export
 #'
 #' @examples
-#' library(RanCh)
 #' n <- 5
 #' n_fact = factorial(n)
 #' pi <- rep(1/n_fact, n_fact) # Uniform distribution over preference orders
 #' u <- create_universe(n)
 #' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
-#' pi_ln_like <- compute_pi_ln_like(pi, u, N)
+#' pi_ln_like <- compute_pi_ln_like(pi, u, Nv)
 #'
 #' @inherit create_universe author references
 #'
@@ -37,17 +38,16 @@ compute_pi_ln_like <- function(pi, u, Nv) {
 #'
 #' @inheritParams compute_pi_ln_like
 #'
-#' @return Gradient of RP log likelihood, a vector of size n!.
+#' @return Gradient of RP log likelihood, a vector of size \eqn{n!}.
 #' @export
 #'
 #' @examples
-#' library(RanCh)
 #' n <- 5
 #' n_fact = factorial(n)
 #' pi <- rep(1/n_fact, n_fact) # Uniform distribution over preference orders
 #' u <- create_universe(n)
 #' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
-#' pi_score <- compute_pi_score(pi, u, N)
+#' pi_score <- compute_pi_score(pi, u, Nv)
 #'
 #' @inherit create_universe author references
 #'
@@ -98,11 +98,10 @@ compute_pi_score <- function(pi, u, Nv) {
 #' @export
 #'
 #' @examples
-#' library(RanCh)
 #' n <- 5
 #' u <- create_universe(n)
 #' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
-#' pi_ln_maxl <- compute_pi_ln_maxl(u, N)
+#' pi_ln_maxl <- compute_pi_ln_maxl(u, Nv)
 #'
 #' @inherit create_universe author references
 #' @references

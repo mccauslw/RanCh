@@ -74,7 +74,6 @@ create_alpha_prior <- function(n, a, b, h = 0.05, eps = 1e-7) {
 #' @export
 #'
 #' @examples
-#' library(RanCh)
 #' n <- 5
 #' u <- create_universe(n)
 #' alpha_prior <- create_alpha_prior(n, 4, 0.1)
