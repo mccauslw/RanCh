@@ -684,10 +684,6 @@ compute_alpha_Ax <- function(u, alpha) {
   alpha_Ax
 }
 
-log_prior_gamma <- function(u, gamma_p, alpha_p) {
-  colSums(stats::dgamma(gamma_p, alpha_p, log = TRUE))
-}
-
 #' Compute RC or RP log likelihood terms, by menu and particle
 #'
 #' Compute one of the following log probabilities, by choice set
