@@ -4,7 +4,9 @@
 \name{RDS_2011_counts}
 \alias{RDS_2011_counts}
 \title{Choice count data from the Regenwetter, Dana and Davis-Stober (2011) experiment}
-\format{An object of class \code{array} of dimension 3 x 18 x 31 x 5.}
+\format{
+An object of class \code{array} of dimension 3 x 18 x 31 x 5.
+}
 \usage{
 RDS_2011_counts
 }

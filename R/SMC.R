@@ -653,15 +653,8 @@ compute_EP_ln_maxl <- function(u, Nv, alpha, M) {
   Eln_maxl
 }
 
-#' Aggregate preference gamma weights to obtain choice object gamma weights
-#'
-#' @param u
-#' @param gamma
-#'
-#' @returns A matrix of gamma weights indexed by Ax and particle
-#' @export
-#'
-#' @examples
+# Helper function to aggregate preference gamma weights to obtain choice object
+# gamma weights, making sure rownames are set correctly.
 compute_gamma_Ax <- function(u, gamma) {
   gamma_Ax <- u$pi_to_P %*% gamma
   rownames(gamma_Ax) <- u$Ax_strings
@@ -670,13 +663,11 @@ compute_gamma_Ax <- function(u, gamma) {
 
 #' Compute Dirichlet alpha parameters by Ax given a
 #'
-#' @param u
+#' @inheritParams compute_pi_ln_like
 #' @param alpha vector of alpha values by particle
 #'
-#' @returns matrix, n_probs by MJ, of Dirichlet alpha parameters
-#' @export
-#'
-#' @examples
+#' @returns matrix, n_probs by number of particles, of Dirichlet alpha
+#' parameters
 compute_alpha_Ax <- function(u, alpha) {
   card_Ax <- u$A_table[u$Ax_table[, 'A'], 'nA']
   alpha_Ax <- outer(card_Ax, alpha, FUN = function(x,y){y/x})
@@ -742,15 +733,12 @@ compute_ln_Pr_by_A <- function(u, type, weight_Ax, Nv) {
 #' Takes log likelihood terms, by subset A, for the RC and RP models and
 #' computes a weighted log likelihood for the hybrid model indexed by the
 #' scalar value \code{lambda} in the unit interval @eqn{[0,1]}.
-#' @param u
+#' @inheritParams compute_pi_ln_like
 #' @param lambda index of hybrid model
 #' @param ln_Pr_RC_by_A matrix of RC log likelihood terms, by menu A and particle
 #' @param ln_Pr_RP_by_A matrix of RP log likelihood terms, by menu A and particle
 #'
 #' @returns A vector of hybrid model log likelihood values, by particle
-#' @export
-#'
-#' @examples
 compute_ln_like <- function(u, lambda, ln_Pr_RC_by_A, ln_Pr_RP_by_A) {
   # If lambda is (scalar) zero, ln_Pr_RP_by_A is not referenced
   if (identical(lambda, 0.00)) {
@@ -780,6 +768,15 @@ compute_ln_like <- function(u, lambda, ln_Pr_RC_by_A, ln_Pr_RP_by_A) {
 #' @export
 #'
 #' @examples
+#' M <- 10
+#' n_rep <- 100
+#' alpha <- 3.0
+#' phi <- 0.9
+#' gamma <- matrix(nrow = n_rep, ncol = M)
+#' gamma[1,] = rgamma(M, alpha)
+#' for (i in seq(2, n_rep)) {
+#'  gamma[i,] = AR_gamma(gamma[i-1,], alpha, phi)
+#'}
 AR_gamma <- function(gamma, alpha, phi) {
   M <- length(gamma)
   be <- stats::rbeta(M, phi*alpha, (1-phi)*alpha)
@@ -794,7 +791,9 @@ AR_gamma <- function(gamma, alpha, phi) {
 #' @param alpha current state of alpha particles
 #' @param gamma_p current state of gamma particles
 #' @param lambda parameter of hybrid model
-#' @param ln_Pr_RP_by_A
+#' @param ln_Pr_RP_by_A matrix, n_subsets by M*J, giving, for each set A (row)
+#' and particle m (col), the probability of choice count vector N_A given
+#' gamma_p (col m) and lambda = 1
 #' @param n_reps number of times to apply Metropolis-Hastings update of alpha
 #'
 #' @returns

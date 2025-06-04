@@ -4,7 +4,9 @@
 \name{T_1969_counts}
 \alias{T_1969_counts}
 \title{Choice count data from the Tversky (1969) experiment}
-\format{An object of class \code{array} of dimension 8 x 31 x 5.}
+\format{
+An object of class \code{array} of dimension 8 x 31 x 5.
+}
 \usage{
 T_1969_counts
 }
