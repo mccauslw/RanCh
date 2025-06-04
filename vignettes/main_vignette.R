@@ -104,7 +104,7 @@ points(tritrafo(p[filt2, ]), pch=20)
 
 ## ----HPD----------------------------------------------------------------------
 library(klaR)
-prior_Alpha <- RCS_scalar_alpha_prior(2.0, ncol(N_bce))
+prior_Alpha <- DirRC_constant_sum(ncol(N_bce), 2.0)
 post_Alpha <- prior_Alpha + N_bce
 HD3 <- Dir2_3_HD_region(post_Alpha, 0.9, c(1,2,3))
 triplot(label=c('b', 'c', 'e'))               # Set up ternary plot
@@ -119,14 +119,16 @@ N = MMS_2019_counts['Colours',,]
 n_objects = ncol(N)
 
 # Zero parameter models
-print(log_L_DCE_multinomial(P_uniform(n_objects), N, categorical=TRUE))
-print(log_L_DCE_Dir_mult(RCS_uniform_prior(n_objects), N, categorical=TRUE))
+print(dmultinomRC(P_uniform(n_objects), N, categorical=TRUE))
+Alpha <- DirRC_constant_shape(n_objects, 1.0)
+print(dDirMultinomRC(Alpha, N, categorical=TRUE, log=TRUE))
 
 # One parameter models
-print(log_L_DCE_Dir_mult(RCS_scalar_alpha_prior(2.0, n_objects), N,
-                         categorical=TRUE))
+alpha <- 2.0
+Alpha <- DirRC_constant_sum(n_objects, 2.0)
+print(dDirMultinomRC(Alpha, N, categorical=TRUE, log=TRUE))
 
 # n-parameter models
-print(log_L_DCE_Dir_mult(RCS_vector_alpha_prior(4.0, c(1.0, 2.0, 1.0, 2.0, 1.0)),
-                         N, categorical=TRUE))
+Alpha <- DirRC_constant_sum(c(1.0, 2.0, 1.0, 2.0, 1.0), 4.0)
+print(dDirMultinomRC(Alpha, N, categorical=TRUE, log=TRUE))
 
