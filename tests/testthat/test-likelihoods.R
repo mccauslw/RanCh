@@ -15,10 +15,10 @@ test_that("Get correct value of max-min log marginal likelihood", {
 })
 
 test_that("Get correct value of P log maximum likelihood",{
-  N <- RanCh::MMS_2019_counts[1, , ]
+  N <- RanCh::MMS_2019_counts[2, , ]
   P <- proportions(N)
   P_ln_maxl <- dmultinomRC(P, N, categorical=TRUE, log=TRUE)
-  expect_equal(P_ln_maxl, -982.7762)
+  expect_equal(P_ln_maxl, -876.9697533)
 })
 
 test_that("Get correct value of uniform P log marginal likelihood",{

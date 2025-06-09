@@ -74,6 +74,7 @@ dmultinomRC <- function(P, N, categorical=FALSE, log=TRUE) {
     for (A in 1:nrow(P)) {
       if (subset_card[A] > 1) {
         v <- subset_vectors[[A]]
+        v <- v[N[A,v,i] != 0]
         if (categorical)
           ln_L <- ln_L + sum(N[A, v, i] * log(P[A, v]))
         else

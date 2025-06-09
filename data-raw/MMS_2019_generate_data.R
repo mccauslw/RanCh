@@ -96,6 +96,7 @@ MMS_2019_demographics =
 
 # Compute choice counts by domain, subset and choice object
 MMS_2019_table = table(MMS_2019_trials[c('domain', 'set_index', 'choice_int')])
+MMS_2019_table = MMS_2019_table[domain_names,,]
 
 # Dimension naming for MMS_2019_counts
 MMS_2019_count_dimnames = dimnames(MMS_2019_table)

@@ -91,8 +91,8 @@ compute_proposal_params <- function(u, alpha_prior, Nv) {
 
   # Evaluate f(alpha) Pr(N|alpha,lambda=0) on a grid
   alpha_Ax <- compute_alpha_Ax(u, alpha_grid)
-  ln_Pr_ind_by_A <- compute_ln_Pr_by_A(u, 'ind', alpha_Ax, Nv)
-  ln_Pr_N__al <- compute_ln_like(u, 0.0, ln_Pr_ind_by_A, ln_Pr_ind_by_A) # Last arg ignored
+  ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, Nv)
+  ln_Pr_N__al <- compute_ln_like(u, 0.0, ln_Pr_RC_by_A, ln_Pr_RC_by_A) # Last arg ignored
   ln_f_al <- dgamma(alpha_grid, alpha_prior$a, alpha_prior$b, log = TRUE)
   ln_f_al_N <- ln_Pr_N__al + ln_f_al
   ln_g <- ln_f_al_N - max(ln_f_al_N) # Subtract offset to avoid overflow
