@@ -3,9 +3,9 @@ Title: Tools for abstract discrete Random Choice
 URL: http://github.com/mccauslw/RanCh
 BugReports: http://github.com/mccauslw/RanCh/issues
 Version: 1.0.0
-Authors@R: c(
-    person("William", "McCausland", email = "mccauslw@mac.com", role = c("aut", "cre")),
-    person("Laure-Anna", "Baumol", email = "laureanna.bomal@gmail.com", role=c("aut")))
+Authors@R:
+    person("William", "McCausland", , "william.j.mccausland@umontreal.ca", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9896-235X"))
 Description: This package provides tools for a research project whose purpose is to help us
     better understand the foundations of stochastic discrete choice. It includes datasets
     compiled from the literature on context effects and stochastic intransitivity and from

@@ -7,3 +7,6 @@ vignettes/main_vignette.R
 data-raw/.DS_Store
 data-raw/*.csv
 data-raw/MSMPB_2019_data_files
+NAMESPACE
+/doc/
+/Meta/
