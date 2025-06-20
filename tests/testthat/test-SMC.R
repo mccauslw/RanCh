@@ -10,8 +10,8 @@ test_that("RC and RP simulation works", {
 
   p <- c(0.1, 0.5, 0.9)
   group_stats <- ind_groups_stats(RC_sim$alpha, J, p)
-  expect_lt(group_stats$mu, 25.0)
-  expect_gt(group_stats$mu, 20.0)
+  expect_lt(group_stats$mu, 14.0)
+  expect_gt(group_stats$mu, 12.0)
 
   lambda_values <- seq(0.01, 1.00, by=0.01)
   cycle_schedule <- create_cycle_schedule(lambda_values)

@@ -129,12 +129,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: William McCausland \email{mccauslw@mac.com}
-
-Authors:
-\itemize{
-  \item Laure-Anna Baumol \email{laureanna.bomal@gmail.com}
-}
+\strong{Maintainer}: William McCausland \email{william.j.mccausland@umontreal.ca} (\href{https://orcid.org/0000-0002-9896-235X}{ORCID})
 
 }
 \keyword{package}

@@ -17,5 +17,5 @@ RCS where all choice probabilities are discrete uniform
 choice probabilities are discrete uniform
 }
 \examples{
-P = P_uniform(3)
+P <- P_uniform(3)
 }

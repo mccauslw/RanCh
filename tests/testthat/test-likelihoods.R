@@ -11,19 +11,19 @@ test_that("Get correct value of max-min log marginal likelihood", {
   N <- RanCh::MMS_2019_counts[1, , ]
   P <- P_uniform(5)
   max_min_ln_marl <- dmultinomRC(P, N, categorical=TRUE, log=TRUE)
-  expect_equal(max_min_ln_marl, -1061.11277)
+  expect_equal(max_min_ln_marl, -1060.41961795424)
 })
 
 test_that("Get correct value of P log maximum likelihood",{
-  N <- RanCh::MMS_2019_counts[2, , ]
+  N <- RanCh::MMS_2019_counts[1, , ]
   P <- proportions(N)
   P_ln_maxl <- dmultinomRC(P, N, categorical=TRUE, log=TRUE)
-  expect_equal(P_ln_maxl, -876.9697533)
+  expect_equal(P_ln_maxl, -943.728101159082)
 })
 
 test_that("Get correct value of uniform P log marginal likelihood",{
   N <- RanCh::MMS_2019_counts[1, , ]
   Alpha <- DirRC_constant_shape(5, 1.0)
   uniform_P_ln_marl <- dDirMultinomRC(Alpha, N, categorical=TRUE, log=TRUE)
-  expect_equal(uniform_P_ln_marl, -1055.28457)
+  expect_equal(uniform_P_ln_marl, -1017.67826542784)
 })

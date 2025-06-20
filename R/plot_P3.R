@@ -158,8 +158,8 @@ bin_tern_MR_plot <- function(P3) {
 bin_term_MR_plot_all <- function(N) {
   P <- proportions(N)
   op = par(mfrow=c(4, 3), mar = c(1, 1, 0.5, 0.5))
-  for (i_triple in 1:n_tripletons[5]) {
-    triple <- tripletons[i_triple]
+  for (i_triple in 1:.n_tripletons[5]) {
+    triple <- .tripletons[i_triple]
     triple_v <- subset_vectors[[triple]]
     P3 <- marginalize(P, triple_v)
     bin_tern_MR_plot(P3)

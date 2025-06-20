@@ -1,133 +1,3 @@
-n_objects = 8
-object_names = c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
-n_subsets = 2^n_objects - 1
-
-# Compute names and cardinality of all subsets of {1,2,...,n_objects}
-subset_names = vector(mode='character', length=n_subsets)
-subset_card = vector(mode='integer', length=n_subsets)
-subset_vectors = vector(mode='list', length=n_subsets)
-for (subset in seq(1, n_subsets)) {
-  name = ''
-  card = 0
-  v = c()
-  for (i in seq(1, n_objects)) {
-    if (bitwAnd(subset, bitwShiftL(1, i-1))) {
-      name = paste(name, object_names[i], sep='')
-      card = card+1
-      v = c(v, i)
-    }
-  }
-  subset_names[subset] = name
-  subset_card[subset] = card
-  subset_vectors[[subset]] = v
-}
-
-# Singletons are special because we can set choice probability to one
-# without data
-n_singletons = 1:n_objects
-singletons = (1:n_subsets)[subset_card==1]
-singleton_names = object_names
-
-# Doubletons are special because they figure in revealed preference
-# calculations
-n_doubletons = choose(1:n_objects, 2)
-doubletons = (1:n_subsets)[subset_card==2]
-doubleton_names = subset_names[subset_card==2]
-
-# Tripleons are special because they figure in 2D graphics
-n_tripletons = choose(1:n_objects, 3)
-tripletons = (1:n_subsets)[subset_card==3]
-tripleton_names = subset_names[subset_card==3]
-
-# Create table of revealed preference
-# Value at (subset, object, doubleton) is 1, 0, or -1
-#   1 if object is first object in doubleton, doubleton a subset of subset.
-#  -1 if object is second object in doubleton, doubleton a subset of subset.
-#   0 otherwise
-RP_table = array(0, c(n_subsets, n_objects, n_doubletons[n_objects]),
-                    dimnames = list(subset=subset_names,
-                                    choice=object_names,
-                                    doubleton=doubleton_names))
-for (subset in seq(1, n_subsets)) {
-  for (d in seq(1, n_doubletons[n_objects])) {
-    if (bitwAnd(doubletons[d], subset)==doubletons[d]) {
-      # Do this if doubleton is a subset of subset
-      for (i in seq(1, n_objects)) {
-        singleton = bitwShiftL(1, i-1)
-        if (bitwAnd(singleton, bitwAnd(doubletons[d], subset)) > 0)
-          RP_table[subset, i, d] =
-            ifelse ((doubletons[d] - singleton > singleton), 1, -1)
-      }
-    }
-  }
-}
-
-# R objects related to impossible choice probabilities
-#  - membership function returns one if object obj in in subset sub, NA otherwise
-#  - vmembership vectorizes membership function in both dimensions
-#  - member_table gives 1 or NA for every element of subset X object table
-membership = function(subs, obj) {ifelse(bitwAnd(subs, bitwShiftL(1, obj-1)) > 0, 1, NA)}
-vmembership = Vectorize(membership)
-member_table = outer(1:n_subsets, 1:n_objects, vmembership)
-
-#' Vector of default object names, corresponding to \code{\link{subset_names}}
-"object_names"
-
-#' Vector of default subset names, corresponding to \code{\link{object_names}}
-"subset_names"
-
-#' Cardinality of subsets up to the set 111111 of six objects.
-"subset_card"
-
-#' List of vectors of choice objects in each choice subset.
-"subset_vectors"
-
-#' Vector of singleton subset indices, for universes up to size six
-"singletons"
-
-#' Vector of doubleton subset indices, for universes up to size six
-"doubletons"
-
-#' Vector of tripleton subset indices, for universes up to size six
-"tripletons"
-
-#' Vector of doubleton names, for universes up to size six
-#'
-#' Names correspond to \code{\link{object_names}}
-"doubleton_names"
-
-#' Vector of tripleton names, for universes up to size six
-#'
-#' Names correspond to \code{\link{object_names}}
-"tripleton_names"
-
-#' Array of revealed preference indicators
-#'
-#' Value at (subset, object, doubleton) is 1, 0, or -1
-#' 1 if object is first object in doubleton, doubleton a subset of subset.
-#'  -1 if object is second object in doubleton, doubleton a subset of subset.
-#'   0 otherwise
-#' Names correspond to \code{\link{object_names}}
-"RP_table"
-
-#' Matrix of set membership indicators
-#'
-#' Value at (subset, object) is 1 if object is an element of subset, NA otherwise
-"member_table"
-
-usethis::use_data(object_names,
-                  subset_names,
-                  subset_card,
-                  subset_vectors,
-                  singletons,
-                  doubletons,
-                  tripletons,
-                  doubleton_names,
-                  tripleton_names,
-                  RP_table,
-                  member_table,
-                  overwrite = TRUE)
-
 #' Precompute tables and matrices depending only on n, the number of objects
 #'
 #' For a choice universe of size n, precompute a list of frequently used
@@ -167,8 +37,14 @@ usethis::use_data(object_names,
 #' @importFrom Matrix invertPerm
 #'
 #' @examples
-#' create_universe(3)      # Example where output is not excessively long
-#' u = create_universe(5)  # Example corresponding to datasets in reference, above.
+#' # Example with a small universe of objects, where the output is easy to read
+#' create_universe(3)
+#' # Objects have default names "1", "2" and "3"
+#' # Example with a universe of five objects, suitable for work with the datasets
+#' \link{\code{MMS_2019_counts}} and \link{\code{MSMPB_2019_counts}}.
+#' # Objects have the user-supplied names "a", "b", "c", "d" and "e".
+#'
+#' u = create_universe(5, c("a", "b", "c", "d", "e"))
 #'
 #' @references
 #' McCausland, W. (2024). Sequential Monte Carlo for Random Prefernces. Unpublished manuscript.
@@ -247,4 +123,3 @@ create_universe <- function(n, object_names = as.character(1:9)) {
        Ax_strings=Ax_strings, A_strings=A_strings, order_strings=order_strings,
        pi_to_P=pi_to_P, pi_to_P_logical=pi_to_P_logical)
 }
-

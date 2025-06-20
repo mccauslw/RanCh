@@ -14,13 +14,14 @@
 #' @return a random count matrix (if \code{n_draws} = 1) or array (if \code{n_draws} > 1).
 #' The first two dimensions are indexed by choice set A and object x.
 #' @examples
-#' u = c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
-#' P = P_Luce(u)
-#' N_total = vector(mode="integer", length=n_subsets)
-#' N_total[singletons[1:3]] = 0
-#' N_total[doubletons[1:3]] = 10
-#' N_total[tripletons[1]] = 10
-#' N = rmultinomRC(5, P, N_total)
+#' u <- c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
+#' P <- P_Luce(u)
+#' xy <- set_index(c(1, 2))      # Choice set with x and y
+#' xyz <- set_index(c(1, 2, 3))  # Choice set with x, y, and z
+#' N_total <- vector(mode="integer", length=n_subsets)
+#' N_total[xy] <- 10
+#' N_total[xyz] <- 10
+#' N <- rmultinomRC(5, P, N_total)
 #' print(N[, , 1], na.print='-') # Print first count matrix
 #' dmultinomRC(P, N[, , 1], categorical=TRUE, log=TRUE)
 #' @seealso \code{\link{dmultinomRC}}, which computes the density for this distribution.
@@ -30,7 +31,7 @@ rmultinomRC <- function(n_draws, P, N_total) {
   stopifnot(nrow(P)==length(N_total))
   N <- array(dim=c(dim(P), n_draws), dimnames=c(dimnames(P), list(NULL)))
   for (A in seq_len(nrow(P))) {
-    v <- subset_vectors[[A]]
+    v <- u_const$subset_vectors[[A]]
     N[A, v, ] <- rmultinom(n_draws, N_total[A], P[A, v])
   }
   N
@@ -51,13 +52,14 @@ rmultinomRC <- function(n_draws, P, N_total) {
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
 #' @return value of log density or density
 #' @examples
-#' u = c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
-#' P = P_Luce(u)
-#' N_total = vector(mode="integer", length=n_subsets)
-#' N_total[singletons[1:3]] = 0
-#' N_total[doubletons[1:3]] = 10
-#' N_total[tripletons[1]] = 10
-#' N = rmultinomRC(1, P, N_total) # Random count matrix
+#' u <- c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
+#' P <- P_Luce(u)
+#' xy <- set_index(c(1, 2))      # Choice set with x and y
+#' xyz <- set_index(c(1, 2, 3))  # Choice set with x, y, and z
+#' N_total <- vector(mode="integer", length=n_subsets)
+#' N_total[xy] <- 10
+#' N_total[xyz] <- 10
+#' N <- rmultinomRC(1, P, N_total) # Random count matrix
 #' print(N[, , 1], na.print='-') # Print first count matrix
 #' dmultinomRC(P, N[, , 1], categorical=FALSE, log=TRUE)
 #' dmultinomRC(P, N[, , 1], categorical=TRUE, log=TRUE)
@@ -72,8 +74,8 @@ dmultinomRC <- function(P, N, categorical=FALSE, log=TRUE) {
   ln_L <- 0
   for (i in seq_len(dim(N)[3])) {
     for (A in 1:nrow(P)) {
-      if (subset_card[A] > 1) {
-        v <- subset_vectors[[A]]
+      if (u_const$subset_card[A] > 1) {
+        v <- u_const$subset_vectors[[A]]
         v <- v[N[A,v,i] != 0]
         if (categorical)
           ln_L <- ln_L + sum(N[A, v, i] * log(P[A, v]))
@@ -93,7 +95,7 @@ dmultinomRC <- function(P, N, categorical=FALSE, log=TRUE) {
 #' @param n_trials number of trials
 #' @return a \code{n} by \code{length(alpha)} matrix of counts.
 #' @examples
-#' n = rDirMultinom(10, c(2.4, 1.5, 3.2), 100)
+#' n <- rDirMultinom(10, c(2.4, 1.5, 3.2), 100)
 #' @importFrom stats rmultinom
 #' @export
 rDirMultinom <- function(n_draws, alpha, n_trials) {
@@ -198,9 +200,9 @@ dDirichletRC <- function(Alpha, P, log=TRUE) {
 #' n_subsets <- 2^n_objects-1
 #' Alpha <- DirRC_constant_sum(v, 5.0)
 #' N_total <- vector(mode="integer", length=n_subsets)
-#' N_total[singletons[1:3]] = 0
-#' N_total[doubletons[1:3]] = 10
-#' N_total[tripletons[1]] = 10
+#' N_total[u_const$.singletons[1:3]] = 0
+#' N_total[u_const$.doubletons[1:3]] = 10
+#' N_total[u_const$.tripletons[1]] = 10
 #' N = rDirMultinomRC(10, Alpha, N_total)
 #' @seealso \code{\link{dDirMultinomRC}} for the likelihood function for
 #' this model.
@@ -210,8 +212,8 @@ rDirMultinomRC <- function(n_draws, Alpha, N_total) {
   stopifnot(nrow(Alpha)==length(N_total))
   N <- array(dim=c(n_draws, dim(Alpha)), dimnames=c(list(NULL), dimnames(Alpha)))
   for (i in 1:nrow(Alpha)) {
-    v <- subset_vectors[[i]]
-    if (subset_card[i] > 1) {
+    v <- u_const$subset_vectors[[i]]
+    if (u_const$subset_card[i] > 1) {
       for (draw in 1:n_draws) { # Need fresh draw of p, saving memory at cost of speed
         p <- rDirichlet(1, Alpha[i, v])
         N[draw, i, v] <- rmultinom(1, N_total[i], p)
@@ -238,8 +240,8 @@ rDirMultinomRC <- function(n_draws, Alpha, N_total) {
 #' @param log logical; if TRUE, return the log Bayes factor
 #' @return Likelihood or log likelihood value
 #' @examples
-#' Alpha = DirRC_constant_sum(3, 2.0)
-#' N = T_1972_counts['Dots', 6,,]
+#' Alpha <- DirRC_constant_sum(3, 2.0)
+#' N <- T_1972_counts['Dots', 6,,]
 #' dDirMultinomRC(Alpha, N)
 #' @seealso \code{\link{rDirMultinomRC}}, which simulates a count matrix under
 #' this model, given the total number of trials for each choice subset.
@@ -248,8 +250,8 @@ dDirMultinomRC <- function(Alpha, N, categorical=FALSE, log=TRUE) {
   stopifnot(identical(dim(Alpha), dim(N)))
   ln_L <- 0
   for (i in 1:nrow(Alpha)) {
-    if (subset_card[i] > 1) {
-      v <- subset_vectors[[i]]
+    if (u_const$subset_card[i] > 1) {
+      v <- u_const$subset_vectors[[i]]
       ln_L <- ln_L + dDirMultinom(Alpha[i, v], N[i, v], categorical, log=TRUE)
     }
   }
@@ -265,13 +267,13 @@ dDirMultinomRC <- function(Alpha, N, categorical=FALSE, log=TRUE) {
 #' @param n_objects integer, number of objects in universe
 #' @return RCS where all choice probabilities are discrete uniform
 #' @examples
-#' P = P_uniform(3)
+#' P <- P_uniform(3)
 #' @export
 P_uniform <- function(n_objects) {
-  n_subsets = 2^n_objects - 1
-  P = member_table[1:n_subsets, 1:n_objects]
+  n_subsets <- 2^n_objects - 1
+  P <- u_const$member_table[1:n_subsets, 1:n_objects]
   for (i in 1:n_subsets) {
-    P[i, ] = P[i, ]/subset_card[i]
+    P[i, ] <- P[i, ]/u_const$subset_card[i]
   }
   P
 }
@@ -286,11 +288,11 @@ P_uniform <- function(n_objects) {
 #' @examples
 #' P = P_Luce(c(1.2,2.5,3.3))
 P_Luce <- function(v) {
-  n_objects = length(v)
-  n_subsets = 2^n_objects - 1
-  P = member_table[1:n_subsets, 1:n_objects]
+  n_objects <- length(v)
+  n_subsets <- 2^n_objects - 1
+  P <- u_const$member_table[1:n_subsets, 1:n_objects]
   for (i in 1:n_subsets) {
-    P[i, ] = P[i, ] * v / sum(v * member_table[i, ], na.rm=TRUE)
+    P[i, ] <- P[i, ] * v / sum(v * u_const$member_table[i, ], na.rm=TRUE)
   }
   P
 }
@@ -309,7 +311,7 @@ proportions <- function(N) {
   n_objects <- ncol(N)
   P <- N/rowSums(N, na.rm = TRUE)
   for (i in 1:n_objects)
-    P[singletons[i], i] <- 1.0
+    P[u_const$singletons[i], i] <- 1.0
   P
 }
 
@@ -332,7 +334,7 @@ proportions <- function(N) {
 #' @export
 DirRC_constant_shape <- function(n_objects, alpha, name_source = NULL) {
   n_subsets <- 2^n_objects-1
-  Alpha <- alpha * member_table[1:n_subsets, 1:n_objects]
+  Alpha <- alpha * u_const$member_table[1:n_subsets, 1:n_objects]
   dimnames(Alpha) <- copy_A_x_names(name_source, n_subsets, n_objects)
   Alpha
 }
@@ -360,10 +362,11 @@ DirRC_constant_sum <- function(weights_spec, alpha_sum, name_source = NULL) {
   n_subsets <- 2^n_objects-1
   Alpha = matrix(0, nrow=n_subsets, ncol=n_objects)
   for (A in 1:n_subsets) {
-    den <- sum(weights_spec[subset_vectors[[A]]])
-    Alpha[A, subset_vectors[[A]]] = alpha_sum * weights_spec[subset_vectors[[A]]]/den
+    den <- sum(weights_spec[u_const$subset_vectors[[A]]])
+    Alpha[A, u_const$subset_vectors[[A]]] =
+      alpha_sum * weights_spec[u_const$subset_vectors[[A]]]/den
   }
-  Alpha <- Alpha * member_table[1:n_subsets, 1:n_objects]
+  Alpha <- Alpha * u_const$member_table[1:n_subsets, 1:n_objects]
   dimnames(Alpha) <- copy_A_x_names(name_source, n_subsets, n_objects)
   Alpha
 }

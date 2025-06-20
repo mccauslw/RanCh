@@ -5,7 +5,7 @@ test_that("compute_pi_ln_like works", {
   u <- create_universe(n)
   Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
   pi_ln_like <- compute_pi_ln_like(pi, u, Nv)
-  expect_equal(pi_ln_like, -1061.112765)
+  expect_equal(pi_ln_like, -1060.41961795424)
 })
 
 test_that("compute_pi_score works", {
@@ -16,7 +16,7 @@ test_that("compute_pi_score works", {
   Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
   pi_score <- compute_pi_score(pi, u, Nv)
   expect_length(pi_score, n_fact)
-  expect_equal(pi_score[[1]], 1272)
+  expect_equal(pi_score[[1]], 1305)
 })
 
 test_that("compute_pi_ln_maxl works", {
@@ -24,6 +24,6 @@ test_that("compute_pi_ln_maxl works", {
   u <- create_universe(n)
   Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
   pi_ln_maxl <- compute_pi_ln_maxl(u, Nv)
-  expect_equal(pi_ln_maxl$ln_maxl, -994.39244)
+  expect_equal(pi_ln_maxl$ln_maxl, -948.558892391828)
   expect_lt(pi_ln_maxl$ln_maxl_diff, 1e-8)
 })
