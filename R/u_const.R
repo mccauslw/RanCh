@@ -1,6 +1,7 @@
 #' Internal constants for universe construction
 #'
-#' A named list of constants (scalars, vectors, and arrays) used throughout the RanCh package.
+#' A named list of constants (vectors, lists, matrices and arrays) used
+#' throughout the RanCh package and made available to users.
 #'
 #' @name universe_constants
 #' @aliases u_const

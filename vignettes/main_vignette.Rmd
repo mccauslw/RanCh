@@ -25,31 +25,27 @@ library(HDInterval)
 library(tidyverse)
 ```
 
-## Introduction
+# Introduction
 
 This package provides tools for a research project whose purpose is to help us better understand the foundations of stochastic discrete choice. It includes datasets compiled from the context effects literature, the stochastic intransitivity literature, and from some recent experiments where we observe choices from all doubleton and larger subsets of some universe of objects. It provides graphical tools illustrating likelihood function and posterior density contours, as well as regions, in the space of choice probabilities, defined by various stochastic choice axioms, context effects and other conditions. Finally, it provides tools for parametric and non-parametric inference subject to various combinations of discrete choice axioms, as well as the testing of said axioms.
 
-## Data sets
+# Data sets
 
 We provide some datasets from the context effects literature, the stochastic intransitivity literature and from some recent experiments.
 The data sets are organized in similar ways, allowing for the use of a common set of analytical tools, described below.
 
-### Data sets from the context effects literature
+## Data sets from the context effects literature
 
 One of the data sets in this package is the choice count data from the experiments described in @Tver72a, which introduces the similarity effect.
 The $3 \times 8 \times 7 \times 3$ array `T_1972_counts` contains the data for the three choice domains ("Dots", "Gambles" and "Applicants") and the eight subjects in that experiment.
 The first dimension of the array is indexed by choice domain, either as an integer from one to three, or as one of the strings "Dots", "Gambles" or "Applicants".
 The second dimension is indexed by subject identifier, an integer from one to eight.
 The third dimension is indexed by choice set and the fourth by choice object.
+See Appendix A for a description of how indexing by choice set and choice object works.
 
-Here and in many other contexts, choice sets and choice objects each have different kinds of indices.
 In this dataset, the object names are $x$, $y$ and $z$, as in the paper; they can be indexed using the strings `"x"`, `"y"` and `"z"` or the integers 1, 2, and 3, respectively.
-Choice sets, subsets of the choice universe $\{x,y,z\}$, can be indexed using the strings `"x"`, `"y"`, `"xy"`, ..., `"xyz"` or by integers we will call set indices.
-Each digit (or bit) in the binary representation of a set index is an inclusion indicator: object $i \in \{1,\ldots,3\}$ is in the set if and only if the $i$'th digit from the right is 1.
+Choice sets, subsets of the choice universe $\{x,y,z\}$, can be indexed using the strings `"x"`, `"y"`, `"xy"`, ..., `"xyz"` or by the set indices described in Appendix A.
 For example, the sets $\{x,z\}$, $\{y,z\}$ and $\{x,y,z\}$ have indices that are binary 101, 110 and 111, or decimal 5, 6 and 7.
-This convention for indexing sets has some important computational advantages.
-The singleton set with object $i$ is represented as $2^i-1$.
-The bitwise “or” of the indices of two sets gives the index of their union; the bitwise “and”, the index of their intersection.
 
 Thus the number of times subject five chose object $x$ from choice set $\{x,y,z\}$ of domain `Dots` is `T_1972_counts["Dots", 5, "xyz", "x"]` or `T_1972_counts[1, 5, 7, 1]`; names and integer indices can be mixed.
 Counts of impossible events, such as choosing $x$ from $\{y,z\}$ have the value `NA` rather than zero.
@@ -61,7 +57,7 @@ For example, the number of times this subject chose gamble $x$ when presented wi
 print(T_1972_counts['Gambles', 1, c('xz', 'yz', 'xyz'), ], na.print='-')
 ```
 
-### Data sets from the stochastic intransitivity literature
+## Data sets from the stochastic intransitivity literature
 
 Another data set in the package is the count data from the experiment described in @RegeDanaDavi11.
 The $3 \times 18 \times 31 \times 5$ array `RDS_2011_counts` contains the data for the three choice domains ("Cash 1", "Cash 2" and "Noncash") and the 18 subjects in that experiment.
@@ -73,19 +69,20 @@ Again, counts of impossible events have the value `NA`.
 Here is a cross section of counts for the "Cash 1" domain and the fifth subject, showing binary choice sets (the only choice sets used in the experimental design) only.
 For example, the number of times this subject chose gamble $c$ when presented with a choice between $b$ and $c$ is `r RDS_2011_counts['Cash 1', 5, 6, 3]`.
 ```{r counts_RDS_2011}
-print(RDS_2011_counts['Cash 1', 5, c(3, 5, 6, 9, 10, 12, 17, 18, 20, 24), ], na.print='-')
-n_objects = 5
-print(RDS_2011_counts['Cash 1', n_objects, doubletons[1:choose(n_objects, 2)], ], na.print='-')
+n_objects <- 5
+doubletons <- u_const$doubletons[1:u_const$n_doubletons[n_objects]]
+print(RDS_2011_counts['Cash 1', n_objects, doubletons, ], na.print='-')
 ```
 For this particular domain and subject, all choice proportions are consistent with weak stochastic transitivity: from each binary choice set, the subject chose the lower alphabetically ranked object much more often than the higher.
 
-### Data sets where all subsets of the choice universe are presented 
+## Data sets where all subsets of the choice universe are presented 
 
 We provide data from three experiments in which individuals, or a sample from a population of individuals, make repeated choices from all doubleton and larger subsets of a universe of related choice objects.
 (In the experiment described in @Tver72a, the set $\{x,y\}$ is never presented; in the experiment in @RegeDanaDavi11, only doubleton subsets of the universe are presented.)
 
 For each of the three experiments, we provide four data objects.
-Here, we will take the population choice experiment described in McCausland, Marley and Davis-Stober (no paper yet) as an example.
+The name of each object consists of the name of the experiment and one of the suffixes `_trials`, `_counts`, `_demographics` or `_raw`.
+Take for example the population choice experiment described in McCausland, Marley and Davis-Stober and named `MMS_2019`.
 `MMS_2019_trials` shows all responses of all subjects in a discrete choice experiment.
 The first few variables are the name of the choice domain (a universe of five related choice objects), the subject identifier and the trial index giving the order in which a subject responded to the various choice sets presented to her.
 The next variable, `set`, is a string showing which choice objects were presented at a given trial, the objects in alphabetical order.
@@ -98,7 +95,8 @@ The decimal value 30 is binary 11110, which indicates that the 2nd, 3rd, 4th and
 This corresponds to the string `bcde` that is the value of the `set` variable.
 
 ```{r trials}
-head(MMS_2019_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm', 'set_index', 'choice_int')], 5)
+head(MMS_2019_trials[c('domain', 'subject', 'trial', 'set', 'choice', 'set_perm',
+                       'set_index', 'choice_int')], 5)
 ```
 
 The remaining variables are revealed preference indicators for given pairs of objects.
@@ -144,7 +142,7 @@ In the YG experiment, each subject is presented with two waves of 16 trials.
 In each wave, the subject sees one choice set from each of the 16 choice domains.
 We can partition the complete dataset into two waves and test to see if choice probabilities are plausibly the same in both waves.
 
-In the following code, we compute for every domain and every subset of size two or more, the p-value for the Pearson two-sample chi-squared test of the hypothesis that the counts in the two waves are drawn from the same multinomial distribution.
+In the following code, we compute for every domain and every subset of size two or more, the p-value for the Pearson two-sample chi-squared test of the hypothesis that the counts in the two waves are drawn from the same multinomial distribution, then display a histogram of the 176 p-values.
 ```{r compare.waves}
 my.chisq.test <- function(A)
 {
@@ -159,11 +157,12 @@ hist(M, 20)
 ```
 
 Under the null hypotheses that the distributions are the same, the 176 different p-values are independent and uniformly distributed on $[0,1]$.
-The histogram shows the realized p-values.
+Many different tests of the null hypothesis are possible; for the purposes of illustration we consider the results of the chi-squared test for each case.
+The figure gives a histogram of the realized p-values.
 The number of rejections at the five percent level is given by the height of the first histogram bar.
 Five rejections out of 176 is less than the 8.8 we would expect, on average, under the null.
 
-## Random Choice Structures
+# Random Choice Structures
 
 To make sense of most of the functions in this package, we need to introduce the concept of a Random Choice Structure (RCS), which organizes choice probabilities.
 
@@ -208,7 +207,7 @@ This point has Barycentric coordinates $(P_{\{b,c,e\}}(b), P_{\{b,c,e\}}(c), P_{
 We adopt the convention that binary probabilities are indicated by hollow dots and ternary probability vectors by solid dots.
 In this way, we can tell the difference between a binary probability and a ternary probability vector that happens to be on the boundary of the triangle.
 
-## Axioms
+# Axioms
 
 Let $\Delta$ be the space of RCSs consistent with the axioms of probability; $\Delta$ is a Cartesian product of unit simplexes of various dimensions.
 
@@ -220,7 +219,7 @@ Examples include weak, moderate and strong stochastic transitivity, regularity, 
 @Falm78 showed that the Block-Marshak inequalities are necessary and sufficient for random utility.
 @Tver72b and @SattTver76 establish that the Block-Marshak inequalities, moderate stochastic transitivity and the multiplicative inequality are all necessary conditions for, and thus testable implications of, the Elimination by Aspects model (EBA) introduced by @Tver72a.
 
-### Displaying cross sections of regions in barycentric coordinates
+## Displaying cross sections of regions in barycentric coordinates
 
 A random choice structure $P$ satisfies
 
@@ -244,7 +243,7 @@ For a universe of size three, regularity and the Block-Marshak conditions are eq
 Notice that the ternary choice probability lies outside the two cross sections: the solid dot is not inside either the blue or red triangles.
 We can conclude that the RCE `Pbce` does not satisfy regularity, the multiplicative inequality, or the Block-Marschak inequalities.
 
-### Checking whether a given Random Choice Structure satisfies a given axiom
+## Checking whether a given Random Choice Structure satisfies a given axiom
 
 We just saw visually that for the RCS `P_bce`, the ternary choice probability vector was not consistent with the binary probabilities, under regularity.
 This can be checked directly using the function `regularity`, which works for RCSs with up to 6 choice objects:
@@ -258,14 +257,12 @@ print(P_xyz, na.print='-')
 print(regularity(P_xyz))
 ```
 
-## Context effects
+# Context effects
 
-Three context effects pertaining to stochastic discrete choice have attracted a lot of
-attention in Psychology, Economics, Marketing and other fields: the similarity effect,
-the compromise effect and the asymmetric dominance effect.
-See McCausland, Marley, Davis-Stober and Turner (no paper yet) for details.
+Three context effects pertaining to stochastic discrete choice have attracted a lot of attention in Psychology, Economics, Marketing and other fields: the similarity effect, the compromise effect and the asymmetric dominance effect.
+See @StobMarlMcCaTurn23 for details.
 
-### Displaying context effects
+## Displaying context effects
 
 Just as we can display cross-sections of a RCS consistent with regularity and the multiplicative inequality, we can display cross-sections of regions defined by various context effects.
 
@@ -321,7 +318,7 @@ polygon(tritrafo(C$Cz), col=grey(0.9)); text(tritrafo(colMeans(C$Cz)), 'Cz')
 polygon(tritrafo(C$Cxz), col=grey(0.8)); text(tritrafo(colMeans(C$Cxz)), 'Cxz')
 ```
 
-### Checking for context effects
+## Checking for context effects
 
 We can also check specific RCDs, arising from direct specification, simulation, or observed choice proportions, to see if they exhibit context effects.
 Below, we simulate 500 variates from the uniform distribution on the 2-simplex.
@@ -346,7 +343,7 @@ triplot(label=c('x', 'y', 'z'))
 points(tritrafo(p[filt2, ]), pch=20)
 ```
 
-## Inference
+# Inference
 
 Suppose we have a count matrix $N$ for a discrete choice experiment and an RCS matrix $P$ with the same dimensions as $N$.
 Then the likelihood function for data $N$, evaluated at $P$, is a product of multinomial likelihoods, each likelihood factor corresponding to a particular choice set.
@@ -365,7 +362,7 @@ Here, $\alpha=2$, which implies that all binary choice probabilities are uniform
 The posterior distribution takes the same form as the prior: rows are *a posteriori* independent and Dirichlet.
 Here the matrix of Dirichlet parameters is `post_Alpha`, the sum of `prior_Alpha` and `N_bce`; see the Wikipedia page on the [Dirichlet distribution][dirW] for details.
 
-### High posterior density curves
+## High posterior density curves
 
 The code below constructs and then displays 0.90 High Posterior Density (HPD) regions for four choice probability vectors.
 Regions for the three binary choice probabilities are the thick-line intervals on the three sides of the triangle.
@@ -384,7 +381,7 @@ polygon(tritrafo(HD3$HD123), border='lightgreen') # Plot ternary
 plot_P3(P_bce)                           # Plot proportions from data
 ```
 
-### Marginal likelihoods for some simple models
+## Marginal likelihoods for some simple models
 
 We can also compute the log marginal likelihood for various simple models, as follows.
 ```{r logML}
@@ -407,10 +404,69 @@ print(dDirMultinomRC(Alpha, N, categorical=TRUE, log=TRUE))
 ```
 These marginal likelihoods serve as useful benchmarks.
 
-## References
-
 [terW]: https://en.wikipedia.org/wiki/Ternary_plot
 [barW]: https://en.wikipedia.org/wiki/Barycentric_coordinate_system
 [DirW]: https://en.wikipedia.org/wiki/Dirichlet_distribution
 [DiMW]: https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution
 [betW]: https://en.wikipedia.org/wiki/Beta_distribution
+
+# Appendix A: Indexing
+
+Most of the operations available in the `RanCh` package are relative to a universe $T$ with $n$ elements.
+We need to be able to iterate through the $n$ elements of $T$, the $2^n-1$ non-empty subsets of $T$, and the $n!$ linear orders on $T$, interpreted as choice objects, menus and preferences, respectively.
+R objects created by the `RanCh` package often have dimensions indexed by object, menu or preference.
+This appendix establishes consistent orderings for objects, menus and preferences.
+
+We make use of the dimension naming system in R to allow indexing by integers or names, interchangeably.
+There will be times, usually for computational convenience, when we wish to treat the universe as a set of integers, as in  $T=\{1,2,\ldots,n\}$, and times when we use variable names, as in $T=\{a,b,\ldots\}$.
+As a running example, we consider the universe $T_3 = \{a,b,c\}$, sometimes expressed as $T_3 = \{1,2,3\}$.
+
+To create a universe structure for $T_3$, we will provide the names "a", "b" and "c" for objects 1, 2 and 3, respectively, as follows:
+```{r u_define}
+u <- create_universe(3, object_names = c("a", "b", "c"))
+```
+For this function, we can provide names or accept the default names "1", "2", etc.
+Many `RanCh` functions that create structures set the dimension names of outputs to be consistent with the dimension names of inputs.
+
+Each menu, a non-empty subset $A \subseteq T$ is associated with a *set index* from $1$ to $2^n-1$.
+Each digit in the binary representation of the set index of a set $A$ serves as an inclusion indicator: for any $i \in \{1,\ldots,n\}$, $i \in A$ if and only if the $i$'th binary digit (or bit) of the set index, counting from the right, is 1.
+Thus, the singleton set with object $i$ has set index $2^{i-1}$ and the set index of any non-empty $A \subseteq T$ is $\sum_{i \in A} 2^{i-1}$.
+This convention for indexing sets has some important computational advantages.
+The bitwise “or” (`bitwOr` in R) of the indices of two sets gives the set index of their union; the bitwise “and” (`bitwAnd`), the set index of their intersection.
+
+Preference orders are indexed by integers running from $1$ to $n!$ in increasing lexicographic order.
+Thus for $T_3 = \{a, b, c\}$, the six preferences are, in sequence, $a \succ b \succ c$, $a \succ c \succ b$, $b \succ a \succ c$, $b \succ c \succ a$, $c \succ a \succ b$ and $c \succ b \succ a$.
+The names used to represent these orders are `abc`, `acb`, `bac`, `bca`, `cab` and `cba`.
+
+In some cases, we replace the double index $(A,x)$, where $A$ is the index of a choice set and $x$ is the index of an object in $A$, with a flat index.
+All pairs $(A,x)$ where $x \in A$ and where $A$ has at least two elements have an index, and only those pairs.
+Thus the flat index runs from 1 to $\sum_{i=2}^n \binom{n}{i} i = n (2^{n-1}-1)$.
+Pairs $(A,x)$ are ordered lexicographically by increasing set size $|A|$ then by increasing set index $A$ (within each set size) then by object index $x$.
+Thus for the universe $T = \{a, b, c\}$, the order is
+$(\{a,b\}, a)$, $(\{a,b\}, b)$, $(\{a,c\}, a)$, $(\{a,c\}, c)$, $(\{b,c\}, b)$, $(\{b,c\}, c)$, $(\{a,b,c\}, a)$, $(\{a,b,c\}, b)$, $(\{a,b,c\}, c)$.
+The names used to represent these orders are `ab;a`, `ab;b`, `ac;a`, `ac;c`, `bc;b`, `bc:c`, `abc;a`, `abc;b`, and `abc;c`.
+
+# Appendix B: Universe constants
+
+The RanCh package provides a named list `u_const` of various constants pertaining to universes up to size $n_{\max} = 6$.
+
+The following vectors, each of length $n_{\max}$, give dimension information for universes up to size $n_{\max}$.
+For a given universe $T$ of cardinality $n$,
+
+- `u_const$n_subsets[n]` is the number of non-empty subsets of the universe, equal to $2^n-1$;
+- `u_const$n_orders[n]` is the number of strict preference orders over the elements of the universe, equal to $n!$;
+- `u_const$n_singletons[n]` is the number of singleton subsets of $T$, equal to $n$;
+- `u_const$n_doubletons[n]` is the number of doubleton subsets of $T$, equal to $\binom{n}{2}$;
+- `u_const$n_tripletons[n]` is the number of tripleton subsets of $T$, equal to $\binom{n}{3}$;
+- `u_const$n_Ax[n]` is the number of flat `Ax` indices, equal to $n(2^{n-1}-1)$
+
+`u_const$subset_card` is a vector of length $2^{n_{\max}}-1$.
+`u_const$subset_vectors` is a list of length $2^{n_{\max}}-1$.
+If the variable `A` is the index of a choice set, then `u_const$subset_card[A]` is the number of elements in that choice set and `u_const$subset_vectors[[A]]` is a vector of length `u_const$subset_card[A]` giving the elements of choice set $A$.
+
+`u_const$singletons`, `u_const$doubletons` and `u_const$tripletons` are vectors whose elements are the set indices of all the singleton, doubleton and tripleton subsets of a universe of $n_{\max}$ elements.
+In all cases, the set indices are in order; thus, for a universe $T$ of size $n \leq n_{\max}$, `u_const$singletons[1:u_const$n_singletons[n]]` are the set indices of all the singleton subsets of a universe of $|T|$ elements, and similarly for doubletons and tripletons.
+
+`u_const$member_table` is a $(2^{n_{\max}}-1) \times n_{\max}$ array of set membership indicators.
+`u_const$member_table[A][x]` is 1 if $x \in A$ and `NA` otherwise.
+

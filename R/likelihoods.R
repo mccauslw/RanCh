@@ -286,7 +286,7 @@ P_uniform <- function(n_objects) {
 #' @export
 #' @return RCS with choice probabilities given by Luce weights
 #' @examples
-#' P = P_Luce(c(1.2,2.5,3.3))
+#' P <- P_Luce(c(1.2,2.5,3.3))
 P_Luce <- function(v) {
   n_objects <- length(v)
   n_subsets <- 2^n_objects - 1
