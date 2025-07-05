@@ -21,15 +21,7 @@
 #'
 #' @importFrom extraDistr rbetapr dbetapr
 #'
-#' @examples
-#' n <- 5 # Number of objects in choice universe
-#' alpha_prior <- create_alpha_prior(n, 4, 0.1)
-#' N <- RanCh::MMS_2019_counts[1, , ]
-#' u <- create_universe(n, object_names=dimnames(N)[[2]])
-#' Nv <- vectorize(u, N)
-#' J <- 20
-#' M <- 50
-#' RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
+#' @example R/examples/RC_example.R
 #'
 #' @inherit create_universe author references
 #'
@@ -147,17 +139,7 @@ create_cycle_schedule <- function(lambda_values) {
 #'
 #' @importFrom stats rgamma runif
 #'
-#' @examples
-#' n <- 5 # Number of objects in the relevant choice universe
-#' alpha_prior <- create_alpha_prior(n, 4, 0.1)
-#' N <- RanCh::MMS_2019_counts[1, , ]
-#' u <- create_universe(n, object_names=dimnames(N)[[2]])
-#' Nv <- vectorize(u, N)
-#' J <- 20
-#' M <- 50
-#' lambda_values <- seq(0.01, 1.00, by=0.01)
-#' cycle_schedule <- create_cycle_schedule(lambda_values)
-#' RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule)
+#' @example R/examples/RP_example.R
 #'
 #' @inherit create_universe author references
 #'
@@ -184,8 +166,8 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
   n_bl <- c(u$n, u$n*(u$n-1)); bl_len <- c(factorial(u$n-1), factorial(u$n-2))
   bl_data <- list(big = list(), sm = list())
   for (blt in 1:length(n_bl)) {
-    bl_data[[blt]]$n_bl = n_bl[blt]
-    bl_data[[blt]]$bl_len = bl_len[blt]
+    bl_data[[blt]]$n_bl <- n_bl[blt]
+    bl_data[[blt]]$bl_len <- bl_len[blt]
     bl_data[[blt]]$indices <- seq_len(n_bl[blt])
     bl_data[[blt]]$start <- (seq_len(n_bl[blt]) - 1) * bl_len[blt] + 1
     bl_data[[blt]]$end <- seq_len(n_bl[blt]) * bl_len[blt]
@@ -301,9 +283,9 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
           # Redraw a random sample of gamma vectors
           small_gamma_indices <- seq(bld$start[i_bl], bld$end[i_bl])
           small_pi_to_P <- u$pi_to_P[, small_gamma_indices]
-          small_alpha_p <- alpha_p[small_gamma_indices, ]
+          small_alpha_p <- alpha_p[small_gamma_indices, , drop=FALSE]
           small_alpha_total <- colSums(small_alpha_p)
-          small_gamma_p <- gamma_p[small_gamma_indices, ]
+          small_gamma_p <- gamma_p[small_gamma_indices, , drop=FALSE]
 
           small_gamma_total <- colSums(small_gamma_p)
           AR_small_gamma_total <-
@@ -383,15 +365,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
 #' }
 #' @export
 #'
-#' @examples
-#' n <- 5
-#' u <- create_universe(n)
-#' alpha_prior <- create_alpha_prior(n, 4, 0.1)
-#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
-#' J <- 20
-#' M <- 50
-#' RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
-#' ind_groups_stats(RC_sim$alpha, J, c(0.1, 0.5, 0.9))
+#' @example R/examples/RC_example.R
 #'
 #' @inherit create_universe author references
 #'
@@ -405,7 +379,7 @@ ind_groups_stats <- function(x, J, p) {
   q_by_group <- apply(x, 2, stats::quantile, probs = p)
   q <- rowMeans(q_by_group)
   q_nse2 = apply(q_by_group, 1, stats::var)/J; q_nse <- sqrt(q_nse2)
-  list(mu = mu, std = std, nse = nse, rne = (s2/(M*J))/nse2,
+  list(mean = mu, std = std, nse = nse, rne = (s2/(M*J))/nse2,
        p = p, q = q, q_nse = q_nse)
 }
 
@@ -429,7 +403,8 @@ ind_groups_stats <- function(x, J, p) {
 #'
 #' @importFrom graphics hist
 #'
-#' @examples
+#' @example R/examples/RC_example.R
+#'
 compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
   if (length(x_grid) == 1) {
     x_grid = seq(min(x), max(x), len=x_grid)
@@ -472,7 +447,7 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
 #' as the return value of [compute_pdf_cdf_on_grid()].
 #' @export
 #'
-#' @examples
+#' @example R/examples/RP_example.R
 #'
 #' @inherit create_universe author references
 #'
@@ -507,7 +482,7 @@ compute_RP_binp_funcs <- function(u, gamma_p, J, Nv, p_grid) {
 #'
 #' @importFrom stats dbeta pbeta
 #'
-#' @examples
+#' @example R/examples/RC_example.R
 #'
 #' @inherit create_universe author references
 #'
