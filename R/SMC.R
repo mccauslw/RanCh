@@ -552,9 +552,6 @@ compute_RC_binp_funcs <- function(u, alpha, J, Nv, p_grid) {
 #'   likelihood at the end of the current SMC cycle}
 #' }
 #'
-#' @export
-#'
-#' @examples
 weights_to_C_stage_stats <- function(W, cum_ln_marl, cum_ln_marl_nse2,
                                      gr_cum_ln_marl) {
   J <- length(gr_cum_ln_marl)
@@ -628,21 +625,33 @@ compute_EP_ln_maxl <- function(u, Nv, alpha, M) {
   Eln_maxl
 }
 
-# Helper function to aggregate preference gamma weights to obtain choice object
-# gamma weights, making sure rownames are set correctly.
+#' Aggregate preference weights by (A,x) pair.
+#'
+#' For each column of gamma (i.e. each particle), aggregate preference weights
+#' by (A,x) pair. Ensures that rownames are set correctly.
+#'
+#' @inheritParams compute_pi_ln_like
+#' @param gamma matrix, n_probs by number of particles, of probability weights,
+#' where each row is the weight of a given preference and each column is a
+#' particle.
+#'
+#' @returns matrix, n_probs by number of particles, of gamma parameters.
 compute_gamma_Ax <- function(u, gamma) {
   gamma_Ax <- u$pi_to_P %*% gamma
   rownames(gamma_Ax) <- u$Ax_strings
   gamma_Ax
 }
 
-#' Compute Dirichlet alpha parameters by Ax given a
+#' Aggregate Dirichlet alpha parameters by (A,x) pair.
+#'
+#' For each column of gamma (i.e, each particle), aggregate Dirichlet alpha
+#' parameters by (A,x) pair. Ensures that rownames are set correctly.
 #'
 #' @inheritParams compute_pi_ln_like
 #' @param alpha vector of alpha values by particle
 #'
 #' @returns matrix, n_probs by number of particles, of Dirichlet alpha
-#' parameters
+#' parameters.
 compute_alpha_Ax <- function(u, alpha) {
   card_Ax <- u$A_table[u$Ax_table[, 'A'], 'nA']
   alpha_Ax <- outer(card_Ax, alpha, FUN = function(x,y){y/x})
@@ -663,10 +672,9 @@ compute_alpha_Ax <- function(u, alpha) {
 #'
 #' @inheritParams compute_pi_ln_like
 #' @param type the string "RP" or "RC", to indicate which terms to compute
-#' @param weight_Ax
+#' @param weight_Ax Either gamma_Ax (if type="RP") or alpha_Ax (if type="RC")
 #'
 #' @returns A matrix of RC or RP log likelihood terms, by menu and particle
-#' @export
 #'
 #' @examples
 #' n <- 5
@@ -674,7 +682,7 @@ compute_alpha_Ax <- function(u, alpha) {
 #' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
 #' M <- 10
 #' weight_Ax <- matrix(rgamma(u$n_probs * M, 4.0), nrow=u$n_probs, ncol=M)
-#' ln_Pr_by_A <- compute_ln_Pr_by_A(u, "RC", weight_Ax, Nv)
+#' ln_Pr_by_A <- RanCh:::compute_ln_Pr_by_A(u, "RC", weight_Ax, Nv)
 compute_ln_Pr_by_A <- function(u, type, weight_Ax, Nv) {
   ln_Pr_by_A <- matrix(0, nrow=u$n_subsets, ncol=ncol(weight_Ax))
   rownames(ln_Pr_by_A) <- u$A_strings
@@ -780,9 +788,7 @@ AR_gamma <- function(gamma, alpha, phi) {
 #'   probability}
 #'   \item{mu}{Mean of alpha}
 #' }
-#' @export
 #'
-#' @examples
 update_alpha <- function(u, Nv, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by_A,
                          n_reps = 2) {
   MJ <- length(alpha)

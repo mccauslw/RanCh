@@ -15,16 +15,28 @@ u <- create_universe(n, object_names=dimnames(N)[[2]])
 Nv <- vectorize(u, N)
 J <- 40
 M <- 1000
+set.seed(123)
 RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
 
 # Extract posterior mean and quantiles, numerical errors, etc.
 alpha_stats <- ind_groups_stats(RC_sim$alpha, J, quant_p)
 
-# Extract posterior densities of p(x,y) and p(x,z) and plot them
+# Extract posterior densities of p(x,y) and p(x,z) and plot them;
+# plots show simulation mean (black) as well as plus and minus one numerical
+# standard error (red)
 RC_binp_funcs <- compute_RC_binp_funcs(u, RC_sim$alpha, J, Nv, p_grid)
-plot(RC_binp_funcs[[1]]$pdf$x, RC_binp_funcs[[1]]$pdf$func, 'l')
-plot(RC_binp_funcs[[2]]$pdf$x, RC_binp_funcs[[2]]$pdf$func, 'l')
+xy_pdf <- RC_binp_funcs[[1]]$pdf # posterior pdf function for p(x,y)
+plot(xy_pdf$x, xy_pdf$func, 'l', xlab = "p(x,y)", ylab = "density value")
+lines(xy_pdf$x, xy_pdf$func + xy_pdf$nse, col='red')
+lines(xy_pdf$x, xy_pdf$func - xy_pdf$nse, col='red')
+xz_pdf <- RC_binp_funcs[[2]]$pdf # posterior pdf function for p(x,z)
+plot(xz_pdf$x, xz_pdf$func, 'l', xlab = "p(x,z)", ylab = "density value")
+lines(xz_pdf$x, xz_pdf$func + xz_pdf$nse, col='red')
+lines(xz_pdf$x, xz_pdf$func - xz_pdf$nse, col='red')
 
 # Extract posterior density of alpha and plot it
 RC_alpha_funcs <- compute_pdf_cdf_on_grid(RC_sim$alpha, J, n_alpha_grid)
-plot(RC_alpha_funcs$pdf$x, RC_alpha_funcs$pdf$func, 'l')
+al_pdf <- RC_alpha_funcs$pdf # cdf is also possible
+plot(al_pdf$x, al_pdf$func, 'l', xlab = "alpha", ylab = "density value")
+lines(al_pdf$x, al_pdf$func + al_pdf$nse, col='red')
+lines(al_pdf$x, al_pdf$func - al_pdf$nse, col='red')
