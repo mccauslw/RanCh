@@ -16,7 +16,7 @@ test_that("Get correct value of max-min log marginal likelihood", {
 
 test_that("Get correct value of P log maximum likelihood",{
   N <- RanCh::MMS_2019_counts[1, , ]
-  P <- proportions(N)
+  P <- P_frequencies(N)
   P_ln_maxl <- dmultinomRC(P, N, categorical=TRUE, log=TRUE)
   expect_equal(P_ln_maxl, -943.728101159082)
 })

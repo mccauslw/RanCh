@@ -41,7 +41,7 @@
 #' create_universe(3)
 #' # Objects have default names "1", "2" and "3"
 #' # Example with a universe of five objects, suitable for work with the datasets
-#' \link{\code{MMS_2019_counts}} and \link{\code{MSMPB_2019_counts}}.
+#' # \link{\code{MMS_2019_counts}} and \link{\code{MSMPB_2019_counts}}.
 #' # Objects have the user-supplied names "a", "b", "c", "d" and "e".
 #'
 #' u = create_universe(5, c("a", "b", "c", "d", "e"))

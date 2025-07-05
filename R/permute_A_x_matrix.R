@@ -8,13 +8,17 @@
 #' @export
 #'
 #' @examples
+#' P1 = P_logit(c(a=-2, b=0, c=1))
+#' P2 = permute_A_x_matrix(P1, c(2, 3, 1))
+#' print(P1)
+#' print(P2)
 permute_A_x_matrix <- function(M_in, perm) {
   M_out <- M_in
   x_names_in <- colnames(M_in)
   x_names_out <- x_names_in[perm]
   A_names_out <- rownames(M_in)
   for (A_out in seq.int(nrow(M_in))) {
-    v_out <- subset_vectors[[A_out]]
+    v_out <- u_const$subset_vectors[[A_out]]
     v_in <- perm[v_out]
     A_in <- set_index(v_in)
     M_out[A_out, v_out] <- unname(M_in[A_in, v_in])

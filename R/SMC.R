@@ -796,7 +796,15 @@ AR_gamma <- function(gamma, alpha, phi) {
 #' gamma_p (col m) and lambda = 1
 #' @param n_reps number of times to apply Metropolis-Hastings update of alpha
 #'
-#' @returns
+#' @returns A list with components
+#' \describe{
+#'   \item{alpha}{SMC sample of the alpha parameter, as a vector}
+#'   \item{gamma_p}{SMC sample of the gamma parameter vector, as an
+#'   `n_subsets` by $MJ$ matrix. Each column is a single draw of the vector.}
+#'   \item{aPr}{Scalar, an estimate of the Metropolis-Hastings acceptance
+#'   probability}
+#'   \item{mu}{Mean of alpha}
+#' }
 #' @export
 #'
 #' @examples

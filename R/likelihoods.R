@@ -52,13 +52,15 @@ rmultinomRC <- function(n_draws, P, N_total) {
 #' \code{log=FALSE} is usually not recommendend, as underflow is likely.
 #' @return value of log density or density
 #' @examples
-#' u <- c(1, 2, 3); n_objects=3; n_subsets=2^n_objects-1;
-#' P <- P_Luce(u)
+#' v <- c(x=2, y=5, z=3) # Vector of Luce weights, names of objects are x, y, z
+#' n <-length(v)         # Number of objects
+#' n_subsets <- 2^n-1;   # Number of non-zero subsets of {x,y,z}
+#' P <- P_Luce(v)        # Random choice model with given Luce weights
 #' xy <- set_index(c(1, 2))      # Choice set with x and y
 #' xyz <- set_index(c(1, 2, 3))  # Choice set with x, y, and z
-#' N_total <- vector(mode="integer", length=n_subsets)
-#' N_total[xy] <- 10
-#' N_total[xyz] <- 10
+#' N_total <- vector(mode="integer", length=n_subsets) # Count totals by menu
+#' N_total[xy] <- 10     # Count total for menu {x, y}
+#' N_total[xyz] <- 10.   # Count total for menu {x, y, z}
 #' N <- rmultinomRC(1, P, N_total) # Random count matrix
 #' print(N[, , 1], na.print='-') # Print first count matrix
 #' dmultinomRC(P, N[, , 1], categorical=FALSE, log=TRUE)
@@ -77,10 +79,12 @@ dmultinomRC <- function(P, N, categorical=FALSE, log=TRUE) {
       if (u_const$subset_card[A] > 1) {
         v <- u_const$subset_vectors[[A]]
         v <- v[N[A,v,i] != 0]
-        if (categorical)
-          ln_L <- ln_L + sum(N[A, v, i] * log(P[A, v]))
-        else
-          ln_L <- ln_L + dmultinom(N[A, v, i], prob=P[A, v], log=TRUE)
+        if (length(v) > 0) {
+          if (categorical)
+            ln_L <- ln_L + sum(N[A, v, i] * log(P[A, v]))
+          else
+            ln_L <- ln_L + dmultinom(N[A, v, i], prob=P[A, v], log=TRUE)
+        }
       }
     }
   }
@@ -154,8 +158,8 @@ dDirMultinom <- function(alpha, counts, categorical=FALSE, log=TRUE) {
 rDirichletRC <- function(n_draws, Alpha) {
   P <- array(dim=c(dim(Alpha), n_draws), dimnames=c(dimnames(Alpha), list(NULL)))
   for (A in 1:nrow(Alpha)) {
-    x <- subset_vectors[[A]]
-    if (subset_card[A] > 1) {
+    x <- u_const$subset_vectors[[A]]
+    if (u_const$subset_card[A] > 1) {
       P[A, x, ] <- t(rDirichlet(n_draws, Alpha[A, x]))
     } else {
       P[A, x, ] <- 1.0
@@ -278,13 +282,15 @@ P_uniform <- function(n_objects) {
   P
 }
 
-#' P_Luce
+#' Construct a Luce model
 #'
 #' \code{P_Luce} constructs a random choice structure (RCS) from a Luce
 #' model.
-#' @param v postive vector, Luce weights
+#' @param v positive vector, Luce weights for a vector of objects.
+#' If \code{v} is a named vector, the row and column names of the output will
+#' be set accordingly.
+#' @returns RCS with choice probabilities given by Luce weights
 #' @export
-#' @return RCS with choice probabilities given by Luce weights
 #' @examples
 #' P <- P_Luce(c(1.2,2.5,3.3))
 P_Luce <- function(v) {
@@ -294,20 +300,41 @@ P_Luce <- function(v) {
   for (i in 1:n_subsets) {
     P[i, ] <- P[i, ] * v / sum(v * u_const$member_table[i, ], na.rm=TRUE)
   }
+  if (!is.null(names(v))) {
+    rownames(P) <- menu_names(names(v))
+    colnames(P) <- names(v)
+  }
   P
+}
+
+#' Construct a logit model
+#'
+#' \code{P_logit} constructs a random choice structure (RCS) for a logit model.
+#' @param x vector of logit values for a vector of objects.
+#' If \code{x} is a named vector, the row and column names of the output will
+#' be set accordingly.
+#'
+#' @returns A random choice structure.
+#' @export
+#'
+#' @examples
+#' P <- P_logit(c(a=-2, b=0, c=1))
+P_logit <- function(x) {
+  P <- P_Luce(exp(x))
 }
 
 #' Random Choice Structure from count proportions
 #'
-#' \code{proportions} takes a count matrix as input, and returns choice
-#' proportions as a random choice structure.
+#' \code{P_frequencies} takes a count matrix as input, and returns choice
+#' frequencies as a random choice structure.
 #'
 #' @param N A count matrix.
 #' @return A random choice structure.
 #' @export
+#'
 #' @examples
-#' P <- proportions(MMS_2019_counts[1,,])
-proportions <- function(N) {
+#' P <- P_frequencies(MMS_2019_counts[1,,])
+P_frequencies <- function(N) {
   n_objects <- ncol(N)
   P <- N/rowSums(N, na.rm = TRUE)
   for (i in 1:n_objects)

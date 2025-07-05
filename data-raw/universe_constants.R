@@ -91,13 +91,11 @@ u_const <- list(
   subset_vectors    = subset_vectors,
   n_singletons      = n_singletons,
   singletons        = singletons,
-  singleton_names   = singleton_names,
   n_doubletons      = n_doubletons,
   doubletons        = doubletons,
   doubleton_names   = doubleton_names,
   n_tripletons      = n_tripletons,
   tripletons        = tripletons,
-  tripleton_names   = tripleton_names,
   RP_table          = RP_table,
   member_table      = member_table
 )

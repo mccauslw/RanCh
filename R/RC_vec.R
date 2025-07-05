@@ -18,6 +18,7 @@ vectorize <- function(u, Ax_array) {
   d1 <- dims[1]
   d2 <- dims[2]
   slice_dims <- dims[-(1:2)]
+  slice_names <- dimnames(Ax_array)[-(1:2)]
   n_slices <- prod(slice_dims)
 
   Ax_matrix <- matrix(Ax_array, nrow = d1*d2, ncol = n_slices)
@@ -25,9 +26,14 @@ vectorize <- function(u, Ax_array) {
                    function(i) Ax_matrix[u$Ax_table[,3], i],
                    numeric(u$n_probs))
   d <- c(u$n_probs, slice_dims)
-  if (length(d) == 1)
-    return(as.vector(result))
-  if (length(d) == 1)
+  names <- c(u$Ax_strings, slice_names)
+  if (length(d) == 1) {
+    result <- as.vector(result)
+    names(result) <- names
+    return(result)
+  }
+  dimnames(result) <- names
+  if (length(d) == 2)
     return(as.matrix(result, nrow=d[1], ncol=d[2]))
   dim(result) <- d
 }

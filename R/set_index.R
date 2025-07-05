@@ -24,3 +24,27 @@
 set_index <- function(v) {
   set <- sum(bitwShiftL(1, v-1))
 }
+
+#' Compute menu names given object names
+#'
+#' @param obj_names vector of object names
+#'
+#' @returns a vector of menu names
+#' @export
+#'
+#' @examples
+#' menus_as_strings <- menu_names(c('a', 'b', 'c'))
+menu_names <- function(obj_names) {
+  n <- length(obj_names)
+  menu_names <- vector(mode='character', length=u_const$n_subsets[n])
+  for (menu in seq_along(menu_names)) {
+    name <- ''
+    for (i in seq(n)) {
+      if (bitwAnd(menu, bitwShiftL(1, i-1))) {
+        name <- paste(name, obj_names[i], sep='')
+      }
+    }
+    menu_names[menu] <- name
+  }
+  menu_names
+}

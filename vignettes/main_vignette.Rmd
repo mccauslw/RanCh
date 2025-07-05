@@ -73,7 +73,7 @@ n_objects <- 5
 doubletons <- u_const$doubletons[1:u_const$n_doubletons[n_objects]]
 print(RDS_2011_counts['Cash 1', n_objects, doubletons, ], na.print='-')
 ```
-For this particular domain and subject, all choice proportions are consistent with weak stochastic transitivity: from each binary choice set, the subject chose the lower alphabetically ranked object much more often than the higher.
+For this particular domain and subject, all choice frequencies are consistent with weak stochastic transitivity: from each binary choice set, the subject chose the lower alphabetically ranked object much more often than the higher.
 
 ## Data sets where all subsets of the choice universe are presented 
 
@@ -89,7 +89,7 @@ The next variable, `set`, is a string showing which choice objects were presente
 This is followed by `choice`, a letter indicating which object the subject chose from the given choice set.
 The variable `set_perm` shows the configuration of the objects as seen on screen by the subject.
 The subset and choice information is repeated in the values of the variables `set_index` and `choice_int`.
-The variable `set_index` is the set index, a binary representation of the choice set, as described above.
+The variable `set_index` is the menu index, a binary representation of the choice set, as described above.
 Take for example the first row of the table below.
 The decimal value 30 is binary 11110, which indicates that the 2nd, 3rd, 4th and 5th elements of the set $\{a,b,c,d,e\}$ are in the choice set.
 This corresponds to the string `bcde` that is the value of the `set` variable.
@@ -171,18 +171,18 @@ When faced with a non-empty choice set $A \subseteq T$, a decision maker (DM) ch
 The probability that the DM chooses $x \in A$ is denoted $P_A(x)$.
 A *Random Choice Structure* (RCS) is the complete specification of the $P_A(x)$, $x \in A \subseteq T$, and is denoted $P$.
 
-The function `proportions` computes choice proportions from choice counts.
-The following code computes and displays the choice proportions that correspond to the cross section `N_bce` of counts constructed above.
-These choice proportions are an example of a RCS for the choice universe $\{b,c,e\}$.
+The function `P_frequencies` computes choice frequencies from choice counts.
+The following code computes and displays the choice frequencies that correspond to the cross section `N_bce` of counts constructed above.
+These choice frequencies are an example of a RCS for the choice universe $\{b,c,e\}$.
 ```{r write_RCS}
-P_bce <- proportions(N_bce)  # Compute proportions from count data
+P_bce <- P_frequencies(N_bce)  # Compute frequencies from count data
 print(P_bce, na.print='-')   # and display.
 ```
-Note that we are using the convention that for singleton sets, the choice proportions for the only element of the set are equal to 1, even if the set is never presented.
+Note that we are using the convention that for singleton sets, the choice frequencies for the only element of the set are equal to 1, even if the set is never presented.
 This convention makes it easier to check various choice axioms, by avoiding the need for special cases.
 
 A big part of this package is a collection of tools for plotting binary and ternary probabilities in barycentric coordinate systems.
-The Wikipedia page on [ternary plots][terW] gives a nice overview of plotting ternary probabilities or proportions in the regular 2-simplex, an equililateral triangle.
+The Wikipedia page on [ternary plots][terW] gives a nice overview of plotting ternary probabilities or frequencies in the regular 2-simplex, an equililateral triangle.
 The page on [Barycentric coordinate systems][barW] gives more detail and generality.
 
 The following code creates a figure displaying four points in barycentric coordinates, correponding to the three binary choice probability vectors and the ternary choice probability vector of the RCS `P_bce` we just constructed.
@@ -228,10 +228,10 @@ A random choice structure $P$ satisfies
 - *random utility* if and only if for all $x \in A \subseteq T$, $$\sum_{B \colon A \subseteq B \subseteq T} (-1)^{|B \backslash A|} P_B(x) \geq 0.$$ The various terms on the left hand side are the *Block-Marschak* terms; these can be computed using the function `BM_terms`.
 
 The next code excerpt displays cross sections of the regularity and multiplicative inequality regions, both subsets of $\Delta$.
-The blue triangle (pointing down) shows the region of ternary probabilities that is consistent with both regularity and the binary choice proportions given by the observed counts in `N_bce`: those binary choice proportions are displayed, as before, as hollow dots on the three sides of the triangle bce.
+The blue triangle (pointing down) shows the region of ternary probabilities that is consistent with both regularity and the binary choice frequencies given by the observed counts in `N_bce`: those binary choice frequencies are displayed, as before, as hollow dots on the three sides of the triangle bce.
 Notice that the top side of the blue triangle is aligned with the lower of the two hollow dots on the left and right sides of the triangle bce; the left and right sides of the blue triangle meet at the hollow dot on the base of bce.
 
-The red triangle (pointing up) shows the region of ternary probabilities consistent with the multiplicative inequality and the same binary choice proportions.
+The red triangle (pointing up) shows the region of ternary probabilities consistent with the multiplicative inequality and the same binary choice frequencies.
 ```{r regularity}
 triplot(label=c('b', 'c', 'e')) # Set up ternary plot, with labels and grid
 plot_P3(P_bce)                  # Plot points 
@@ -252,7 +252,7 @@ print(regularity(P_bce))
 ```
 However, the RCS generated by a Luce model, with weights 2, 3 and 5 for objects 'x', 'y' and 'z' is consistent with regularity:
 ```{r check regularity xyz}
-P_xyz <- P_Luce(c(2, 3, 5))
+P_xyz <- P_Luce(c(x=2, y=3, z=5))
 print(P_xyz, na.print='-')
 print(regularity(P_xyz))
 ```
@@ -320,7 +320,7 @@ polygon(tritrafo(C$Cxz), col=grey(0.8)); text(tritrafo(colMeans(C$Cxz)), 'Cxz')
 
 ## Checking for context effects
 
-We can also check specific RCDs, arising from direct specification, simulation, or observed choice proportions, to see if they exhibit context effects.
+We can also check specific RCDs, arising from direct specification, simulation, or observed choice frequencies, to see if they exhibit context effects.
 Below, we simulate 500 variates from the uniform distribution on the 2-simplex.
 For each draw, we construct a RCD by setting the ternary choice probability to the random draw and supplying the (constant) binary choice probabilities used in the examples illustrating `similarity_X3` and `compromise_X3`---the probabilities in the two examples are consistent with each other.
 Then we create two graphics.
@@ -378,7 +378,7 @@ lines(tritrafo(HD3$HD12), lwd=4)              # Plot three binaries
 lines(tritrafo(HD3$HD23), lwd=4)
 lines(tritrafo(HD3$HD13), lwd=4)
 polygon(tritrafo(HD3$HD123), border='lightgreen') # Plot ternary
-plot_P3(P_bce)                           # Plot proportions from data
+plot_P3(P_bce)                           # Plot frequencies from data
 ```
 
 ## Marginal likelihoods for some simple models
@@ -413,38 +413,60 @@ These marginal likelihoods serve as useful benchmarks.
 # Appendix A: Indexing
 
 Most of the operations available in the `RanCh` package are relative to a universe $T$ with $n$ elements.
-We need to be able to iterate through the $n$ elements of $T$, the $2^n-1$ non-empty subsets of $T$, and the $n!$ linear orders on $T$, interpreted as choice objects, menus and preferences, respectively.
+We need to be able to iterate through the $n$ elements of $T$, the $2^n-1$ non-empty subsets of $T$, and the $n!$ linear orders on $T$; the elements of $T$ are  interpreted as choice objects, the non-empty subsets of $T$ as menus and the linear orders on $T$ as preferences.
 R objects created by the `RanCh` package often have dimensions indexed by object, menu or preference.
-This appendix establishes consistent orderings for objects, menus and preferences.
+This appendix establishes consistent orderings for all three.
 
-We make use of the dimension naming system in R to allow indexing by integers or names, interchangeably.
-There will be times, usually for computational convenience, when we wish to treat the universe as a set of integers, as in  $T=\{1,2,\ldots,n\}$, and times when we use variable names, as in $T=\{a,b,\ldots\}$.
-As a running example, we consider the universe $T_3 = \{a,b,c\}$, sometimes expressed as $T_3 = \{1,2,3\}$.
+To define these orderings, we will denote any universe with $n$ elements as $T_n \equiv \{1,2,\ldots,n\}$, without substantive loss of generality.
+However, the user may prefer to use symbols to represent objects, however.
+In a running example, the user has in mind a universe $T \equiv \{a,b,c\}$.
+The user can assign the names "a", "b", and "c" to the objects 1, 2 and 3, respectively.
+Various functions in RanCh then assign names to each menu or preferences based on the object names supplied by the user.
+The name of the menu $\{a,b\}$, for example, is `ab` and the name of the preference $b \succ c \succ a$ is `bca`.
+In all this, we make use of the dimension naming system in R.
+The user can refer to choice objects, menus and preferences by integer or name, interchangeably.
 
-To create a universe structure for $T_3$, we will provide the names "a", "b" and "c" for objects 1, 2 and 3, respectively, as follows:
-```{r u_define}
-u <- create_universe(3, object_names = c("a", "b", "c"))
+The following example illustrates how this works.
+The first command of the following code creates a Luce random choice model for three objects.
+The input, a *named vector*, gives the Luce weights $2$, $3$ and $5$ and establishes the object names `a`, `b` and `c`.
+The second line displays the random choice model.
+Rows are labelled by menu names and columns are labelled by object names.
+The third and fourth commands both display $P_\{a,b\}(b)$, the probability of choosing $b$ from the menu $\{a,b\}$; menu and object are first indexed by number and then by name.
+```{r P3}
+P <- P_Luce(c(a=2,b=3,c=5))
+print(P, na.print='-')
+print(P[3,2])
+print(P["ab", "b"])
 ```
-For this function, we can provide names or accept the default names "1", "2", etc.
-Many `RanCh` functions that create structures set the dimension names of outputs to be consistent with the dimension names of inputs.
 
-Each menu, a non-empty subset $A \subseteq T$ is associated with a *set index* from $1$ to $2^n-1$.
-Each digit in the binary representation of the set index of a set $A$ serves as an inclusion indicator: for any $i \in \{1,\ldots,n\}$, $i \in A$ if and only if the $i$'th binary digit (or bit) of the set index, counting from the right, is 1.
-Thus, the singleton set with object $i$ has set index $2^{i-1}$ and the set index of any non-empty $A \subseteq T$ is $\sum_{i \in A} 2^{i-1}$.
+Each menu, a non-empty subset $A \subseteq T$ is associated with an index from $1$ to $2^n-1$.
+Each digit in the binary representation of the index of a menu $A$ serves as an inclusion indicator: for any $i \in \{1,\ldots,n\}$, $i \in A$ if and only if the $i$'th binary digit (or bit) of the index, counting from the right, is 1.
+Thus, the singleton set with object $i$ has index $2^{i-1}$ and the index of any non-empty $A \subseteq T$ is $\sum_{i \in A} 2^{i-1}$.
 This convention for indexing sets has some important computational advantages.
-The bitwise “or” (`bitwOr` in R) of the indices of two sets gives the set index of their union; the bitwise “and” (`bitwAnd`), the set index of their intersection.
+The bitwise “or” (`bitwOr` in R) of the indices of two sets gives the menu index of their union; the bitwise “and” (`bitwAnd`), the menu index of their intersection.
 
 Preference orders are indexed by integers running from $1$ to $n!$ in increasing lexicographic order.
 Thus for $T_3 = \{a, b, c\}$, the six preferences are, in sequence, $a \succ b \succ c$, $a \succ c \succ b$, $b \succ a \succ c$, $b \succ c \succ a$, $c \succ a \succ b$ and $c \succ b \succ a$.
 The names used to represent these orders are `abc`, `acb`, `bac`, `bca`, `cab` and `cba`.
 
-In some cases, we replace the double index $(A,x)$, where $A$ is the index of a choice set and $x$ is the index of an object in $A$, with a flat index.
-All pairs $(A,x)$ where $x \in A$ and where $A$ has at least two elements have an index, and only those pairs.
-Thus the flat index runs from 1 to $\sum_{i=2}^n \binom{n}{i} i = n (2^{n-1}-1)$.
-Pairs $(A,x)$ are ordered lexicographically by increasing set size $|A|$ then by increasing set index $A$ (within each set size) then by object index $x$.
+In some cases, we want to iterate through all pairs $(A,x)$ where $x \in A \subseteq T$ and $|T| \geq 2$.
+We can do this using a single numeric index, running from 1 to $\sum_{i=2}^n \binom{n}{i} i = n (2^{n-1}-1)$.
+We just need to establish a conventional order.
+We order the $(A,x)$ lexicographically by increasing set size $|A|$ then by increasing menu index $A$ (within each set size) then by object index $x$.
 Thus for the universe $T = \{a, b, c\}$, the order is
 $(\{a,b\}, a)$, $(\{a,b\}, b)$, $(\{a,c\}, a)$, $(\{a,c\}, c)$, $(\{b,c\}, b)$, $(\{b,c\}, c)$, $(\{a,b,c\}, a)$, $(\{a,b,c\}, b)$, $(\{a,b,c\}, c)$.
 The names used to represent these orders are `ab;a`, `ab;b`, `ac;a`, `ac;c`, `bc;b`, `bc:c`, `abc;a`, `abc;b`, and `abc;c`.
+The point of ordering first by set size is computational efficiency in the analysis of experimental data where only binary choices, or only binary and ternary choices are observed.
+
+The following example illustrates this flat indexing.
+The first command creates a universe of three objects named `a`, `b` and `c`.
+The second command creates a flat vector containing the non-redundant information in the Luce random choice model $P$.
+The third command displays this named vector; element names indicate the menu and object names, separated by a semicolon.
+```{r vectorize}
+u <- create_universe(3, c("a", "b", "c"))
+P_Ax <- vectorize(u, P)
+print(P_Ax)
+```
 
 # Appendix B: Universe constants
 

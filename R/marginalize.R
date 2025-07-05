@@ -8,10 +8,15 @@
 #' @return A count matrix or RCS
 #' @export
 #' @examples
-#' N_bce <- marginalize(MMS_2019_counts['Beer',,], c(2, 3, 5)) # Marginalize data first
-#' P_bce_1 <- proportions(N_bce)                               # then compute proportions
-#' P <- proportions(MMS_2019_counts['Beer',,]) # Compute proportions first
-#' P_bce_2 <- marginalize(P, c(2, 3, 5))       # then marginalize. Gives same result.
+#' # Marginalize data first
+#' N_bce <- marginalize(MMS_2019_counts['Beer',,], c(2, 3, 5))
+#' # then compute frequencies
+#' P_bce_1 <- P_frequencies(N_bce)
+#'
+#' # Compute frequencies first
+#' P <- P_frequencies(MMS_2019_counts['Beer',,])
+#' # then marginalize. Gives same result.
+#' P_bce_2 <- marginalize(P, c(2, 3, 5))
 marginalize <- function(input, objects) {
   d <- dim(input)
   n <- d[2]               # Number of objects in universe

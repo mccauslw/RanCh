@@ -26,14 +26,54 @@ plot_P3 <- function(P, perm=c(1, 2, 3), binary_pch = 1, ternary_pch = 20) {
   xyz <- set_index(c(x, y, z))
 
   # Sides of triangle
-  tripoints(P[xy, x], P[xy, y], 0.0, pch=binary_pch)
-  tripoints(0.0, P[yz, y], P[yz, z], pch=binary_pch)
-  tripoints(P[xz, x], 0.0, P[xz, z], pch=binary_pch)
+  klaR::tripoints(P[xy, x], P[xy, y], 0.0, pch=binary_pch)
+  klaR::tripoints(0.0, P[yz, y], P[yz, z], pch=binary_pch)
+  klaR::tripoints(P[xz, x], 0.0, P[xz, z], pch=binary_pch)
 
   # Centre of triangle
-  tripoints(P[xyz, x], P[xyz, y], P[xyz, z], pch=ternary_pch)
+  klaR::tripoints(P[xyz, x], P[xyz, y], P[xyz, z], pch=ternary_pch)
 }
 
+#' Plot probabilities for a random choice structure with 3 objects
+#'
+#' For the random choice structure on a universe of three objects, plot
+#' all binary and ternary choice probabilities in barycentric coordinates and
+#' optionally plot cross-sections (for fixed binary choice probabilities) of the
+#' regions where regularity and the multiplicative inequality hold.
+#'
+#' @param P Matrix representing a random choice model
+#' @param do.reg Flag indicating whether or not to plot the cross section of
+#' the region where regularity holds.
+#' @param do.mul Flag indicating whether or not to plot the cross section of
+#' the region where the multiplicative inequality holds.
+#' @param do.ternary Flag indicating whether or not to plot the ternary choice
+#' probabilities.
+#' @param do.context Flag indicating whether or not to plot context effects
+#' @param between Index of object that is the *between* object in the compromise
+#' effect or the *dissimilar* object in the similarity effect.
+#' @param grid Vector of probabilities giving the position of grid lines
+#' @param binary.pch Value of pch for binary probabilities
+#' (defaults to 1, for solid dot)
+#' @param ternary.pch Value of pch for ternary probability
+#' (defaults to 20, for hollow dot)
+#' @param reg.col Colour for regularity cross section
+#' @param mul.col Colour for multiplicative inequality cross section
+#' @param one.ce.color Colour for one-sided context effect
+#' @param both.ce.color Colour for two-sided context effect
+#' @param border Value of `border` parameter passed to polygon to draw context
+#' effect regions.
+#' @param panel.label Text to draw as title of the plot.
+#' @importFrom klaR tripoints trilines triplot tritrafo triframe trigrid
+#' @importFrom graphics polygon text
+#'
+#' @returns Called for its side effects. Returns handle of plot returned by
+#' \code{triplot}.
+#' @export
+#'
+#' @examples
+#' P3 <- P_logit(c(a=-2, b=0, c=1))
+#' plot_axioms(P3)
+#'
 plot_axioms = function(P,
                        do.reg=TRUE, do.mul=TRUE,
                        do.ternary=TRUE, do.context=FALSE,
@@ -53,7 +93,7 @@ plot_axioms = function(P,
 
   # Set up empty plot with no frame (with grid that will be overwritten)
   tripl = klaR::triplot(frame=FALSE, grid=grid)
-  text(0, -0.4, panel.label, pos=1)
+  graphics::text(0, -0.4, panel.label, pos=1)
 
   # Set up context effect region based on object whose tripleton probability is favoured
   if (between==1) pc = c(pxy, pxz) # c=x, a=y, b=z
@@ -81,19 +121,19 @@ plot_axioms = function(P,
 
     # Plotting, according to between/dissimilar object
     if (between==1) {
-      polygon(klaR::tritrafo(r1c, r1a, r1b), col=one.ce.color, border=border)
-      polygon(klaR::tritrafo(r2c, r2a, r2b), col=one.ce.color, border=border)
-      polygon(klaR::tritrafo(r3c, r3a, r3b), col=both.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r1c, r1a, r1b), col=one.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r2c, r2a, r2b), col=one.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r3c, r3a, r3b), col=both.ce.color, border=border)
     }
     if (between==2) {
-      polygon(klaR::tritrafo(r1b, r1c, r1a), col=one.ce.color, border=border)
-      polygon(klaR::tritrafo(r2b, r2c, r2a), col=one.ce.color, border=border)
-      polygon(klaR::tritrafo(r3b, r3c, r3a), col=both.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r1b, r1c, r1a), col=one.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r2b, r2c, r2a), col=one.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r3b, r3c, r3a), col=both.ce.color, border=border)
     }
     if (between==3) {
-      polygon(klaR::tritrafo(r1a, r1b, r1c), col=one.ce.color, border=border)
-      polygon(klaR::tritrafo(r2a, r2b, r2c), col=one.ce.color, border=border)
-      polygon(klaR::tritrafo(r3a, r3b, r3c), col=both.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r1a, r1b, r1c), col=one.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r2a, r2b, r2c), col=one.ce.color, border=border)
+      graphics::polygon(klaR::tritrafo(r3a, r3b, r3c), col=both.ce.color, border=border)
     }
   }
 
@@ -140,6 +180,8 @@ plot_axioms = function(P,
 #' @export
 #'
 #' @examples
+#' P3 <- P_logit(c(a=-2, b=0, c=1))
+#' bin_tern_MR_plot(P3)
 bin_tern_MR_plot <- function(P3) {
   # Permute P3 matrix so that ternary probabilities are decreasing
   P3 <- permute_A_x_matrix(P3, order(P3[7,]))
@@ -152,17 +194,19 @@ bin_tern_MR_plot <- function(P3) {
 #' @param N A count matrix for a discrete choice experiment
 #'
 #' @returns Invisibly returns \code{NULL}. Called for its side effects.
+#' @importFrom graphics par
 #' @export
 #'
 #' @examples
-bin_term_MR_plot_all <- function(N) {
-  P <- proportions(N)
-  op = par(mfrow=c(4, 3), mar = c(1, 1, 0.5, 0.5))
-  for (i_triple in 1:.n_tripletons[5]) {
-    triple <- .tripletons[i_triple]
-    triple_v <- subset_vectors[[triple]]
+#' bin_tern_MR_plot_all(RanCh::MMS_2019_counts[1, , ])
+bin_tern_MR_plot_all <- function(N) {
+  P <- P_frequencies(N)
+  op = graphics::par(mfrow=c(4, 3), mar = c(1, 1, 0.5, 0.5))
+  for (i_triple in 1:u_const$n_tripletons[5]) {
+    triple <- u_const$tripletons[i_triple]
+    triple_v <- u_const$subset_vectors[[triple]]
     P3 <- marginalize(P, triple_v)
     bin_tern_MR_plot(P3)
   }
-  par(op)
+  graphics::par(op)
 }

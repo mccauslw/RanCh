@@ -1,3 +1,6 @@
+# Declare global variable to suppress CMD check warning
+utils::globalVariables("u_const")
+
 #' Internal constants for universe construction
 #'
 #' A named list of constants (vectors, lists, matrices and arrays) used
@@ -17,13 +20,10 @@
 #'   \item{subset_vectors}{List giving, for each subset, a vector of its elements.}
 #'   \item{n_singletons}{Number of singleton subsets, for each set size}
 #'   \item{singletons}{Vector of singleton subsets.}
-#'   \item{singleton_names}{Names of singleton subsets.}
 #'   \item{n_doubletons}{Number of doubleton subsets, for each set size.}
 #'   \item{doubletons}{Vector of doubleton subsets.}
-#'   \item{doubleton_names}{Names of doubleton subsets.}
 #'   \item{n_tripletons}{Number of tripleton subsets, for each set size.}
 #'   \item{tripletons}{Vector of tripleton subsets.}
-#'   \item{tripleton_names}{Names of tripleton subsets.}
 #'   \item{RP_table}{Array of revealed preference indicators.}
 #'   \item{member_table}{Matrix of set membership indicators}
 #' }
@@ -32,7 +32,7 @@
 #'   1 if object is first object in the doubleton set, which is a subset of subset.
 #'  -1 if object is second object in the doubleton set, which is a subset of subset.
 #'   0 otherwise
-#' Names correspond to \code{\link{object_names}}
+#' Names correspond to the object names in the vector \code{object_names}
 #'
 #' Value at index (subset, object) of member_table is 1 if object is an element of subset, NA otherwise
 #'
