@@ -1,6 +1,22 @@
 ## Density and random generation for distributions of the RC model P and
 ## for distributions of RC count data N
 
+#' Compute multinomial coefficient
+#'
+#' Given a vector of counts, compute the multinomial coefficient. This is used
+#' to compute the repeated categorial or
+#' @param counts vector of positive integer counts
+#' @param log logical; if \code{TRUE}, return the log multinomial coefficient;
+#' if \code{FALSE}, the multinomial coefficient.
+#'
+#' @returns the multinomial coefficient or the log multinomial coefficient
+#'
+multinomial_coef <- function(counts, log = TRUE) {
+  total <- sum(counts)
+  ln_coeff <- lgamma(total + 1) - sum(lgamma(counts + 1))
+  if (log) ln_coeff else exp(ln_coeff)
+}
+
 #' Random generation of RC count data from a multiple multinomial model
 #'
 #' code{rmultinomRC} draws random counts given probabilities in a RCS \code{P}
@@ -32,7 +48,7 @@ rmultinomRC <- function(n_draws, P, N_total) {
   N <- array(dim=c(dim(P), n_draws), dimnames=c(dimnames(P), list(NULL)))
   for (A in seq_len(nrow(P))) {
     v <- u_const$subset_vectors[[A]]
-    N[A, v, ] <- rmultinom(n_draws, N_total[A], P[A, v])
+    N[A, v, ] <- stats::rmultinom(n_draws, N_total[A], P[A, v])
   }
   N
 }
@@ -83,61 +99,10 @@ dmultinomRC <- function(P, N, categorical=FALSE, log=TRUE) {
           if (categorical)
             ln_L <- ln_L + sum(N[A, v, i] * log(P[A, v]))
           else
-            ln_L <- ln_L + dmultinom(N[A, v, i], prob=P[A, v], log=TRUE)
+            ln_L <- ln_L + stats::dmultinom(N[A, v, i], prob=P[A, v], log=TRUE)
         }
       }
     }
-  }
-  if (log) ln_L else exp(ln_L)
-}
-
-#' Random generation for the Dirichlet-multinomial distribution
-#'
-#' \code{rDirMultinom} draws from a Dirichlet-multinomial distribution
-#' @param n_draws number of random vectors to draw
-#' @param alpha vector of Dirichlet parameters
-#' @param n_trials number of trials
-#' @return a \code{n} by \code{length(alpha)} matrix of counts.
-#' @examples
-#' n <- rDirMultinom(10, c(2.4, 1.5, 3.2), 100)
-#' @importFrom stats rmultinom
-#' @export
-rDirMultinom <- function(n_draws, alpha, n_trials) {
-  N = matrix(nrow=length(alpha), ncol=n_draws)
-  for (d in 1:n_draws) { # WJM: avoid loop?
-    p <- rDirichlet(1, alpha)
-    N[, d] = rmultinom(1, n_trials, p)
-  }
-  N
-}
-
-#' Density for the Dirichlet-multinomial distribution
-#'
-#' \code{dDirMultinom} evaluates the density for the Dirichlet-multinomial
-#' distribution.
-#' @param alpha vector of Dirichlet parameters
-#' @param counts vector of multinomial counts
-#' @param categorical logical; if \code{TRUE}, the likelihood is the for
-#' the sequence of responses (categorical distribution) rather than for
-#' the counts (multinomial distribution).
-#' @param log logical; if \code{TRUE}, return the log likelihood;
-#' if \code{FALSE}, the likelihood.
-#' \code{log=FALSE} is usually not recommendend, as underflow is likely.
-#' @return Likelihood or log likelihood
-#' @examples
-#' ln_L <- dDirMultinom(c(2.4, 1.5, 3.2), c(45, 20, 33))
-#' @export
-dDirMultinom <- function(alpha, counts, categorical=FALSE, log=TRUE) {
-  if (is.vector(counts)) counts = matrix(counts, ncol=1)
-  stopifnot(length(alpha) == nrow(counts))
-  ln_L <- 0
-  for (i in seq_len(ncol(counts))) {
-    # Compute prior and posterior normalization constants
-    ln_prior_nc <- lgamma(sum(alpha)) - sum(lgamma(alpha))
-    ln_post_nc <- lgamma(sum(alpha + counts)) - sum(lgamma(alpha + counts))
-    ln_L <- ln_L + ln_prior_nc - ln_post_nc
-    if (!categorical)
-      ln_L <- ln_L + lfactorial(sum(counts)) - sum(lfactorial(counts))
   }
   if (log) ln_L else exp(ln_L)
 }
@@ -153,14 +118,15 @@ dDirMultinom <- function(alpha, counts, categorical=FALSE, log=TRUE) {
 #' of a RCS.
 #' @examples
 #' Alpha = DirRC_constant_shape(3, 1.0)
-#' P <- rDirichlet(10, Alpha) # 10 draws, 3 objects in universe
+#' P <- rDirichletRC(10, Alpha) # 10 draws, 3 objects in universe
+#' @importFrom extraDistr rdirichlet
 #' @export
 rDirichletRC <- function(n_draws, Alpha) {
   P <- array(dim=c(dim(Alpha), n_draws), dimnames=c(dimnames(Alpha), list(NULL)))
   for (A in 1:nrow(Alpha)) {
     x <- u_const$subset_vectors[[A]]
     if (u_const$subset_card[A] > 1) {
-      P[A, x, ] <- t(rDirichlet(n_draws, Alpha[A, x]))
+      P[A, x, ] <- t(extraDistr::rdirichlet(n_draws, Alpha[A, x]))
     } else {
       P[A, x, ] <- 1.0
     }
@@ -177,12 +143,20 @@ rDirichletRC <- function(n_draws, Alpha) {
 #' @inherit dmultinomRC return
 #' @examples
 #' Alpha = DirRC_constant_shape(3, 1.0)
-#' P <- rDirichlet(10, Alpha) # 10 draws, 3 objects in universe
+#' P <- rDirichletRC(10, Alpha) # 10 draws, 3 objects in universe
 #' ln_L <- dDirichletRC(Alpha, P)
+#' @importFrom extraDistr ddirichlet
 #' @export
 dDirichletRC <- function(Alpha, P, log=TRUE) {
   ln_L <- 0
-  # Fill in meat of function
+  for (A in 1:nrow(Alpha)) {
+    x <- u_const$subset_vectors[[A]]
+    if (u_const$subset_card[A] > 1) {
+      print(P[A, x, ])
+      print(Alpha[A, x])
+      ln_L <- ln_L + extraDistr::ddirichlet(t(P[A, x, ]), Alpha[A, x], log=TRUE)
+    }
+  }
   if (log) ln_L else exp(ln_L)
 }
 
@@ -210,7 +184,7 @@ dDirichletRC <- function(Alpha, P, log=TRUE) {
 #' N = rDirMultinomRC(10, Alpha, N_total)
 #' @seealso \code{\link{dDirMultinomRC}} for the likelihood function for
 #' this model.
-#' @importFrom stats rmultinom
+#' @importFrom extraDistr rdirmnom
 #' @export
 rDirMultinomRC <- function(n_draws, Alpha, N_total) {
   stopifnot(nrow(Alpha)==length(N_total))
@@ -219,8 +193,7 @@ rDirMultinomRC <- function(n_draws, Alpha, N_total) {
     v <- u_const$subset_vectors[[i]]
     if (u_const$subset_card[i] > 1) {
       for (draw in 1:n_draws) { # Need fresh draw of p, saving memory at cost of speed
-        p <- rDirichlet(1, Alpha[i, v])
-        N[draw, i, v] <- rmultinom(1, N_total[i], p)
+        N[draw, i, v] <- extraDistr::rdirmnom(1, Alpha[i, v], N_total[i])
       }
     } else {
       N[, i, v] <- N_total[i]
@@ -249,6 +222,7 @@ rDirMultinomRC <- function(n_draws, Alpha, N_total) {
 #' dDirMultinomRC(Alpha, N)
 #' @seealso \code{\link{rDirMultinomRC}}, which simulates a count matrix under
 #' this model, given the total number of trials for each choice subset.
+#' @importFrom extraDistr ddirmnom
 #' @export
 dDirMultinomRC <- function(Alpha, N, categorical=FALSE, log=TRUE) {
   stopifnot(identical(dim(Alpha), dim(N)))
@@ -256,7 +230,10 @@ dDirMultinomRC <- function(Alpha, N, categorical=FALSE, log=TRUE) {
   for (i in 1:nrow(Alpha)) {
     if (u_const$subset_card[i] > 1) {
       v <- u_const$subset_vectors[[i]]
-      ln_L <- ln_L + dDirMultinom(Alpha[i, v], N[i, v], categorical, log=TRUE)
+      ln_L <- ln_L + ddirmnom(N[i, v], sum(N[i, v]), Alpha[i, v], log=TRUE)
+      if (categorical) {
+        ln_L <- ln_L - multinomial_coef(N[i, v], log=TRUE)
+      }
     }
   }
   if (log) ln_L else exp(ln_L)
