@@ -144,7 +144,7 @@ In each wave, the subject sees one choice set from each of the 16 choice domains
 We can partition the complete dataset into two waves and test to see if choice probabilities are plausibly the same in both waves.
 
 In the following code, we compute for every domain and every subset of size two or more, the p-value for the Pearson two-sample chi-squared test of the hypothesis that the counts in the two waves are drawn from the same multinomial distribution, then display a histogram of the 176 p-values.
-```{r compare.waves}
+```{r compare_waves}
 my.chisq.test <- function(A)
 {
   x <- na.omit(t(A))
