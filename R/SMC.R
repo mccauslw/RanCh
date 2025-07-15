@@ -585,46 +585,6 @@ weights_to_C_stage_stats <- function(W, cum_ln_marl, cum_ln_marl_nse2,
        cum_ln_marl_nse2 = cum_ln_marl_nse2 + ln_marl_nse^2)
 }
 
-#' Compute posterior expected value of RC log likelihood function for the
-#' Bayesian Dirichlet RC model
-#'
-#' @inheritParams compute_pi_ln_like
-#' @param alpha common scalar sum of Dirichlet shape parameters
-#' @param M total number of draws from each Dirichlet distribution
-#'
-#' @returns The posterior expected value of the RC log likelihood
-#' @export
-#'
-#' @examples
-#' n <- 5
-#' u <- create_universe(n)
-#' alpha <- 1.0
-#' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
-#'
-compute_EP_ln_maxl <- function(u, Nv, alpha, M) {
-
-  # Compute log multinomial density without the "n choose r" normalization
-  # constant, so that it measures the probability of the sequence, rather than
-  # the count.
-  lnf_seq_multinom <- function(p, N_x) {
-    sum(N_x[N_x != 0] * log(p[N_x != 0]))
-  }
-
-  Eln_maxl <- 0
-  for (A in 1:u$n_subsets) {
-    if (u$A_table[A, 'nA'] > 1) {
-      Ax <- u$A_table[A, 'Ax']
-      nA <- u$A_table[A, 'nA']
-      N_Ax <- Nv[Ax:(Ax+nA-1)]
-      al_post = N_Ax + rep(alpha/nA, nA)
-      P = bayesm::rdirichlet(M, N_Ax)
-      lnf = apply(P, MARGIN=1, lnf_seq_multinom, N_Ax)
-      Eln_maxl <- Eln_maxl + mean(lnf)
-    }
-  }
-  Eln_maxl
-}
-
 #' Aggregate preference weights by (A,x) pair.
 #'
 #' For each column of gamma (i.e. each particle), aggregate preference weights
