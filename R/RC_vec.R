@@ -26,13 +26,12 @@ vectorize <- function(u, Ax_array) {
                    function(i) Ax_matrix[u$Ax_table[,3], i],
                    numeric(u$n_probs))
   d <- c(u$n_probs, slice_dims)
-  names <- c(u$Ax_strings, slice_names)
   if (length(d) == 1) {
     result <- as.vector(result)
-    names(result) <- names
+    names(result) <- u$Ax_strings
     return(result)
   }
-  dimnames(result) <- names
+  dimnames(result) <- c(list(Ax=u$Ax_strings), slice_names)
   if (length(d) == 2)
     return(as.matrix(result, nrow=d[1], ncol=d[2]))
   dim(result) <- d
@@ -44,6 +43,9 @@ vectorize <- function(u, Ax_array) {
 #'
 #' @inheritParams compute_pi_ln_like
 #' @param Ax_vector A vector indexed by a flat Ax index
+#' @param singleton_value Value to insert for cases (A, x) where A = {x}. Should
+#' be 1.0 for choice probabilities. Recommended value is 0 for count structures
+#' and 1.0 for Dirichlet parameter structures.
 #'
 #' @return Matrix indexed by set A and object x
 #' @export
@@ -54,10 +56,11 @@ vectorize <- function(u, Ax_array) {
 #' Nv <- vectorize(u, RanCh::MMS_2019_counts[1, , ])
 #' N <- unvectorize(u, Nv)
 #'
-unvectorize <- function(u, Ax_vector) {
+unvectorize <- function(u, Ax_vector, singleton_value) {
   d1 <- u$n_subsets
   d2 <- u$n
   slice_dims <- dim(Ax_vector)[-1]
+  slice_names <- dimnames(Ax_vector)[-1]
   n_slices <- prod(slice_dims)
 
   # Flatten Ax_vector and create full matrix
@@ -66,9 +69,10 @@ unvectorize <- function(u, Ax_vector) {
 
   # Insert values at indexed positions
   result[u$Ax_table[,3], ] <- Ax_vector_flat
-  result[u$singleton_is, ] <- 1.0
+  result[u$singleton_is, ] <- singleton_value
 
   # Reshape back to full array
   result <- array(result, dim = c(d1, d2, slice_dims))
+  dimnames(result) <- c(list(Menu=u$A_strings, Object=u$object_names), slice_names)
   result
 }

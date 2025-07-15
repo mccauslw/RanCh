@@ -102,6 +102,7 @@ P_Luce <- function(v) {
   if (!is.null(names(v))) {
     rownames(P) <- menu_names(names(v))
     colnames(P) <- names(v)
+    names(dimnames(P)) <- c("Menu", "Object")
   }
   P
 }
@@ -142,6 +143,7 @@ P_frequencies <- function(N) {
   P <- N/rowSums(N, na.rm = TRUE)
   for (i in 1:n_objects)
     P[u_const$singletons[i], i] <- 1.0
+  names(dimnames(P)) <- c("Menu", "Object")
   P
 }
 
