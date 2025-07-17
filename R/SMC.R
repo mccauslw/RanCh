@@ -512,8 +512,8 @@ compute_RC_binp_funcs <- function(u, alpha, J, Nv, p_grid) {
     }
     pdf_mean = rowMeans(pdf); cdf_mean = rowMeans(cdf)
     binp_funcs[[i_bin]] <- list(
-      pdf = list(x=p_grid, func=pdf_mean, nse=rowMeans((pdf - pdf_mean)^2/J)),
-      cdf = list(x=p_grid, func=cdf_mean, nse=rowMeans((cdf - cdf_mean)^2/J))
+      pdf = data.frame(x=p_grid, func=pdf_mean, nse=rowMeans((pdf - pdf_mean)^2/J)),
+      cdf = data.frame(x=p_grid, func=cdf_mean, nse=rowMeans((cdf - cdf_mean)^2/J))
     )
   }
   binp_funcs

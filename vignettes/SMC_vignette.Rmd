@@ -1,0 +1,211 @@
+---
+title: "SMC for random preferences"
+output: rmarkdown::html_vignette
+bibliography: bibliography.bib
+vignette: >
+  %\VignetteIndexEntry{SMC for random preferences}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(RanCh)
+library(kableExtra)
+library(corrplot)
+library(tidyverse)
+```
+
+## Introduction
+
+This vignette illustrates the use of tools for Sequential Monte Carlo (SMC) analysis of Bayesian random choice (BRC) and Bayesian random preference (BRP) models.
+A detailed theoretical discussion of the SMC tools used here is in @McCaMarl13.
+We illustrate here a small, but not trivial problem, so that the computations in this vignette take only a few seconds.
+WJM: point to github stuff on full experiment.
+
+## Preparing for simulation
+
+All of the illustrations use data from @Tver72a, a paper that introduces both the elimination by aspects model and the "similary hypothesis", now usually known as the similary effect.
+The universe of objects is the set of three choice objects of choice task $C$ (Gambles), denoted $T = \{x,y,z\}$.
+Object $x$ is the lottery where one wins 4 Israeli pounds with probability $\tfrac{1}{5}$ (and nothing otherwise);
+$y$ is the lottery where one wins 3.5 pounds with probability $\tfrac{1}{4}$; and $z$ is the lottery where one wins 1 pound with probability $\tfrac{2}{3}$.
+Objects $x$ and $y$ are designed to be similar to each other and object $z$ is designed to be dissimilar to both $x$ and $y$.
+Only the menus $\{x,z\}$, $\{y,z\}$ and $\{x,y,z\}$ are presented.
+The doubleton menu $\{x,y\}$ consisting of the two similar objects is never presented.
+The following code extracts the count data for choice task `Gambles` observed for experimental subject 1.
+
+```{r data}
+subject <- 1
+n <- 3
+N <- T_1972_counts["Gambles", subject, , ]
+u <- create_universe(3, colnames(N))
+print(N, na.print = '-')
+Nv <- vectorize(u, N)
+print(Nv)
+```
+
+The following code sets up the prior distribution of $\alpha$, a parameter of both the BRC and the BRP models, sets dimension parameters that will be passed to simulation routine, and sets a seed for pseudo-random number generation.
+Given $\alpha$ and any choice menu $A \subseteq T$, the distribution of the choice probability vector for menu $A$ is symmtric Dirichlet with shape parameters all equal to $\alpha/|A|$.
+
+```{r SMC_setup}
+a <- 4      # Gamma shape parameter
+b <- 0.1    # Gamma rate (inverse scale) parameter
+alpha_prior <- create_alpha_prior(n, 4, 0.1)
+J <- 40     # Number of independent particle groups
+M <- 120    # Number of particles in each group
+set.seed(123)
+```
+
+The prior distribution of the parameter $\alpha$ is $\alpha \sim \mathrm{Ga}(a,b)$ and we choose the values $a = `r a`$ and $b = `r b`$, so that the prior mean and variance of $\alpha$ are $a/b = `r a/b`$ and $a/b^2 = `r a/b^2`$.
+There are $J = `r J`$ statistically independent groups, each with $M = `r M`$ particles.
+
+## Simulation from the Bayesian random choice model
+
+The following command performs SMC for the BRC model, returning a named list `RC_sim`.
+```{r RC_sim}
+RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
+```
+
+The most important component of `RC_sim` is `alpha`, a $M \times J$ matrix consisting of a posterior sample of the parameter $\alpha$.
+By construction, the $J$ columns of `RC_sim$alpha` are mutually independent.
+The function `ind_group_stats` provides a way of computing several relevant statistics for samples organized in the form of matrix with mutually independent columns.
+The following code shows how to use this function to obtain the posterior mean and  standard deviation of $\alpha$, as well as the numerical standard error and the relative numerical efficiency of this mean.
+```{r alpha_stats}
+quant_p <- c(0.025, 0.05, 0.5, 0.95, 0.975)
+stats <- ind_groups_stats(RC_sim$alpha, J, quant_p)
+sprintf("Mean, standard deviation of alpha are %f, %f", stats$mean, stats$std)
+sprintf("Numerical standard error of mean is %f", stats$nse)
+sprintf("Relative numerical efficiency of mean is %f", stats$rne)
+
+df <- data.frame(q = stats$q, nse = stats$q_nse)
+knitr::kable(df, digits = 3, caption = "Posterior quantiles of alpha") %>%
+   kableExtra::kable_styling(full_width = FALSE)
+```
+
+Another useful function, `compute_pdf_cdf_on_grid` computes probability density and cumulative density functions for samples organized as a matrix with mutually independent columns.
+```{r alpha_pdf}
+n_alpha_grid <- 40
+RC_alpha_funcs <- compute_pdf_cdf_on_grid(RC_sim$alpha, J, n_alpha_grid)
+al_pdf <- RC_alpha_funcs$pdf # cdf is also possible
+plot(al_pdf$x, al_pdf$func, 'l', xlab = "alpha", ylab = "density value")
+lines(al_pdf$x, al_pdf$func + al_pdf$nse, col='red')
+lines(al_pdf$x, al_pdf$func - al_pdf$nse, col='red')
+```
+
+```{r binp_funcs, fig.width=6, fig.height=4}
+p_grid <- seq(0, 1, by=1/80)
+RC_binp_funcs <- compute_RC_binp_funcs(u, RC_sim$alpha, J, Nv, p_grid)
+xy_pdf <- RC_binp_funcs[[1]]$pdf # posterior pdf function for p(x,y)
+xy_pdf$upper <- xy_pdf$func + xy_pdf$nse
+xy_pdf$lower <- xy_pdf$func - xy_pdf$nse
+ggplot(xy_pdf, aes(x = x)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
+  geom_line(aes(y = func), color = "black") +
+  labs(x = "p(x,y)", y = "density value") +
+  theme_minimal()
+xz_pdf <- RC_binp_funcs[[2]]$pdf # posterior pdf function for p(x,z)
+xz_pdf$upper <- xz_pdf$func + xz_pdf$nse
+xz_pdf$lower <- xz_pdf$func - xz_pdf$nse
+ggplot(xz_pdf, aes(x = x)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
+  geom_line(aes(y = func), color = "black") +
+  labs(x = "p(x,z)", y = "density value") +
+  theme_minimal()
+```
+
+## SMC simulation from the Bayesian random preference model
+
+```{r RP_sim}
+lambda_values <- seq(0.01, 1.00, by=0.01)
+cycle_schedule <- create_cycle_schedule(lambda_values)
+RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule)
+```
+
+
+```{r ln_marl_nse, fig.width=6, fig.height=4}
+# Prepare data
+cycle_stats <- as_tibble(RP_sim$cycle_stats)
+cycle_stats$upper <- cycle_stats$cum_ln_marl + 2*sqrt(cycle_stats$cum_ln_marl_nse2)
+cycle_stats$lower <- cycle_stats$cum_ln_marl - 2*sqrt(cycle_stats$cum_ln_marl_nse2)
+
+ggplot(cycle_stats, aes(x = lambda)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
+  geom_line(aes(y = cum_ln_marl), color = "black") +
+  labs(x = "lambda", y = "log marginal likelihood of hybrid model") +
+  theme_minimal()
+```
+
+```{r ln_marl_scatter, fig.width=6, fig.height=4}
+lambda_stats <- RP_sim$lambda_stats
+aggr_stats <- lambda_stats$aggregates
+gr_df <- as_tibble(t(lambda_stats$gr_cum_ln_marl))
+gr_df$lambda <- lambda_stats$aggregates[,'lambda']
+
+gr_df$aggr_cum_ln_marl <- aggr_stats[,'cum_ln_marl']
+gr_long <- pivot_longer(
+  gr_df, cols = -c(lambda, aggr_cum_ln_marl),
+  names_to = "group", values_to = "cum_ln_marl"
+)
+
+ggplot() +
+  geom_line(data = gr_long, aes(x = lambda, y = cum_ln_marl, group = group),
+            color = "grey", size = 0.3) +
+  geom_line(data = gr_long, aes(x = lambda, y = aggr_cum_ln_marl),
+            color = "black", size = 1) +
+  labs(x = "lambda", y = "log marginal likelihood of hybrid model") +
+  theme_minimal()
+```
+
+```{r newaPr, fig.width=6, fig.height=4}
+big_aPr <- as_tibble(RP_sim$big_aPr)
+colnames(big_aPr) = c('x..', 'y..', 'z..')
+big_aPr$lambda <- cycle_stats$lambda
+
+aPr_long <- pivot_longer(
+  big_aPr, cols = -lambda, names_to = "group", values_to = "aPr"
+)
+
+ggplot() +
+  geom_line(data = aPr_long, aes(x = lambda, y = aPr, group = group),
+            color = "grey", size = 0.3) +
+  labs(x = "lambda", y = "Acceptance probability by block") +
+  theme_minimal()
+```
+
+```{r aPr, fig.width=6, fig.height=4}
+big_aPr = RP_sim$big_aPr
+sm_aPr = RP_sim$sm_aPr
+n_cycles <- nrow(big_aPr)
+plot(seq(n_cycles), rowMeans(big_aPr), 'l',
+     xlab='Cycle index l = 1,...,L',
+     ylab='Acceptance probability', ylim=c(0,1))
+for (i in seq(3))
+  lines(seq(n_cycles), big_aPr[,i], col='grey')
+lines(seq(n_cycles), rowMeans(sm_aPr), col='blue')
+for (i in seq(6))
+  lines(seq(n_cycles), sm_aPr[,i], col='lightgreen')
+```
+
+```{r alaPr, fig.width=6, fig.height=4}
+plot(RP_sim$alpha_aPr, xlab='Cycle index l = 1,...,L', ylab='Acceptance probability')
+```
+
+```{r pi_graphics, echo=FALSE}
+pi <- scale(RP_sim$gamma, center = F, scale = colSums(RP_sim$gamma))
+pi_mean <- rowMeans(pi)
+pi_cor <- cor(t(pi))
+pi_thin <- pi[, seq(40, J*M, by=40)]
+
+bp <- boxplot(t(pi_thin))
+points(1:factorial(n), pi_mean)
+
+corrplot.mixed(pi_cor, upper='ellipse', lower='number', tl.pos='lt')
+```
+
