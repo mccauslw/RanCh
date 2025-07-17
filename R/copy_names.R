@@ -27,7 +27,7 @@ copy_A_x_names <- function(name_source, n_subsets, n_objects) {
       all(c("A_strings", "object_names") %in% names(name_source)) &&
       length(name_source$A_strings) == n_subsets &&
       length(name_source$object_names) == n_objects)
-    return(list(Subset=name_source$A_strings, Object=name_source$object_names))
+    return(list(Menu=name_source$A_strings, Object=name_source$object_names))
   NULL
 }
 

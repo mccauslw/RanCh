@@ -6,7 +6,8 @@
 #'
 #' @param n number of elements in choice universe
 #' @param a,b shape and rate parameters of a Gamma prior distribution of alpha
-#' @param h distance between grid points in a grid of values of p_bar
+#' @param h distance between grid points in a grid of values of p_bar, defined
+#' Appendix B of the reference below
 #' @param eps parameter specifying extreme prior quantiles (for eps and 1-eps)
 #'        of alpha
 #'
@@ -16,6 +17,7 @@
 #'   \item{h}{same as input with that name}
 #'   \item{p_grid}{grid of values of p_bar}
 #'   \item{alpha_mode}{grid of values of mode of alpha|pi as function of p_bar}
+#'   \item{mode_error}{maximum value of error of mode on grid}
 #'   \item{psi_diff}{grid of values of psi(1+alpha_mode) - psi(1+alpha_mode/n!)}
 #'   \item{p_min}{minimum value of p_bar in p_grid}
 #'   \item{funcs}{grids of values of alpha, prior pdf and cdf}
@@ -33,21 +35,23 @@
 #' @inherit create_universe author references
 #'
 create_alpha_prior <- function(n, a, b, h = 0.05, eps = 1e-7) {
-  n_fact = factorial(n)
+  n_fact <- factorial(n)
   # Prior quantiles eps and 1-eps of alpha
-  alpha_min = stats::qgamma(eps, a, b)
-  alpha_max = stats::qgamma(eps, a, b, lower.tail=F)
+  alpha_min <- stats::qgamma(eps, a, b)
+  alpha_max <- stats::qgamma(eps, a, b, lower.tail=F)
   p_min <- -log_f_alpha__pi_grad(alpha_min, 0, a, b, n_fact)
   p_max <- -log_f_alpha__pi_grad(alpha_max, 0, a, b, n_fact)
-  p_grid = seq(p_min, p_max, by=h)
-  n_grid = length(p_grid)
-  alpha_mode = rep(NA, n_grid)
-  psi_diff = rep(NA, n_grid)
+  p_grid <- seq(p_min, p_max, by=h)
+  n_grid <- length(p_grid)
+  alpha_mode <- rep(NA, n_grid)
+  psi_diff <- rep(NA, n_grid)
+  mode_error <- 0.0
   for (i in seq(n_grid)) {
     res <- stats::uniroot(log_f_alpha__pi_grad, c(0,2000),
-                          p_grid[i], a, b, n_fact)
-    alpha_mode[i] = res$root
-    psi_diff[i] = digamma(1 + alpha_mode[i]) - digamma(1+alpha_mode[i]/n_fact)
+                          p_grid[i], a, b, n_fact) # passed to log_f_alpha__pi_grad
+    alpha_mode[i] <- res$root
+    mode_error <- max(mode_error, res$estim.prec)
+    psi_diff[i] <- digamma(1 + alpha_mode[i]) - digamma(1+alpha_mode[i]/n_fact)
   }
 
   # Compute prior density of alpha on a grid
@@ -55,7 +59,7 @@ create_alpha_prior <- function(n, a, b, h = 0.05, eps = 1e-7) {
   grid <- seq(0, stats::qgamma(0.995, a, b), length.out=n_grid)
   funcs <- list(cdf = list(x=grid, func=stats::pgamma(grid, a, b), nse=rep(0, 200)),
                 pdf = list(x=grid, func=stats::dgamma(grid, a, b), nse=rep(0, 200)))
-  list(a=a, b=b, alpha_mode = alpha_mode, p_grid = p_grid,
+  list(a=a, b=b, alpha_mode = alpha_mode, mode_error = mode_error, p_grid = p_grid,
        psi_diff = psi_diff, p_min = p_min, h = h, funcs = funcs)
 }
 
@@ -135,7 +139,7 @@ log_f_alpha__pi_grad <- function(alpha, p_bar, a, b, n_fact) {
 #' @noRd
 #'
 KL <- function(ln_theta, alpha_grid, g, h) {
-  theta <- ln_theta
+  theta <- exp(ln_theta)
   ln_ratio = log(g) -
     extraDistr::dbetapr(alpha_grid, theta[1], theta[2], theta[3], log = TRUE)
   result <- sum(ln_ratio * h * g)
