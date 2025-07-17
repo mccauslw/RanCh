@@ -153,9 +153,9 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
 
   # Table to hold marginal likelihood statistics
   lambda_stats <- list(
-    gr_ESS = matrix(nrow = J, ncol = n_lambda_values),
-    gr_marl = matrix(nrow = J, ncol = n_lambda_values),
-    gr_cum_ln_marl = matrix(nrow = J, ncol = n_lambda_values),
+    gr_ESS = matrix(nrow = n_lambda_values, ncol = J),
+    gr_marl = matrix(nrow = n_lambda_values, ncol = J),
+    gr_cum_ln_marl = matrix(nrow = n_lambda_values, ncol = J),
     aggregates =
       matrix(nrow = n_lambda_values, ncol = 1 + length(lambda_aggregate_names),
              dimnames = list(NULL, c('lambda', lambda_aggregate_names)))
@@ -239,9 +239,9 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
                                  cum_ln_marl, cum_ln_marl_nse2, gr_cum_ln_marl)
       for (name in lambda_aggregate_names)
         lambda_stats$aggregates[lambda_i, name] <- single_lambda_stats[[name]]
-      lambda_stats$gr_ESS[, lambda_i] <- single_lambda_stats$gr_ESS
-      lambda_stats$gr_marl[, lambda_i] <- single_lambda_stats$gr_marl
-      lambda_stats$gr_cum_ln_marl[, lambda_i] <- single_lambda_stats$gr_cum_ln_marl
+      lambda_stats$gr_ESS[lambda_i, ] <- single_lambda_stats$gr_ESS
+      lambda_stats$gr_marl[lambda_i, ] <- single_lambda_stats$gr_marl
+      lambda_stats$gr_cum_ln_marl[lambda_i, ] <- single_lambda_stats$gr_cum_ln_marl
     }
 
     # Values at last lambda value of cycle

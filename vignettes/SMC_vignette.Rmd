@@ -145,7 +145,7 @@ ggplot(cycle_stats, aes(x = lambda)) +
 ```{r ln_marl_scatter, fig.width=6, fig.height=4}
 lambda_stats <- RP_sim$lambda_stats
 aggr_stats <- lambda_stats$aggregates
-gr_df <- as_tibble(t(lambda_stats$gr_cum_ln_marl))
+gr_df <- as_tibble(lambda_stats$gr_cum_ln_marl)
 gr_df$lambda <- lambda_stats$aggregates[,'lambda']
 
 gr_df$aggr_cum_ln_marl <- aggr_stats[,'cum_ln_marl']
