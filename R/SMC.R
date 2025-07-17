@@ -132,7 +132,7 @@ create_cycle_schedule <- function(lambda_values) {
 #'    \item{big_aPr}{A matrix of acceptance probabilities for big blocks, by cycle and block}
 #'    \item{sm_aPr}{A matrix of acceptance probabilities for small blocks, by cycle and block}
 #'    \item{alpha_aPr}{A vector of acceptance probabilities for alpha proposals, by cycle}
-#'    \item{alpha_mu}{Posterior mean of alpha parameter, by cycle}
+#'    \item{alpha_mean}{Posterior mean of alpha parameter, by cycle}
 #' }
 #'
 #' @export
@@ -175,7 +175,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
   }
 
   # alpha information by cycle
-  alpha_mu <- rep(NA, n_cycles)
+  alpha_mean <- rep(NA, n_cycles)
   alpha_aPr <- rep(NA, n_cycles)
 
   # Start with simulation based on lambda = 0
@@ -324,7 +324,7 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
     alpha <- res$alpha
     gamma_p <- res$gamma_p
     alpha_aPr[cycle_index] = res$aPr
-    alpha_mu[cycle_index] = res$mu
+    alpha_mean[cycle_index] = res$mu
     alpha_Ax <- compute_alpha_Ax(u, alpha)
     alpha_p <- outer(rep.int(1/u$n_orders, u$n_orders), alpha)
     ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, Nv)
@@ -333,11 +333,13 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
     first_lambda_index = last_lambda_index + 1
   }
 
+  cycle_stats <- as_tibble(lambda_stats$aggregates[cycle_schedule$lambda_break_indices,])
+  cycle_stats$alpha_aPr <- alpha_aPr
+  cycle_stats$alpha_mean <- alpha_mean
   list(alpha = alpha, gamma = gamma_p,
        lambda_stats = lambda_stats,
-       cycle_stats = lambda_stats$aggregates[cycle_schedule$lambda_break_indices,],
-       big_aPr = bl_data[[1]]$aPr, sm_aPr = bl_data[[2]]$aPr,
-       alpha_aPr = alpha_aPr, alpha_mu = alpha_mu)
+       cycle_stats = cycle_stats,
+       big_aPr = bl_data[[1]]$aPr, sm_aPr = bl_data[[2]]$aPr)
 }
 
 #' Compute sample statistics and standard errors for a collection of SMC samples

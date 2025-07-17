@@ -131,7 +131,7 @@ RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule)
 
 ```{r ln_marl_nse, fig.width=6, fig.height=4}
 # Prepare data
-cycle_stats <- as_tibble(RP_sim$cycle_stats)
+cycle_stats <- RP_sim$cycle_stats
 cycle_stats$upper <- cycle_stats$cum_ln_marl + 2*sqrt(cycle_stats$cum_ln_marl_nse2)
 cycle_stats$lower <- cycle_stats$cum_ln_marl - 2*sqrt(cycle_stats$cum_ln_marl_nse2)
 
@@ -173,8 +173,9 @@ aPr_long <- pivot_longer(
 )
 
 ggplot() +
-  geom_line(data = aPr_long, aes(x = lambda, y = aPr, group = group),
-            color = "grey", size = 0.3) +
+  geom_line(data = aPr_long,
+            aes(x = lambda, y = aPr, group = group, color = group),
+            size = 0.3) +
   labs(x = "lambda", y = "Acceptance probability by block") +
   theme_minimal()
 ```
@@ -194,7 +195,9 @@ for (i in seq(6))
 ```
 
 ```{r alaPr, fig.width=6, fig.height=4}
-plot(RP_sim$alpha_aPr, xlab='Cycle index l = 1,...,L', ylab='Acceptance probability')
+ggplot(data = cycle_stats) +
+  geom_line(aes(x = lambda, y = alpha_aPr)) +
+  labs(x = "lambda", y = "Acceptance probability of alpha proposals")
 ```
 
 ```{r pi_graphics, echo=FALSE}
