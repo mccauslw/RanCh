@@ -163,15 +163,23 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
   lambda_stats$aggregates[, 'lambda'] <- lambda_values
 
   # Table for cycle parameters pertaining to gamma update
-  n_bl <- c(u$n, u$n*(u$n-1)); bl_len <- c(factorial(u$n-1), factorial(u$n-2))
+  n_bl <- c(u$n, u$n*(u$n-1))
+  singles <- u$object_names
+  pairs <- expand.grid(singles, singles)
+  pairs <- pairs[pairs$Var1 != pairs$Var2, ]  # exclude self-pairs
+  pairs <- paste0(pairs$Var2, pairs$Var1)
+  bl_names <- list(singles, pairs)
+  bl_len <- c(factorial(u$n-1), factorial(u$n-2))
   bl_data <- list(big = list(), sm = list())
   for (blt in 1:length(n_bl)) {
     bl_data[[blt]]$n_bl <- n_bl[blt]
+    bl_data[[blt]]$bl_names <- bl_names[blt]
     bl_data[[blt]]$bl_len <- bl_len[blt]
     bl_data[[blt]]$indices <- seq_len(n_bl[blt])
     bl_data[[blt]]$start <- (seq_len(n_bl[blt]) - 1) * bl_len[blt] + 1
     bl_data[[blt]]$end <- seq_len(n_bl[blt]) * bl_len[blt]
     bl_data[[blt]]$aPr <- matrix(NA, nrow = n_cycles, ncol = n_bl[blt])
+    colnames(bl_data[[blt]]$aPr) <- bl_names[[blt]]
   }
 
   # alpha information by cycle
