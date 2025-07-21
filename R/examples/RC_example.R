@@ -9,12 +9,12 @@ n_alpha_grid <- 40
 quant_p <- c(0.025, 0.05, 0.5, 0.95, 0.975)
 
 # Set up prior, data, simulation parameters for a small (n=3) example
-alpha_prior <- create_alpha_prior(n, 4, 0.1)
+alpha_prior <- create_alpha_prior(n, 4, 1.0)
 N <- T_1972_counts["Gambles", 1, , ] # Only choices from menus xz and xyz
 u <- create_universe(n, object_names=dimnames(N)[[2]])
 Nv <- vectorize(u, N)
 J <- 40
-M <- 1000
+M <- 120
 set.seed(123)
 RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
 

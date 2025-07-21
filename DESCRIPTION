@@ -13,13 +13,12 @@ Description: This package provides tools for a research project whose purpose is
     posterior density contours, as well as regions, in the space of choice probabilities,
     defined by various stochastic choice axioms, context effects and other conditions.
 Imports:
-    tibble,
+    tidyverse,
     klaR,
     HDInterval,
     Matrix,
     combinat,
-    extraDistr,
-    bayesm
+    extraDistr
 Depends: R (>= 3.6.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -29,6 +28,8 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    tidyverse
+    tidyverse,
+    kableExtra,
+    corrplot
 VignetteBuilder: knitr
 Config/testthat/edition: 3

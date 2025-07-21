@@ -62,8 +62,8 @@ Given $\alpha$ and any choice menu $A \subseteq T$, the distribution of the choi
 
 ```{r SMC_setup}
 a <- 4      # Gamma shape parameter
-b <- 0.1    # Gamma rate (inverse scale) parameter
-alpha_prior <- create_alpha_prior(n, 4, 0.1)
+b <- 1.0    # Gamma rate (inverse scale) parameter
+alpha_prior <- create_alpha_prior(n, a, b)
 J <- 40     # Number of independent particle groups
 M <- 120    # Number of particles in each group
 set.seed(123)
