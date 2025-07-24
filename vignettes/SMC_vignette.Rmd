@@ -20,12 +20,13 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-This vignette illustrates the use of tools for Sequential Monte Carlo (SMC) analysis of Bayesian random choice (BRC) and Bayesian random preference (BRP) models.
-A detailed theoretical discussion of the SMC tools used here is in @McCaMarl13.
+This vignette illustrates the use of tools for posterior analysis of the Bayesian Dirichlet Random Choice (RC) and Bayesian random preference (RP) models using Sequential Monte Carlo (SMC) methods.
+A detailed theoretical discussion of these models and the SMC tools used here is in @McCaMarl13.
 We illustrate here a small problem with a short execution time.
-For an example using much more choice data, see [this Github repository][SMCRandomPref].
+For an example using much more choice data, see the Github repository [SMCRandomPref][SMCRandomPref].
 
 We first attach the required libraries.
+
 ```{r setup}
 library(RanCh)
 library(kableExtra)
@@ -35,21 +36,21 @@ library(tidyverse)
 
 ## Preparing for simulation
 
-All of the illustrations in this vignette use data from @Tver72a, a paper that introduces both the elimination by aspects model and the "similary hypothesis", now usually known as the similary effect.
+All of the illustrations in this vignette use data from @Tver72a, a paper that introduces both the elimination by aspects model and the "similary hypothesis", now commonly known as the similary effect.
 The universe of objects is the set of $n=3$ choice objects of choice task $C$ (Gambles), denoted $T = \{x,y,z\}$.
 Object $x$ is the lottery where one wins 4 Israeli pounds with probability $\tfrac{1}{5}$ (and nothing otherwise);
 $y$ is the lottery where one wins 3.5 pounds with probability $\tfrac{1}{4}$; and $z$ is the lottery where one wins 1 pound with probability $\tfrac{2}{3}$.
 Objects $x$ and $y$ are designed to be similar to each other and object $z$ is designed to be dissimilar to both $x$ and $y$.
 Only the menus $\{x,z\}$, $\{y,z\}$ and $\{x,y,z\}$ are presented.
 The doubleton menu $\{x,y\}$ consisting of the two similar objects is never presented.
-The following code extracts the count data for choice task `Gambles` observed for experimental subject 1.
-For example, of the 20 times the menu $\{x,y\}$ was presented to this subject, the subject chose $x$ 7 times and $z$, 13 times.
+We first extract and display the count data for choice task `Gambles` observed for experimental subject 1.
+We see, for example, that of the 20 times the menu $\{x,z\}$ was presented to this subject, the subject chose $x$ 7 times and $z$, 13 times.
 The vectorized version `Nv` of the data is used in computations for the sake of effeciency.
-Note that singleton choice sets are excluded.
+Note that singleton choice sets are excluded from the vectorized version.
 
 ```{r data}
-subject <- 1
 n <- 3
+subject <- 1
 N <- T_1972_counts["Gambles", subject, , ]
 u <- create_universe(3, colnames(N))
 print(N, na.print = '-')
@@ -57,8 +58,8 @@ Nv <- vectorize(u, N)
 print(Nv)
 ```
 
-The following code sets up the prior distribution of $\alpha$, a parameter of both the BRC and the BRP models, sets dimension parameters that will be passed to simulation routines, and sets a seed for pseudo-random number generation.
-Given $\alpha$ and any choice menu $A \subseteq T$, the distribution of the choice probability vector for menu $A$ is symmtric Dirichlet with shape parameters all equal to $\alpha/|A|$.
+We now set up the prior distribution of $\alpha$, a parameter common to both the RC and the RP models, set dimension parameters that will be passed to simulation routines, and set a seed for pseudo-random number generation.
+Given $\alpha$ and any choice menu $A \subseteq T$, the distribution of the choice probability vector $P_A(\cdot)$ for menu $A$ is symmtric Dirichlet with shape parameters all equal to $\alpha/|A|$.
 
 ```{r SMC_setup}
 a <- 4      # Gamma shape parameter
@@ -74,15 +75,18 @@ There are $J = `r J`$ statistically independent groups, each with $M = `r M`$ pa
 
 ## Simulation from the Bayesian random choice model
 
-The following command performs SMC for the BRC model, returning a named list `RC_sim`.
+Here, the `run_RC_sim` performs SMC for the RC model and returns the named list `RC_sim`.
+
 ```{r RC_sim}
 RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
 ```
 
 The most important component of `RC_sim` is `alpha`, a $M \times J$ matrix consisting of a posterior sample of the parameter $\alpha$.
 By construction, the $J$ columns of `RC_sim$alpha` are mutually independent.
-The function `ind_group_stats` provides a way of computing several relevant statistics for samples organized in the form of matrix with mutually independent columns.
-The following code shows how to use this function to obtain the posterior mean and  standard deviation of $\alpha$, as well as the numerical standard error and the relative numerical efficiency of this mean.
+The function `ind_group_stats` provides a way of computing statistics for a sample organized in the form of matrix with mutually independent columns.
+We use this function here to obtain the posterior mean and  standard deviation of $\alpha$, as well as the numerical standard error and the relative numerical efficiency of this mean.
+Then we tabulate the results.
+
 ```{r alpha_stats}
 quant_p <- c(0.025, 0.05, 0.5, 0.95, 0.975)
 stats <- ind_groups_stats(RC_sim$alpha, J, quant_p)
@@ -95,10 +99,11 @@ knitr::kable(df, digits = 3, caption = "Posterior quantiles of alpha") %>%
    kableExtra::kable_styling(full_width = FALSE)
 ```
 
-Another useful function, `compute_pdf_cdf_on_grid` computes probability density and cumulative density functions for samples organized as a matrix with mutually independent columns.
-The following code provides a histogram of the posterior distribution of $\alpha$ according to the BRC model.
+Another function, `compute_pdf_cdf_on_grid`, computes probability density and cumulative density functions for a sample organized as a matrix with mutually independent columns.
+Here we provide a histogram of the posterior distribution of $\alpha$ according to the RC model.
 Confidence intervals are indicated for each histogram bin, based on the independence of $J$ particle groups; the coverage probabilities are 95\%.
 A kernel density is also provided.
+
 ```{r alpha_pdf, fig.width=6, fig.height=4}
 n_alpha_grid <- 40
 RC_alpha_funcs <- compute_pdf_cdf_on_grid(RC_sim$alpha, J, n_alpha_grid)
@@ -123,31 +128,31 @@ ggplot() +
   theme_minimal()
 ```
 
-The following code 
+The function `compute_RC_binp_funcs` provides the pdf and cdf, with numerical standard errors, of all binary choice probabilities.
+It integrates out $\alpha$ from the joint posterior distribution of $\alpha$ and the binary choice probabilities.
+Because this is a univariate integration, and there is modest posterior correlation between $\alpha$ and the binary choice probabilities, the numerical standard error is very low.
+The following code gives the posterior density of the binary choice probability $p(x,z)$, the probability of choosing $x$ from the menu $\{x,z\}$.
+Error bands in green show confidence intervals with coverage probability $0.95$, based on independent groups.
+While a confidence region, based on a coverage probability of 95\% and the independence of $J$ particle groupes, is plotted, the intervals are too narrow to be visible.
+
 ```{r binp_funcs, fig.width=6, fig.height=4}
 p_grid <- seq(0, 1, by=1/80)
 RC_binp_funcs <- compute_RC_binp_funcs(u, RC_sim$alpha, J, Nv, p_grid)
-xy_pdf <- RC_binp_funcs[[1]]$pdf # posterior pdf function for p(x,y)
-xy_pdf$upper <- xy_pdf$func + qnorm(0.995) * xy_pdf$nse
-xy_pdf$lower <- xy_pdf$func + qnorm(0.005) * xy_pdf$nse
-ggplot(xy_pdf, aes(x = x)) +
-  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
-  geom_line(aes(y = func), color = "black") +
-  labs(x = "p(x,y)", y = "density") +
-  theme_minimal()
 xz_pdf <- RC_binp_funcs[[2]]$pdf # posterior pdf function for p(x,z)
-xz_pdf$upper <- xz_pdf$func + qnorm(0.995) * xz_pdf$nse
-xz_pdf$lower <- xz_pdf$func + qnorm(0.005) * xz_pdf$nse
+xz_pdf$upper <- xz_pdf$func + qnorm(0.975) * xz_pdf$nse
+xz_pdf$lower <- xz_pdf$func + qnorm(0.025) * xz_pdf$nse
 ggplot(xz_pdf, aes(x = x)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
-  geom_line(aes(y = func), color = "black") +
+  geom_line(aes(y = func), color = "black", linewidth = 0.2) +
   labs(x = "p(x,z)", y = "density") +
   theme_minimal()
 ```
 
 ## SMC simulation from the Bayesian random preference model
 
-The following code sets up simulation parameters that are used for simulation of the BRP model and the hybrid models, indexed by parameter $\lambda \in (0,1)$ that are intermediate between the BRC and BRP models.
+Here we set up simulation parameters that are used for simulation of the RP model and the hybrid models, indexed by parameter $\lambda \in (0,1)$, that are intermediate between the RC and RP models.
+The user supplies a grid of values of lambda, `lambda_values`, at which various quantities are evaluated.
+The function `create_cycle_schedule()` returns a grid, coarser than `lambda_values` and irregularly spaced, of $\lambda$ values defining the SMC cycles, along with SMC parameters that vary by cycle.
 
 ```{r RP_sim}
 lambda_values <- seq(0.01, 1.00, by=0.01)
@@ -155,9 +160,10 @@ cycle_schedule <- create_cycle_schedule(lambda_values)
 RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule)
 ```
 
-The following code shows the marginal likelihood of the hybrid models as a function of $\lambda$.
-Error bands show confidence intervals with coverage probability 0.95.
-The marginal likelihoods at $\lambda = 0$ and $\lambda = 1$ are the marginal likelihoods of the BRC and BRP models, respectively.
+Next we plot the marginal likelihood of the hybrid models as a function of $\lambda$.
+Here, the marginal likelihood is computed on the grid of values of $\lambda$ returned by create_cycle_schedule, `cycle_stats$lambda`.
+Error bands show confidence intervals with coverage probability 0.95, based on independent groups.
+The marginal likelihoods at $\lambda = 0$ and $\lambda = 1$ are the marginal likelihoods of the RC and RP models, respectively.
 
 ```{r ln_marl_nse, fig.width=6, fig.height=4}
 # Prepare data
@@ -168,12 +174,13 @@ cycle_stats$lower <- cycle_stats$cum_ln_marl + qnorm(0.025) * nse
 
 ggplot(cycle_stats, aes(x = lambda)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
-  geom_line(aes(y = cum_ln_marl), color = "black") +
+  geom_line(aes(y = cum_ln_marl), color = "black", linewidth = 0.2) +
   labs(x = "lambda", y = "log marginal likelihood of hybrid model, by group") +
   theme_minimal()
 ```
 
 The following code shows the log marginal likelihoods computed using individual partical groups.
+
 ```{r ln_marl_scatter, fig.width=6, fig.height=4}
 lambda_stats <- RP_sim$lambda_stats
 aggr_stats <- lambda_stats$aggregates
@@ -195,18 +202,40 @@ ggplot() +
   theme_minimal()
 ```
 
-The following code shows the acceptance probability for proposals of the $\alpha$ parameter, by $\lambda$.
-```{r alaPr, fig.width=6, fig.height=4}
-ggplot(data = cycle_stats) +
-  geom_line(aes(x = lambda, y = alpha_aPr)) +
-  labs(x = "lambda", y = "Acceptance probability of alpha proposals")
+Here we illustrate the posterior distribution of $\pi$ for the RP model.
+The vector $\pi$ is a vector giving the probabilities of the six preference orders on $T = \{x,y,z\}$.
+
+```{r pi_graphics, echo=FALSE}
+pi <- scale(RP_sim$gamma, center = F, scale = colSums(RP_sim$gamma))
+pi_cor <- cor(t(pi))
+order_names <- rownames(pi)
+
+long_df <- as.tibble(t(pi)) %>%
+  pivot_longer(cols = everything(),
+               names_to = "preference", values_to = "probability")
+
+ggplot(long_df, aes(x = probability, y = fct_rev(preference))) +
+  geom_boxplot() +
+  theme_minimal()
+
+corrplot.mixed(pi_cor, upper='ellipse', lower='number', tl.pos='d')
 ```
 
-The following code shows the acceptance probability for proposals of blocks of the $\gamma$ parameter.
+## Diagnostics for the SMC simulations for the RP model
+
+Here we plot the acceptance probability for proposals of the $\alpha$ parameter, at the M (mutation) phase of each SMC cycle.
+We plot it against the value of $\lambda$ prevailing at the cycle.
+```{r alaPr, fig.width=6, fig.height=4}
+ggplot(data = cycle_stats) +
+  geom_point(aes(x = lambda, y = alpha_aPr)) +
+  labs(x = "lambda", y = "Acceptance probability of alpha proposals")
+```
+Notice the uneven grid of points defining the SMC cycles.
+We need more simulation for smaller and larger values of $\lambda$ to deal with particle depletion.
+
+Next, we show the acceptance probability for proposals of blocks of the $\gamma$ parameter, also at the M phase of each SMC cycle.
 The block `[x..]` of $\gamma$ weights consists of weights for the two preferences `xyz` (i.e. $x \succ y \succ z$) and `xzy`; `[y..]` consists of weights for the
 preferences `yxz` and `yzx`; and `[z..]` consists of weights for the preferences `zxy` and `zyx`.
-WJM: explain breaks.
-
 ```{r newaPr, fig.width=6, fig.height=4}
 big_aPr <- as_tibble(RP_sim$big_aPr)
 big_aPr$lambda <- cycle_stats$lambda
@@ -216,26 +245,12 @@ aPr_long <- pivot_longer(
 )
 
 ggplot() +
-  geom_line(data = aPr_long,
-            aes(x = lambda, y = aPr, group = block, color = block),
-            size = 0.3) +
+  geom_point(data = aPr_long,
+             aes(x = lambda, y = aPr, group = block, color = block),
+             size = 0.3) +
   labs(x = "lambda", y = "Acceptance probability by block") +
   theme_minimal()
 ```
 
-```{r pi_graphics, echo=FALSE}
-pi <- scale(RP_sim$gamma, center = F, scale = colSums(RP_sim$gamma))
-pi_mean <- rowMeans(pi)
-pi_cor <- cor(t(pi))
-pi_thin <- t(pi[, seq(40, J*M, by=40)])
-
-long_df <- as.tibble(t(pi)) %>%
-  pivot_longer(cols = everything(), names_to = "preference", values_to = "probability")
-
-ggplot(long_df, aes(x = probability, y = preference)) +
-  geom_boxplot()
-
-corrplot.mixed(pi_cor, upper='ellipse', lower='number', tl.pos='lt')
-```
 
 [SMCRandomPref]: https://github.com/mccauslw/SMCRandomPref

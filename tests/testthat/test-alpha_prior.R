@@ -1,9 +1,9 @@
 test_that("create_alpha_prior and compute_proposal_params work", {
-  # Typical case, mean of alpha is 40
+  # Typical case for population experiments, mean of alpha is 40
   alpha_prior <- create_alpha_prior(5, 4, 0.1)
   expect_lt(alpha_prior$mode_error, 1e-3)
 
-  # Low mean case, mean of alpha is 4
+  # Typical case for individual experiments, mean of alpha is 4
   alpha_prior <- create_alpha_prior(5, 4, 1)
   expect_lt(alpha_prior$mode_error, 1e-3)
 

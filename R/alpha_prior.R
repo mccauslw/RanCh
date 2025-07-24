@@ -1,25 +1,27 @@
-#' Precompute information for a prior distribution of alpha
+#' Set the prior distribution of alpha
 #'
-#' Precompute information assocated with a prior distribution of alpha, including
-#' lookup tables used for Metropolis-Hastings updates of the conditional posterior
-#' distribution of alpha given pi, described in Appendix B of the reference below.
+#' Set the truncated Gamma prior distribution for the parameter alpha, and
+#' precompute information about it, including lookup tables used for
+#' Metropolis-Hastings updates of the conditional posterior distribution of
+#' alpha given pi, described in Appendix B of the reference below.
 #'
 #' @param n number of elements in choice universe
-#' @param a,b shape and rate parameters of a Gamma prior distribution of alpha
-#' @param h distance between grid points in a grid of values of p_bar, defined
+#' @param a,b shape and rate parameters of a Gamma distribution, the
+#' pre-truncation prior distribution of alpha.
+#' @param alpha_min truncation parameter. The prior distribution of alpha is
+#' truncated to the region /[alpha_min, infinity).
+#' @param n_grid number of grid points in a grid of values of p_bar, defined in
 #' Appendix B of the reference below
-#' @param eps parameter specifying extreme prior quantiles (for eps and 1-eps)
-#'        of alpha
 #'
 #' @return A list with the following elements
 #'\describe{
-#'   \item{a,b}{same as inputs with those names}
-#'   \item{h}{same as input with that name}
+#'   \item{a,b,alpha_min}{same as inputs with those names}
 #'   \item{p_grid}{grid of values of p_bar}
+#'   \item{p_bar_min}{minimum value of `p_bar` in `p_grid`}
+#'   \item{h}{h distance between grid points on `p_grid`}
 #'   \item{alpha_mode}{grid of values of mode of alpha|pi as function of p_bar}
 #'   \item{mode_error}{maximum value of error of mode on grid}
 #'   \item{psi_diff}{grid of values of psi(1+alpha_mode) - psi(1+alpha_mode/n!)}
-#'   \item{p_min}{minimum value of p_bar in p_grid}
 #'   \item{funcs}{grids of values of alpha, prior pdf and cdf}
 #' }
 #' @export
@@ -34,33 +36,60 @@
 #'
 #' @inherit create_universe author references
 #'
-create_alpha_prior <- function(n, a, b, h = 0.05, eps = 1e-7) {
+create_alpha_prior <- function(n, a, b, alpha_min = 0.001, n_grid=2000) {
+
+  # Parameter checking
+  if (!is.numeric(a) || length(a) != 1 || a < 2) {
+    stop("shape parameter a must be a real number greater than or equal to 2.")
+  }
+  if (!is.numeric(b) || length(a) != 1 || a <= 0) {
+    stop("shape parameter b must be a strictly positive real number.")
+  }
+
   n_fact <- factorial(n)
-  # Prior quantiles eps and 1-eps of alpha
-  alpha_min <- stats::qgamma(eps, a, b)
-  alpha_max <- stats::qgamma(eps, a, b, lower.tail=F)
-  p_min <- -log_f_alpha__pi_grad(alpha_min, 0, a, b, n_fact)
-  p_max <- -log_f_alpha__pi_grad(alpha_max, 0, a, b, n_fact)
-  p_grid <- seq(p_min, p_max, by=h)
-  n_grid <- length(p_grid)
+  p_bar_min <- log(.Machine$double.xmin)   # Numerical minimum value
+  p_bar_max <- -log(n_fact)                # Theoretical maximum value
+  p_grid <- seq(p_bar_min, p_bar_max, length.out = n_grid)
+  h <- (p_bar_max - p_bar_min)/(n_grid-1)
   alpha_mode <- rep(NA, n_grid)
   psi_diff <- rep(NA, n_grid)
   mode_error <- 0.0
-  for (i in seq(n_grid)) {
+  for (i in seq(n_grid-1)) {
     res <- stats::uniroot(log_f_alpha__pi_grad, c(0,2000),
-                          p_grid[i], a, b, n_fact) # passed to log_f_alpha__pi_grad
+                          p_grid[i] + 0.5*h, a, b, n_fact) # passed to function
     alpha_mode[i] <- res$root
     mode_error <- max(mode_error, res$estim.prec)
     psi_diff[i] <- digamma(1 + alpha_mode[i]) - digamma(1+alpha_mode[i]/n_fact)
   }
 
   # Compute prior density of alpha on a grid
-  n_grid = 200
-  grid <- seq(0, stats::qgamma(0.995, a, b), length.out=n_grid)
-  funcs <- list(cdf = list(x=grid, func=stats::pgamma(grid, a, b), nse=rep(0, 200)),
-                pdf = list(x=grid, func=stats::dgamma(grid, a, b), nse=rep(0, 200)))
-  list(a=a, b=b, alpha_mode = alpha_mode, mode_error = mode_error, p_grid = p_grid,
-       psi_diff = psi_diff, p_min = p_min, h = h, funcs = funcs)
+  n_alpha_grid <- 200
+  grid <- seq(0, stats::qgamma(0.995, a, b), length.out=n_alpha_grid)
+  funcs <- list(cdf = list(x = grid, func = stats::pgamma(grid, a, b),
+                           nse = rep(0, 200)),
+                pdf = list(x = grid, func = stats::dgamma(grid, a, b),
+                           nse = rep(0, 200)))
+  list(a = a, b = b, alpha_min = alpha_min,
+       p_grid = p_grid, p_bar_min = p_bar_min, h = h,
+       alpha_mode = alpha_mode, mode_error = mode_error,
+       psi_diff = psi_diff, funcs = funcs)
+}
+
+#' Evaluate the 1st derivative of log f(alpha|pi) with respect to alpha.
+#'
+#' @param alpha current value of alpha
+#' @param p_bar sufficient statistic for pi equal to the arithmetic mean of
+#' the log preference probabiliites.
+#' @inheritParams create_alpha_prior
+#' @param n_fact, the value n!, where n is the number of elements in the choice
+#' universe.
+#'
+#' @return The first derivative of log f(alpha|pi) with respect to alpha
+#'
+#' @noRd
+log_f_alpha__pi_grad <- function(alpha, p_bar, a, b, n_fact) {
+  (a + n_fact - 2)/alpha - (b - p_bar) +
+    digamma(1+alpha) - digamma(1+alpha/n_fact)
 }
 
 #' Compute gamma proposal distribution for alpha
@@ -105,23 +134,6 @@ compute_proposal_params <- function(u, alpha_prior, Nv) {
   param_init <- log(c(alpha_prior$a, 100*alpha_prior$b, 100))
   opt <- stats::optim(param_init, Renyi_al, gr = NULL, alpha_grid, g, h, 3)
   exp(opt$par)
-}
-
-#' Evaluate the 1st derivative of log f(alpha|pi) with respect to alpha.
-#'
-#' @param alpha current value of alpha
-#' @param p_bar sufficient statistic for pi equal to the arithmetic mean of
-#' the log preference probabiliites.
-#' @inheritParams create_alpha_prior
-#' @param n_fact, the value n!, where n is the number of elements in the choice
-#' universe.
-#'
-#' @return The first derivative of log f(alpha|pi) with respect to alpha
-#'
-#' @noRd
-log_f_alpha__pi_grad <- function(alpha, p_bar, a, b, n_fact) {
-  (a + n_fact - 2)/alpha - (b - p_bar) +
-    digamma(1+alpha) - digamma(1+alpha/n_fact)
 }
 
 #' Kullbeck-Leibler divergence between density in grid g and a Beta-Gamma

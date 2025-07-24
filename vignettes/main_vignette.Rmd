@@ -105,7 +105,7 @@ The remaining variables are revealed preference indicators for given pairs of ob
 The value of variable `ab` is 1 if object $a$ is revealed preferred to object $b$, -1 if object $b$ is revealed preferred to object $a$ and zero otherwise.
 So for example, the choice of $e$ from $\{b,c,d,e\}$ reveals $e$ preferred to $c$, $d$, and $b$; see the first row of the following table, which repeats the first five observations of the variables `set` and `choice`, and includes the first five observations of the revealed preference indicators.
 ```{r RP}
-MMS_2019_trials %>% select(set, choice, matches("^[a-e]{2}$")) %>% head(5)
+MMS_2019_trials %>% dplyr::select(set, choice, matches("^[a-e]{2}$")) %>% head(5)
 ```
 
 One possible application is aggregation of preferences.
@@ -113,7 +113,8 @@ Aggregating revealed preference indicators for the `Beer` domain gives the follo
 The regular expression `^[a-e]{2}$` matches variable names that are strings of length two
 formed from the letters a through e.
 ```{r RP_plus}
-MMS_2019_trials %>% filter(domain=="Beer") %>% select(matches("^[a-e]{2}$")) %>% colSums
+MMS_2019_trials %>% filter(domain=="Beer") %>%
+  dplyr::select(matches("^[a-e]{2}$")) %>% colSums
 ```
 In terms of net revealed preference, all values are consistent with the preference ranking $e \succ d \succ b \succ a \succ c$.
 That is, the number of times a higher ranked object is revealed preferred to a lower ranked object is always greater than the number of times the lower ranked object is revealed preferred to the higher ranked object.

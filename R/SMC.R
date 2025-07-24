@@ -341,12 +341,12 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
     first_lambda_index = last_lambda_index + 1
   }
 
-  cycle_stats <- as_tibble(lambda_stats$aggregates[cycle_schedule$lambda_break_indices,])
+  cycle_stats <-
+    tibble::as_tibble(lambda_stats$aggregates[cycle_schedule$lambda_break_indices,])
   cycle_stats$alpha_aPr <- alpha_aPr
   cycle_stats$alpha_mean <- alpha_mean
   list(alpha = alpha, gamma = gamma_p,
-       lambda_stats = lambda_stats,
-       cycle_stats = cycle_stats,
+       lambda_stats = lambda_stats, cycle_stats = cycle_stats,
        big_aPr = bl_data[[1]]$aPr, sm_aPr = bl_data[[2]]$aPr)
 }
 
@@ -357,8 +357,8 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
 #' relative numerical efficiency for the mean, specified quantiles and their
 #' numerical standard errors.
 #'
-#' @param x vector of length M * J, with J mutually independent subvectors of length
-#'  M, each subvector arising from a SMC simulation
+#' @param x vector of length M * J, with J mutually independent subvectors of
+#' length M, each subvector arising from a SMC simulation
 #' @inheritParams run_RC_sim
 #' @param p vector of probabilities for which to compute quantiles
 #'
@@ -437,13 +437,12 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
        cdf = list(x=x_grid, func=cdf, nse = cdf_nse))
 }
 
-#' Compute the posterior pdf and cdf of binary choice probabilities for the
-#' Dirichlet Random Preference model
+#' For the Dirichlet RP model, compute the posterior pdf and cdf of binary
+#' choice probabilities.
 #'
-#' For each binary choice probability, compute its posterior pdf and cdf for the
-#' Dirichlet RP model, on the grid p_grid of binary choice probabilities,
-#' given a collection of SMC samples that target the posterior distribution
-#' of gamma in the Dirichlet RP model
+#' For the Dirichlet Random Preference model, compute the posterior pdf and cdf
+#' of each binary choice probability, and their numerical standard errors, on the
+#' grid p_grid of binary choice probabilities.
 #'
 #' @inheritParams ind_groups_stats
 #' @inheritParams compute_pi_ln_like
@@ -451,10 +450,12 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
 #' unnormalized preference probabilities
 #' @param p_grid vector of choice probability values
 #'
-#' @return A list with elements correponding to binary subsets of choice
-#' objects. For a universe of size \eqn{n=5}, there are \eqn{{n \choose 2} = 10} such
-#' subsets. Each element of the list is a list organized in the same way
-#' as the return value of [compute_pdf_cdf_on_grid()].
+#' @return A list with elements correponding to doubleton menus. For a universe
+#' of size \eqn{n}, there are \eqn{\binom{n}{2}} such menus. The doubleton menus
+#' are ordered by increasing menu index; the vector of menu indices, in order,
+#' is \code{u_const$doubletons[1:u_const$n_doubletons[n]]}. Each element of the list
+#' is a list organized in the same way as the return value of
+#' [compute_pdf_cdf_on_grid()].
 #' @export
 #'
 #' @example R/examples/RP_example.R
@@ -476,13 +477,12 @@ compute_RP_binp_funcs <- function(u, gamma_p, J, Nv, p_grid) {
   binp_funcs
 }
 
-#' Compute the posterior pdf and cdf of binary choice probabilities for the
-#' Dirichlet Random Choice model
+#' For the Dirichlet RC model, compute the posterior pdf and cdf of binary
+#' choice probabilities.
 #'
-#' For each binary choice probability, compute its posterior pdf and cdf for the
-#' Dirichlet RC model, on the grid p_grid of binary choice probabilities,
-#' given a collection of SMC samples that target the posterior distribution
-#' of alpha in the Dirichlet RC model
+#' For the Dirichlet Random Choicw model, compute the posterior pdf and cdf
+#' of each binary choice probability, and their numerical standard errors, on the
+#' grid p_grid of binary choice probabilities.
 #'
 #' @inheritParams compute_RP_binp_funcs
 #' @param alpha vector of length M*J, sample of values of alpha
@@ -495,6 +495,7 @@ compute_RP_binp_funcs <- function(u, gamma_p, J, Nv, p_grid) {
 #' @example R/examples/RC_example.R
 #'
 #' @inherit create_universe author references
+#' @inherit compute_RP_binp_funcs return
 #'
 compute_RC_binp_funcs <- function(u, alpha, J, Nv, p_grid) {
   n_grid <- length(p_grid)
@@ -737,7 +738,8 @@ AR_gamma <- function(gamma, alpha, phi) {
   gamma
 }
 
-#' Sample alpha from its conditional distribution given gamma and data
+#' Sample alpha and the gamma multiplier G0 from their conditional distribution
+#' pi and data.
 #'
 #' @inheritParams compute_pi_ln_like
 #' @inheritParams run_RC_sim
@@ -766,16 +768,16 @@ update_alpha <- function(u, Nv, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by
   # alpha|pi is based on the close approximation gamma(x) = 1/x for
   # small values of x. The proposal distribution is Ga(a_post, b_post)
 
-  # First compute a_post, b_post and draw alpha_star
+  # First compute a_bar, b_bar and draw alpha_star
   g_bar <- pmax(colMeans(log(gamma_p)), log(.Machine$double.xmin))
   G0 <- colSums(gamma_p)
   p_bar <- g_bar - log(G0)
   n_fact = u$n_orders
 
-  alpha_mode <- alpha_prior$alpha_mode[(p_bar - alpha_prior$p_min)/alpha_prior$h]
+  alpha_mode <- alpha_prior$alpha_mode[(p_bar - alpha_prior$p_bar_min)/alpha_prior$h]
   a_delta <- -3
   a_bar <- alpha_prior$a + n_fact - 1 + a_delta
-  b_delta <- -alpha_prior$psi_diff[(p_bar - alpha_prior$p_min)/alpha_prior$h] +
+  b_delta <- -alpha_prior$psi_diff[(p_bar - alpha_prior$p_bar_min)/alpha_prior$h] +
     a_delta/alpha_mode
   b_bar <- alpha_prior$b - p_bar + b_delta
 
@@ -790,6 +792,9 @@ update_alpha <- function(u, Nv, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by
   for (i_rep in seq_len(n_reps)) {
     # Next compute ln Pr[Nv|alpha_star, lambda = 0], ln Pr[Nv|alpha, lambda = 0]
     alpha_star <- stats::rgamma(MJ, a_bar, b_bar)
+    if (anyNA(alpha_star) || any(is.nan(alpha_star))) {
+      stop("NAs in alpha")
+    }
     alpha_Ax_star <- compute_alpha_Ax(u, alpha_star)
     ln_Pr_RC_by_A_star <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax_star, Nv)
     ln_ll_star <- compute_ln_like(u, lambda, ln_Pr_RC_by_A_star, ln_Pr_RP_by_A)
