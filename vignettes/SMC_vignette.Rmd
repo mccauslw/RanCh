@@ -204,6 +204,9 @@ ggplot() +
 
 Here we illustrate the posterior distribution of $\pi$ for the RP model.
 The vector $\pi$ is a vector giving the probabilities of the six preference orders on $T = \{x,y,z\}$.
+The left panel shows box plots for each preference probability.
+The right panel shows correlations among the preference probabilities.
+Notice that without data for the menu $\{x,y\}$ it is impossible to discriminate between orders $zxy$ and $zyx$; the result is similar estimated marginal distributions for the two orders and a very high negative posterior correlation between them.
 
 ```{r pi_graphics, echo=FALSE}
 pi <- scale(RP_sim$gamma, center = F, scale = colSums(RP_sim$gamma))
@@ -228,14 +231,14 @@ We plot it against the value of $\lambda$ prevailing at the cycle.
 ```{r alaPr, fig.width=6, fig.height=4}
 ggplot(data = cycle_stats) +
   geom_point(aes(x = lambda, y = alpha_aPr)) +
-  labs(x = "lambda", y = "Acceptance probability of alpha proposals")
+  labs(x = "lambda", y = "Acceptance probability of alpha proposals") +
+  theme_minimal()
 ```
 Notice the uneven grid of points defining the SMC cycles.
 We need more simulation for smaller and larger values of $\lambda$ to deal with particle depletion.
 
 Next, we show the acceptance probability for proposals of blocks of the $\gamma$ parameter, also at the M phase of each SMC cycle.
-The block `[x..]` of $\gamma$ weights consists of weights for the two preferences `xyz` (i.e. $x \succ y \succ z$) and `xzy`; `[y..]` consists of weights for the
-preferences `yxz` and `yzx`; and `[z..]` consists of weights for the preferences `zxy` and `zyx`.
+The block `[x...]` of $\gamma$ weights consists of weights for the two preferences `xyz` (i.e. $x \succ y \succ z$) and `xzy`; `[y...]` consists of weights for the preferences `yxz` and `yzx`; and `[z...]` consists of weights for the preferences `zxy` and `zyx`.
 ```{r newaPr, fig.width=6, fig.height=4}
 big_aPr <- as_tibble(RP_sim$big_aPr)
 big_aPr$lambda <- cycle_stats$lambda

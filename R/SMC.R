@@ -165,10 +165,11 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
   # Table for cycle parameters pertaining to gamma update
   n_bl <- c(u$n, u$n*(u$n-1))
   singles <- u$object_names
+  single_labs <- paste0("[", singles, "...]")
   pairs <- expand.grid(singles, singles)
-  pairs <- pairs[pairs$Var1 != pairs$Var2, ]  # exclude self-pairs
-  pairs <- paste0(pairs$Var2, pairs$Var1)
-  bl_names <- list(singles, pairs)
+  pairs <- pairs[pairs$Var1 != pairs$Var2, ] # exclude self-pairs
+  pair_labs <- paste0("[", pairs$Var2, pairs$Var1, "...]")
+  bl_names <- list(single_labs, pair_labs)
   bl_len <- c(factorial(u$n-1), factorial(u$n-2))
   bl_data <- list(big = list(), sm = list())
   for (blt in 1:length(n_bl)) {
@@ -433,8 +434,8 @@ compute_pdf_cdf_on_grid <- function(x, J, x_grid) {
   cdf <- rowMeans(cdf_by_group)
   pdf_nse <- sqrt(rowMeans((pdf_by_group-pdf)^2)/J)
   cdf_nse <- sqrt(rowMeans((cdf_by_group-cdf)^2)/J)
-  list(pdf = list(x=h$mids, func=pdf, nse = pdf_nse),
-       cdf = list(x=x_grid, func=cdf, nse = cdf_nse))
+  list(pdf = data.frame(x=h$mids, func=pdf, nse = pdf_nse),
+       cdf = data.frame(x=x_grid, func=cdf, nse = cdf_nse))
 }
 
 #' For the Dirichlet RP model, compute the posterior pdf and cdf of binary
@@ -765,8 +766,7 @@ update_alpha <- function(u, Nv, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by
                          n_reps = 2) {
   MJ <- length(alpha)
   # Metropolis-Hastings proposal distribution for target distribution
-  # alpha|pi is based on the close approximation gamma(x) = 1/x for
-  # small values of x. The proposal distribution is Ga(a_post, b_post)
+  # alpha|pi is Ga(a_bar, b_bar)
 
   # First compute a_bar, b_bar and draw alpha_star
   g_bar <- pmax(colMeans(log(gamma_p)), log(.Machine$double.xmin))
@@ -781,6 +781,7 @@ update_alpha <- function(u, Nv, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by
     a_delta/alpha_mode
   b_bar <- alpha_prior$b - p_bar + b_delta
 
+  # Compute part of Hastings ratio relatedd to current state
   alpha_Ax <- compute_alpha_Ax(u, alpha)
   ln_Pr_RC_by_A <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax, Nv)
   ln_ll <- compute_ln_like(u, lambda, ln_Pr_RC_by_A, ln_Pr_RP_by_A)
@@ -790,16 +791,16 @@ update_alpha <- function(u, Nv, alpha_prior, alpha, gamma_p, lambda, ln_Pr_RP_by
 
   aPr <- 0
   for (i_rep in seq_len(n_reps)) {
-    # Next compute ln Pr[Nv|alpha_star, lambda = 0], ln Pr[Nv|alpha, lambda = 0]
+    # Draw proposal alpha_star
     alpha_star <- stats::rgamma(MJ, a_bar, b_bar)
     if (anyNA(alpha_star) || any(is.nan(alpha_star))) {
       stop("NAs in alpha")
     }
     alpha_Ax_star <- compute_alpha_Ax(u, alpha_star)
+
+    # Compute part of Hastings ratio related to proposal
     ln_Pr_RC_by_A_star <- compute_ln_Pr_by_A(u, 'RC', alpha_Ax_star, Nv)
     ln_ll_star <- compute_ln_like(u, lambda, ln_Pr_RC_by_A_star, ln_Pr_RP_by_A)
-
-    # Next evaluate proposal density g and target density f at alpha and alpha_star
     ln_f_over_g_star <- lgamma(alpha_star + 1) -
       n_fact * lgamma(alpha_star/n_fact + 1) -
       a_delta * log(alpha_star) + b_delta * alpha_star

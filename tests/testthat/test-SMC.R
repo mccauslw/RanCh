@@ -7,6 +7,8 @@ test_that("RC and RP simulation works", {
   J <- 20
   M <- 50
   RC_sim <- run_RC_sim(u, J, M, alpha_prior, Nv)
+  expect_false(anyNA(RC_sim$alpha))
+  expect_false(any(is.nan(RC_sim$alpha)))
 
   p <- c(0.1, 0.5, 0.9)
   group_stats <- ind_groups_stats(RC_sim$alpha, J, p)
@@ -17,6 +19,8 @@ test_that("RC and RP simulation works", {
   cycle_schedule <- create_cycle_schedule(lambda_values)
   RP_sim <- run_RP_sim(u, J, M, alpha_prior, Nv,
                        lambda_values, cycle_schedule)
+  expect_false(anyNA(RP_sim$alpha))
+  expect_false(any(is.nan(RP_sim$alpha)))
 })
 
 test_that("AR_gamma works (autoregressive gamma process)", {
