@@ -1,56 +1,61 @@
 library(tidyverse)
 source('./data-raw/trial.R')
 
-MMS_2019_raw = read.csv("data-raw/MMS_2019.csv")
+MMS_2019_raw <- read.csv("data-raw/MMS_2019.csv")
 MMS_2019_raw <- subset(MMS_2019_raw, select = -feedback)
-n_lines = nrow(MMS_2019_raw)
+n_lines <- nrow(MMS_2019_raw)
 
-# Names of the 32 choice domains in the experiment
+# Names of the 32 choice domains in the experiment, as used in tables and graphics.
+# Where participants in the experiment see longer domain names, these longer names
+# appear in internal comments in the following list.
 domain_names = c(
-	'Male stars',           # 1
-	'Female stars',
-	'Films',
-	'Star pairs',
-	'Pizzas',               # 5
-	'Juices',
-	'Colours',
-	'Colour Combinations',
-	'Events',
-	'Radio formats',        # 10
-	'Musical artists',
-	'Aboriginal art',
-	'Impressionist art',
-	'Sentences',
-	'Travel',               # 15
-	'Marijuana',
-	'Latitude',
-	'Dots',
-	'Triangles',
-	'Population',           # 20
-	'Surface area',
-	'Beer',
-	'Cars',
-	'Restaurants',
-	'Flight layovers',      # 25
-	'Future payments',
-	'Phone plans',
-	'Hotel rooms',
-	'Two-flight itineraries',
-	'Televisions',          # 30
-	'Coffee',
-	'Charity')
-n_domains = length(domain_names)
+  'Male stars',           # 1
+  'Female stars',
+  'Films',
+  'Star pairs',
+  'Pizzas',               # 5
+  'Juices',
+  'Colours',
+  'Colour combos',               # Colour cominations
+  'Events',
+  'Radio formats',        # 10
+  'Music',                       # Musical artists
+  'Aboriginal',                  # Aboriginal art
+  'Impressionist',               # Impressionist art
+  'Sentences',
+  'Travel',               # 15
+  'Marijuana',
+  'Latitude',
+  'Dots',
+  'Triangles',
+  'Population',           # 20
+  'Surface area',
+  'Beer',
+  'Cars',
+  'Restaurants',
+  'Layovers',             # 25   # Flight layovers
+  'Future',                      # Future payments
+  'Phone plans',
+  'Hotel rooms',
+  'Itineraries',                 # Two-flight itineraries
+  'Televisions',          # 30   # Televisions
+  'Coffee',
+  'Charity')
+n_domains <- length(domain_names)
 
 # Other experiment parameters
-n_objects = 5
-n_subsets = 2^n_objects-1
-n_subjects_per_set = 40
-n_subjects_extra = 2
-n_subjects = (n_subsets - n_objects) * n_subjects_per_set + n_subjects_extra
+n_objects <- 5
+object_names <- u_const$object_names[1:n_objects]
+n_subsets <- 2^n_objects-1
+subset_names <- u_const$subset_names[1:n_subsets]
+n_subjects_per_set <- 40
+n_subjects_extra <- 2
+n_subjects <- (n_subsets - n_objects) * n_subjects_per_set + n_subjects_extra
+RP_table <- u_const$RP_table
 
 # Demographic categories
-sex_names = c('Male', 'Female')
-location_names = c('Alberta', 'British Columbia', 'Manitoba', 'New Brunswick',
+sex_names <- c('Male', 'Female')
+location_names <- c('Alberta', 'British Columbia', 'Manitoba', 'New Brunswick',
                    'Newfoundland/Labrador', 'Northwest Territories',
                    'Nova Scotia', 'Ontario', 'Prince Edward Island',
                    'Quebec', 'Saskatchewan', 'Yukon Territory')
@@ -73,7 +78,7 @@ MMS_2019_trials <- MMS_2019_raw %>% as_tibble() %>%
   arrange_set_choice_vars()
 
 # Add revealed preference information to MMS_2019_trials
-MMS_2019_trials[doubleton_names[1:choose(n_objects, 2)]] =
+MMS_2019_trials[u_const$doubleton_names[1:choose(n_objects, 2)]] =
   t(apply(MMS_2019_trials[c('set_index', 'choice_int')], 1,
           function(v) as.integer(RP_table[v['set_index'], v['choice_int'],
                                           1:choose(n_objects, 2)])))
@@ -100,15 +105,15 @@ MMS_2019_table = MMS_2019_table[domain_names,,]
 
 # Dimension naming for MMS_2019_counts
 MMS_2019_count_dimnames = dimnames(MMS_2019_table)
-names(MMS_2019_count_dimnames) = c('Domain', 'Subset', 'Object')
-MMS_2019_count_dimnames$Subset = subset_names[1:n_subsets]
+names(MMS_2019_count_dimnames) = c('Domain', 'Menu', 'Object')
+MMS_2019_count_dimnames$Menu = subset_names[1:n_subsets]
 MMS_2019_count_dimnames$Object = object_names[1:n_objects]
 
 # Create matrix with correct names, fill in counts for all subsets, even singletons
 MMS_2019_counts = array(0, dim=c(n_domains, n_subsets, n_objects), dimnames = MMS_2019_count_dimnames)
-MMS_2019_counts[, (1:n_subsets)[subset_card[1:n_subsets]>1], ] = MMS_2019_table
+MMS_2019_counts[, (1:n_subsets)[u_const$subset_card[1:n_subsets]>1], ] = MMS_2019_table
 
 # Set counts that don't make sense (e.g. number of times a chosen from {b,c}) to NA
-MMS_2019_counts = MMS_2019_counts * outer(rep(1, n_domains), member_table[1:n_subsets, 1:n_objects])
+MMS_2019_counts = MMS_2019_counts * outer(rep(1, n_domains), u_const$member_table[1:n_subsets, 1:n_objects])
 
 usethis::use_data(MMS_2019_raw, MMS_2019_counts, MMS_2019_trials, MMS_2019_demographics, overwrite=TRUE)

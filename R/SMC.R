@@ -152,10 +152,10 @@ run_RP_sim <- function(u, J, M, alpha_prior, Nv, lambda_values, cycle_schedule) 
   n_cycles = nrow(cycle_schedule)
 
   # Table to hold marginal likelihood statistics
+  empty_matrix <- matrix(nrow = n_lambda_values, ncol = J)
+  colnames(empty_matrix) <- paste0("G", seq_len(J))
   lambda_stats <- list(
-    gr_ESS = matrix(nrow = n_lambda_values, ncol = J),
-    gr_marl = matrix(nrow = n_lambda_values, ncol = J),
-    gr_cum_ln_marl = matrix(nrow = n_lambda_values, ncol = J),
+    gr_ESS = empty_matrix, gr_marl = empty_matrix, gr_cum_ln_marl = empty_matrix,
     aggregates =
       matrix(nrow = n_lambda_values, ncol = 1 + length(lambda_aggregate_names),
              dimnames = list(NULL, c('lambda', lambda_aggregate_names)))
